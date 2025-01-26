@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-
+import logo from "../assets/logo.png";
 const Dashboard = () => {
   const [navigationList, setNavigationList] = useState("case");
   const navigate = useNavigate();
@@ -8,11 +8,14 @@ const Dashboard = () => {
     <div className="w-full h-screen">
       <div className="w-full h-[70px] sticky top-0 z-20 bg-blue-500 flex justify-between items-center px-4">
         <div className="flex items-center gap-16">
-          <div className="flex flex-col">
-            <h1 className="text-white font-display text-lg font-bold">
-              Brgy. Ampayon
-            </h1>
-            <h2 className="text-white text-xs font-display">Butuan City</h2>
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="logo" width={50} height={50} />
+            <div className="flex flex-col">
+              <h1 className="text-white font-display text-lg font-bold">
+                Brgy. Ampayon
+              </h1>
+              <h2 className="text-white text-xs font-display">Butuan City</h2>
+            </div>
           </div>
 
           <ul className="flex items-center gap-8">
@@ -53,7 +56,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="w-full p-5">{<Outlet />}</div>
+      <div className="w-full p-5 font-display">{<Outlet />}</div>
     </div>
   );
 };
