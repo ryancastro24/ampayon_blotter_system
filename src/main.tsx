@@ -1,14 +1,16 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "./index.css";
+
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import CasesPage, {
   action as CasePageAction,
 } from "./dashboardpages/CasesPage";
+import { Provider } from "@/components/ui/provider";
 import ArchivesPage from "./dashboardpages/ArchivesPage";
 import ReportPage from "./dashboardpages/ReportPage";
+import "./index.css";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -39,6 +41,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <Provider>
+      <RouterProvider router={router} />
+    </Provider>
   </StrictMode>
 );

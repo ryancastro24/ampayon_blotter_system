@@ -1,14 +1,42 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { Form, ActionFunction, useNavigation } from "react-router-dom";
-import { IoIosArrowDropdownCircle } from "react-icons/io";
-import { FaCircleMinus } from "react-icons/fa6";
-import { FaCircleXmark } from "react-icons/fa6";
-import { FaCircleCheck } from "react-icons/fa6";
-import { BiSolidMessageSquareEdit } from "react-icons/bi";
-import { FaTrash } from "react-icons/fa";
+import { Form, ActionFunction } from "react-router-dom";
 import { IoFolderOpen } from "react-icons/io5";
-import { TbDownload } from "react-icons/tb";
+import {
+  Button,
+  Input,
+  Box,
+  Tabs,
+  createListCollection,
+  Textarea,
+  IconButton,
+} from "@chakra-ui/react";
+import { PiSmileySadFill } from "react-icons/pi";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Field } from "@/components/ui/field";
+const caseTypeArray = createListCollection({
+  items: [
+    { label: "Traffic Violation", value: "traffic_violation" },
+    { label: "Property Dispute", value: "property_dispute" },
+    { label: "Noise Complaint", value: "noise_complaint" },
+    { label: "Public Nuisance", value: "public_nuisance" },
+    { label: "Business Licensing", value: "business_licensing" },
+    { label: "Zoning Issue", value: "zoning_issue" },
+    { label: "Environmental Violation", value: "environmental_violation" },
+    { label: "Public Safety", value: "public_safety" },
+  ],
+});
+import {
+  DialogActionTrigger,
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 export const action: ActionFunction = async ({ request }) => {
   console.log(request.method);
   console.log(request);
@@ -27,6 +55,16 @@ export const action: ActionFunction = async ({ request }) => {
 
   return { data };
 };
+
+import {
+  SelectContent,
+  SelectItem,
+  SelectLabel,
+  SelectRoot,
+  SelectTrigger,
+  SelectValueText,
+} from "@/components/ui/select";
+import CasesCardContainer from "@/systemComponents/CasesCardContainer";
 
 const cases = [
   {
@@ -113,28 +151,9 @@ const cases = [
 
 const CasesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [openSelectedCaseModal, setOpenSelectedCaseModal] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<number>(1);
-  const [photo, setPhoto] = useState<string | null>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const cameraRef = useRef<HTMLVideoElement | null>(null);
-  const navigation = useNavigation();
-  const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(
-    null
-  );
-  const [selectedData, setSelectedData] = useState({
-    complainantName: "",
-    complainantNumber: "",
-    complainantEmail: "",
-    respondentName: "",
-    respondentNumber: "",
-    respondentEmail: "",
-    caseType: "",
-    caseDescription: "",
-    scheduledDate: "",
-  });
+
   const [formData, setFormData] = useState({
     complainantName: "",
     complainantNumber: "",
@@ -147,34 +166,10 @@ const CasesPage = () => {
     scheduledDate: "",
   });
 
-  const handleOpenCaseModal = (data: any) => {
-    setSelectedData({
-      complainantName: data.complainant,
-      complainantNumber: "sample",
-      complainantEmail: "sample",
-      respondentName: data.respondent,
-      respondentNumber: data.respondent,
-      respondentEmail: "sample",
-      caseType: data.caseType,
-      caseDescription: "sample",
-      scheduledDate: data.dateOfAppointment,
-    });
-
-    setOpenSelectedCaseModal(true);
-  };
-
   const handleInputChange = (field: any, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleInputSelectedDataChange = (field: any, value: any) => {
-    setSelectedData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleCloseSelectedModal = () => {
-    setOpenSelectedCaseModal(false);
-    setOpenDropdownIndex(null);
-  };
   const casesPerPage = 8;
   const filteredCases = cases.filter(
     (c) =>
@@ -201,783 +196,451 @@ const CasesPage = () => {
     }
   };
 
-  useEffect(() => {
-    if (isModalOpen && activeTab === 1 && !photo) {
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then((stream) => {
-          if (cameraRef.current) {
-            cameraRef.current.srcObject = stream;
-          }
-          setStream(stream);
-        })
-        .catch((error) => console.error("Camera error:", error));
-    }
+  if (cases.length === 0) {
+    return (
+      <Box
+        display={"flex"}
+        justifyContent={"center"}
+        alignItems={"center"}
+        flexDirection={"column"}
+      >
+        <EmptyState
+          icon={<PiSmileySadFill />}
+          title="Empty Dashboard"
+          description="No cases available. Click the button below to add new case"
+        />
 
-    // Clean up camera on modal close
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [isModalOpen, activeTab, photo]);
+        <DialogRoot>
+          <DialogTrigger asChild>
+            <Button colorPalette={"blue"} variant={"subtle"} size="sm">
+              Add new case
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <Form method="post">
+              <DialogHeader>
+                <DialogTitle>Add New Case</DialogTitle>
+              </DialogHeader>
+              <DialogBody>
+                {/* Tabs */}
 
-  const takePicture = () => {
-    const video = cameraRef.current;
-    if (video) {
-      // Ensure video is not null
-      const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        // Ensure the canvas context is not null
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        setPhoto(canvas.toDataURL("image/png"));
-      }
+                <Tabs.Root defaultValue="members">
+                  <Tabs.List>
+                    <Tabs.Trigger value="members">
+                      Complainant Details
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value="projects">
+                      Respondent Details
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value="tasks">Case Details</Tabs.Trigger>
+                  </Tabs.List>
+                  <Tabs.Content value="members">
+                    <Box display="flex" flexDirection="column" gap={5}>
+                      <Field label="Name" errorText="This field is required">
+                        <Input
+                          id="complainant_name"
+                          type="text"
+                          value={formData.complainantName}
+                          placeholder="Enter Complainant Name"
+                          onChange={(e) =>
+                            handleInputChange("complainantName", e.target.value)
+                          }
+                          name="complainant_name"
+                        />
+                      </Field>
 
-      // Stop the camera after capturing photo
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    } else {
-      console.error("Video element not found.");
-    }
-  };
+                      <Field
+                        label="Phone Number"
+                        errorText="This field is required"
+                      >
+                        <Input
+                          id="complainant_number"
+                          type="text"
+                          value={formData.complainantName}
+                          placeholder="09XXXXXXXX"
+                          onChange={(e) =>
+                            handleInputChange(
+                              "complainantNumber",
+                              e.target.value
+                            )
+                          }
+                          name="complainant_number"
+                        />
+                      </Field>
 
-  const retakePicture = () => {
-    setPhoto(null);
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then((stream) => {
-        if (cameraRef.current) {
-          cameraRef.current.srcObject = stream;
-        }
-        setStream(stream);
-      })
-      .catch((error) => console.error("Camera error:", error));
-  };
+                      <Field label="Email" errorText="This field is required">
+                        <Input
+                          id="complainant_email"
+                          type="text"
+                          value={formData.complainantEmail}
+                          placeholder="sample@email.com"
+                          name="complainant_email"
+                          onChange={(e) =>
+                            handleInputChange(
+                              "complainantEmail",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </Field>
+                    </Box>
+                  </Tabs.Content>
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+                  <Tabs.Content value="projects">
+                    <Box display="flex" flexDirection="column" gap={5}>
+                      <Field label="Name" errorText="This field is required">
+                        <Input
+                          id="respondent_name"
+                          type="text"
+                          value={formData.respondentName}
+                          placeholder="Enter Respondent Name"
+                          onChange={(e) =>
+                            handleInputChange("respondentName", e.target.value)
+                          }
+                          name="respondent_name"
+                        />
+                      </Field>
 
-    // Stop the camera when closing the modal
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-    }
-  };
+                      <Field
+                        label="Phone Number"
+                        errorText="This field is required"
+                      >
+                        <Input
+                          id="respondent_number"
+                          type="text"
+                          value={formData.respondentName}
+                          placeholder="09XXXXXXXX"
+                          onChange={(e) =>
+                            handleInputChange(
+                              "respondentNumber",
+                              e.target.value
+                            )
+                          }
+                          name="respondent_number"
+                        />
+                      </Field>
+
+                      <Field label="Email" errorText="This field is required">
+                        <Input
+                          id="respondent_email"
+                          type="text"
+                          value={formData.respondentEmail}
+                          placeholder="sample@email.com"
+                          name="respondent_email"
+                          onChange={(e) =>
+                            handleInputChange("respondentEmail", e.target.value)
+                          }
+                        />
+                      </Field>
+                    </Box>
+                  </Tabs.Content>
+                  <Tabs.Content value="tasks">
+                    <Box display="flex" flexDirection="column" gap={5}>
+                      <SelectRoot
+                        collection={caseTypeArray}
+                        size="sm"
+                        width="320px"
+                      >
+                        <SelectLabel>Select framework</SelectLabel>
+                        <SelectTrigger>
+                          <SelectValueText placeholder="Select Case Type" />
+                        </SelectTrigger>
+                        <SelectContent zIndex={1800}>
+                          {caseTypeArray.items.map((movie) => (
+                            <SelectItem item={movie} key={movie.value}>
+                              {movie.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </SelectRoot>
+                      <Field
+                        label="Case Description"
+                        errorText="This field is required"
+                      >
+                        <Textarea
+                          placeholder="Case Description..."
+                          name="case_description"
+                          resize={"none"}
+                        />
+                      </Field>
+
+                      <Field
+                        label="Scheduled Date"
+                        errorText="This field is required"
+                      >
+                        <Input
+                          id="Scheduled_date"
+                          type="date"
+                          name="scheduled_date"
+                        />
+                      </Field>
+                    </Box>
+                  </Tabs.Content>
+                </Tabs.Root>
+              </DialogBody>
+              <DialogFooter>
+                <DialogActionTrigger asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogActionTrigger>
+                <Button background={"blue.500"}>Submit</Button>
+              </DialogFooter>
+              <DialogCloseTrigger />
+            </Form>
+          </DialogContent>
+        </DialogRoot>
+      </Box>
+    );
+  }
+
   return (
-    <div className="w-full flex flex-col gap-4">
+    <Box padding={5}>
       {/* Search and Add New Case */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <input
+      <Box className="flex items-center justify-between gap-2">
+        <Box className="flex items-center gap-2">
+          <Input
             type="search"
-            className="w-[300px] h-[40px] text-sm rounded border border-gray-300 px-4 font-display"
+            width={300}
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
 
-          <button
-            className="px-3 h-[40px] cursor-pointer hover:bg-blue-600 text-sm rounded bg-blue-500 text-white font-display"
-            onClick={() => setIsModalOpen(true)}
-          >
-            Add new case
-          </button>
-        </div>
+          <DialogRoot>
+            <DialogTrigger asChild>
+              <Button colorPalette={"blue"} size="sm">
+                Add new case
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <Form method="post">
+                <DialogHeader>
+                  <DialogTitle>Add New Case</DialogTitle>
+                </DialogHeader>
+                <DialogBody>
+                  {/* Tabs */}
+
+                  <Tabs.Root defaultValue="members">
+                    <Tabs.List>
+                      <Tabs.Trigger value="members">
+                        Complainant Details
+                      </Tabs.Trigger>
+                      <Tabs.Trigger value="projects">
+                        Respondent Details
+                      </Tabs.Trigger>
+                      <Tabs.Trigger value="tasks">Case Details</Tabs.Trigger>
+                    </Tabs.List>
+                    <Tabs.Content value="members">
+                      <Box display="flex" flexDirection="column" gap={5}>
+                        <Field label="Name" errorText="This field is required">
+                          <Input
+                            id="complainant_name"
+                            type="text"
+                            value={formData.complainantName}
+                            placeholder="Enter Complainant Name"
+                            onChange={(e) =>
+                              handleInputChange(
+                                "complainantName",
+                                e.target.value
+                              )
+                            }
+                            name="complainant_name"
+                          />
+                        </Field>
+
+                        <Field
+                          label="Phone Number"
+                          errorText="This field is required"
+                        >
+                          <Input
+                            id="complainant_number"
+                            type="text"
+                            value={formData.complainantName}
+                            placeholder="09XXXXXXXX"
+                            onChange={(e) =>
+                              handleInputChange(
+                                "complainantNumber",
+                                e.target.value
+                              )
+                            }
+                            name="complainant_number"
+                          />
+                        </Field>
+
+                        <Field label="Email" errorText="This field is required">
+                          <Input
+                            id="complainant_email"
+                            type="text"
+                            value={formData.complainantEmail}
+                            placeholder="sample@email.com"
+                            name="complainant_email"
+                            onChange={(e) =>
+                              handleInputChange(
+                                "complainantEmail",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </Field>
+                      </Box>
+                    </Tabs.Content>
+
+                    <Tabs.Content value="projects">
+                      <Box display="flex" flexDirection="column" gap={5}>
+                        <Field label="Name" errorText="This field is required">
+                          <Input
+                            id="respondent_name"
+                            type="text"
+                            value={formData.respondentName}
+                            placeholder="Enter Respondent Name"
+                            onChange={(e) =>
+                              handleInputChange(
+                                "respondentName",
+                                e.target.value
+                              )
+                            }
+                            name="respondent_name"
+                          />
+                        </Field>
+
+                        <Field
+                          label="Phone Number"
+                          errorText="This field is required"
+                        >
+                          <Input
+                            id="respondent_number"
+                            type="text"
+                            value={formData.respondentName}
+                            placeholder="09XXXXXXXX"
+                            onChange={(e) =>
+                              handleInputChange(
+                                "respondentNumber",
+                                e.target.value
+                              )
+                            }
+                            name="respondent_number"
+                          />
+                        </Field>
+
+                        <Field label="Email" errorText="This field is required">
+                          <Input
+                            id="respondent_email"
+                            type="text"
+                            value={formData.respondentEmail}
+                            placeholder="sample@email.com"
+                            name="respondent_email"
+                            onChange={(e) =>
+                              handleInputChange(
+                                "respondentEmail",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </Field>
+                      </Box>
+                    </Tabs.Content>
+                    <Tabs.Content value="tasks">
+                      <Box display="flex" flexDirection="column" gap={5}>
+                        <SelectRoot
+                          collection={caseTypeArray}
+                          size="sm"
+                          width="320px"
+                        >
+                          <SelectLabel>Select framework</SelectLabel>
+                          <SelectTrigger>
+                            <SelectValueText placeholder="Select Case Type" />
+                          </SelectTrigger>
+                          <SelectContent zIndex={1800}>
+                            {caseTypeArray.items.map((movie) => (
+                              <SelectItem item={movie} key={movie.value}>
+                                {movie.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </SelectRoot>
+                        <Field
+                          label="Case Description"
+                          errorText="This field is required"
+                        >
+                          <Textarea
+                            placeholder="Case Description..."
+                            name="case_description"
+                            resize={"none"}
+                          />
+                        </Field>
+
+                        <Field
+                          label="Scheduled Date"
+                          errorText="This field is required"
+                        >
+                          <Input
+                            id="Scheduled_date"
+                            type="date"
+                            name="scheduled_date"
+                          />
+                        </Field>
+                      </Box>
+                    </Tabs.Content>
+                  </Tabs.Root>
+                </DialogBody>
+                <DialogFooter>
+                  <DialogActionTrigger asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DialogActionTrigger>
+                  <Button background={"blue.500"}>Submit</Button>
+                </DialogFooter>
+                <DialogCloseTrigger />
+              </Form>
+            </DialogContent>
+          </DialogRoot>
+        </Box>
 
         {/* Pagination */}
-        <div className="flex justify-center items-center gap-2">
-          <button
-            className="px-2 py-2 border text-xl border-slate-300 rounded cursor-pointer bg-white"
+        <Box className="flex justify-center items-center gap-2">
+          <IconButton
+            size={"xs"}
+            variant={"subtle"}
             disabled={currentPage === 1}
             onClick={handlePrevPage}
           >
             <IoIosArrowBack />
-          </button>
+          </IconButton>
           <span className="text-sm font-display">
             Page {currentPage} of {totalPages}
           </span>
-          <button
-            className="px-2 py-2 border text-xl border-slate-300 rounded cursor-pointer bg-white"
+          <IconButton
+            size={"xs"}
+            variant={"subtle"}
             disabled={currentPage === totalPages}
             onClick={handleNextPage}
           >
             <IoIosArrowForward />
-          </button>
-        </div>
-      </div>
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-[#00000098] bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded p-6 w-[600px]">
-            <h2 className="text-lg font-bold mb-4">Add New Case</h2>
-
-            {/* Tabs */}
-
-            <Form method="post">
-              <div className="flex justify-between mb-4 border-b border-slate-300">
-                {["Complainant", "Respondent", "Complaint"].map(
-                  (tab, index) => (
-                    <button
-                      key={index}
-                      className={`px-4 py-2 ${
-                        activeTab === index + 1
-                          ? "border-b-4 border-blue-500 font-bold cursor-pointer"
-                          : "cursor-pointer"
-                      }`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setActiveTab(index + 1);
-                      }}
-                    >
-                      {tab}
-                    </button>
-                  )
-                )}
-              </div>
-
-              {/* Tab Content */}
-              <div
-                style={{
-                  display: activeTab === 1 ? "block" : "none",
-                }}
-              >
-                <div className="flex flex-col gap-2">
-                  <div className="grid grid-cols-[2fr_1fr] gap-2">
-                    <div className="flex flex-col gap-1 w-full">
-                      <label htmlFor="complainant_name" className="text-sm">
-                        Name
-                      </label>
-                      <input
-                        id="complainant_name"
-                        type="text"
-                        value={formData.complainantName}
-                        placeholder="Enter Complainant Name"
-                        onChange={(e) =>
-                          handleInputChange("complainantName", e.target.value)
-                        }
-                        name="complainant_name"
-                        className="border border-slate-300 rounded p-2 w-full"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1 w-full">
-                      <label htmlFor="complainant_number" className="text-sm">
-                        Phone Number
-                      </label>
-                      <input
-                        id="complainant_number"
-                        type="text"
-                        value={formData.complainantNumber}
-                        placeholder="09XXXXXXXXX"
-                        name="complainant_number"
-                        onChange={(e) =>
-                          handleInputChange("complainantNumber", e.target.value)
-                        }
-                        className="border border-slate-300 rounded p-2 w-full"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1 w-full">
-                    <label htmlFor="complainant_email" className="text-sm">
-                      Email
-                    </label>
-                    <input
-                      id="complainant_email"
-                      type="text"
-                      value={formData.complainantEmail}
-                      placeholder="sample@email.com"
-                      name="complainant_email"
-                      onChange={(e) =>
-                        handleInputChange("complainantEmail", e.target.value)
-                      }
-                      className="border border-slate-300 rounded p-2 w-full"
-                    />
-                  </div>
-
-                  {/* Camera and Picture */}
-                  <div className="flex flex-col items-center gap-2">
-                    {photo ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <img
-                          src={photo}
-                          alt="Captured"
-                          className="w-full h-[200px] bg-gray-200 rounded"
-                        />
-                        <button
-                          type="button"
-                          className="bg-blue-500 cursor-pointer text-white rounded px-4 py-2"
-                          onClick={retakePicture}
-                        >
-                          Retake
-                        </button>
-                      </div>
-                    ) : (
-                      <div>
-                        <video
-                          ref={cameraRef}
-                          className="w-full h-[200px] bg-gray-200 rounded"
-                          autoPlay
-                        ></video>
-                        <button
-                          type="button"
-                          className="bg-blue-500 cursor-pointer text-white rounded px-4 py-2 mt-2"
-                          onClick={takePicture}
-                        >
-                          Take Picture
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: activeTab === 2 ? "block" : "none",
-                }}
-              >
-                {/* Complaint Details */}
-                <div className="flex flex-col gap-2">
-                  <div className="grid grid-cols-[2fr_1fr] gap-2">
-                    <div className="flex flex-col gap-1 w-full">
-                      <label htmlFor="respondent_name" className="text-sm">
-                        Name
-                      </label>
-                      <input
-                        onChange={(e) =>
-                          handleInputChange("respondentName", e.target.value)
-                        }
-                        name="respondent_name"
-                        value={formData.respondentName}
-                        id="respondent_name"
-                        type="text"
-                        placeholder="Enter Respondent Name"
-                        className="border border-slate-300 rounded p-2 w-full"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1 w-full">
-                      <label htmlFor="Respondent_number" className="text-sm">
-                        Phone Number
-                      </label>
-                      <input
-                        onChange={(e) =>
-                          handleInputChange("respondentNumber", e.target.value)
-                        }
-                        name="responded_number"
-                        value={formData.respondentNumber}
-                        id="Respondent_number"
-                        type="text"
-                        placeholder="09XXXXXXXX"
-                        className="border border-slate-300 rounded p-2 w-full"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1 w-full">
-                    <label htmlFor="respondent_email" className="text-sm">
-                      Email
-                    </label>
-                    <input
-                      onChange={(e) =>
-                        handleInputChange("respondentEmail", e.target.value)
-                      }
-                      name="responded_email"
-                      value={formData.respondentEmail}
-                      id="respondent_email"
-                      type="text"
-                      placeholder="sample@email.com"
-                      className="border border-slate-300 rounded p-2 w-full"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: activeTab === 3 ? "block" : "none",
-                }}
-              >
-                {/* Complaint Details */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-col gap-1 w-full">
-                    <label htmlFor="complainant_name" className="text-sm">
-                      Case Type
-                    </label>
-                    <select
-                      onChange={(e) =>
-                        handleInputChange("caseType", e.target.value)
-                      }
-                      value={formData.caseType}
-                      name="casetype"
-                      id="complainant_name"
-                      className="border border-slate-300 rounded p-2 w-full"
-                    >
-                      <option>Select Case Type</option>
-                      <option> Case Type 1</option>
-                      <option> Case Type 2</option>
-                      <option> Case Type 3</option>
-                      <option> Case Type 4</option>
-                      <option> Case Type 5</option>
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col gap-1 w-full">
-                    <label htmlFor="complainant_name" className="text-sm">
-                      Case Description
-                    </label>
-                    <textarea
-                      name="casedescription"
-                      onChange={(e) =>
-                        handleInputChange("caseDescription", e.target.value)
-                      }
-                      value={formData.caseDescription}
-                      placeholder="Complaint Description"
-                      className="border border-slate-300 rounded p-2 w-full resize-none"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1 w-full">
-                    <label htmlFor="complainant_name" className="text-sm">
-                      Scheduled Date
-                    </label>
-                    <input
-                      name="scheduled_date"
-                      onChange={(e) =>
-                        handleInputChange("scheduledDate", e.target.value)
-                      }
-                      value={formData.scheduledDate}
-                      type="date"
-                      placeholder="Complaint Description"
-                      className="border border-slate-300 rounded p-2 w-full resize-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex justify-end gap-2 mt-4">
-                <button
-                  type="button"
-                  className="bg-gray-300 rounded cursor-pointer px-4 py-2"
-                  onClick={closeModal}
-                >
-                  Cancel
-                </button>
-                {activeTab === 3 && (
-                  <button
-                    type="submit"
-                    className="bg-blue-500 cursor-pointer text-white rounded px-4 py-2"
-                  >
-                    {navigation.state == "submitting" ? "Loading" : "Submit"}
-                  </button>
-                )}
-              </div>
-            </Form>
-          </div>
-        </div>
-      )}
+          </IconButton>
+        </Box>
+      </Box>
 
       {/* Available Cases */}
-      <div>
+      <Box marginY={5}>
         <h2 className="font-display flex items-center gap-2">
           <span className="text-lg">
             <IoFolderOpen />
           </span>
           <span>Available Cases : {cases.length}</span>
         </h2>
-      </div>
+      </Box>
 
       {/* Cases Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+      <Box
+        display={"grid"}
+        gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+        gap={4}
+      >
         {paginatedCases.map((val, index) => (
-          <div
-            key={index}
-            className="w-full relative flex flex-col justify-between p-4 h-[180px] shadow-md shadow-[#0000003f] border border-slate-300 rounded-md"
-          >
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <p className="flex items-center text-slate-400 gap-1 text-sm">
-                    <span className="italic font-display">Case No. </span>
-                    <span>{val.case_number}</span>
-                  </p>
-
-                  <p className="text-xs text-slate-400">|</p>
-
-                  <p
-                    className={`flex items-center font-display gap-1 text-sm ${
-                      val.status === "Settled"
-                        ? "text-green-500"
-                        : val.status === "Ongoing"
-                        ? "text-orange-500"
-                        : "text-red-500"
-                    }`}
-                  >
-                    <span>
-                      {val.status === "Settled" ? (
-                        <FaCircleCheck />
-                      ) : val.status === "Ongoing" ? (
-                        <FaCircleMinus />
-                      ) : (
-                        <FaCircleXmark />
-                      )}
-                    </span>
-                    <span>{val.status}</span>
-                  </p>
-                </div>
-
-                <div className="relative flex items-center gap-2">
-                  <button className="text-xl text-slate-400 cursor-pointer hover:text-slate-500">
-                    <TbDownload />
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      setOpenDropdownIndex(
-                        openDropdownIndex === index ? null : index
-                      )
-                    }
-                    className="text-xl text-slate-400 cursor-pointer hover:text-slate-500"
-                  >
-                    <IoIosArrowDropdownCircle />
-                  </button>
-
-                  <div
-                    style={{
-                      display: openDropdownIndex === index ? "block" : "none",
-                    }}
-                    className="absolute right-0 top-7 w-auto p-3 bg-slate-100 shadow-slate-500 rounded-sm shadow-md"
-                  >
-                    {/* Dropdown content */}
-                    <ul className="flex flex-col w-auto gap-1 ">
-                      <div className="flex flex-col gap-2">
-                        <li
-                          onClick={() => handleOpenCaseModal({ ...val })}
-                          className="text-sm cursor-pointer flex items-center gap-1 text-left px-4 py-1 rounded-sm   hover:bg-slate-300"
-                        >
-                          <span className="text-lg">
-                            <BiSolidMessageSquareEdit />
-                          </span>
-                          <span>Update</span>
-                        </li>
-
-                        <hr className="text-slate-300 text-sm" />
-                        <li className="text-sm text-left cursor-pointer   flex items-center gap-1 px-4 py-1 rounded-sm   hover:bg-slate-300">
-                          <span>
-                            <FaTrash />
-                          </span>
-                          <span>Remove</span>
-                        </li>
-                      </div>
-
-                      <li
-                        onClick={() =>
-                          setOpenDropdownIndex(
-                            openDropdownIndex === index ? null : index
-                          )
-                        }
-                        className="text-xs mt-5  cursor-pointer  bg-red-400 text-center px-4 py-1 rounded-sm text-white  hover:bg-red-500"
-                      >
-                        Cancel
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <hr className="text-xs text-slate-200" />
-
-            <div className="mt-5 flex flex-col gap-2">
-              <h2 className="font-display">
-                <strong className="italic">Case: </strong>
-                {val.caseType}
-              </h2>
-
-              <div className="flex flex-col">
-                <p className="text-sm text-slate-500">
-                  <span className="italic">Complainant: </span>
-                  <span>{val.complainant}</span>
-                </p>
-                <p className="text-sm text-slate-500">
-                  <span className="italic">Respondent: </span>
-                  <span>{val.respondent}</span>
-                </p>
-              </div>
-            </div>
-          </div>
+          <CasesCardContainer {...val} index={index} />
         ))}
-      </div>
+      </Box>
 
       {/* selected case modal */}
-
-      {openSelectedCaseModal && (
-        <div className="fixed inset-0 bg-[#00000098] bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded p-6 w-[600px]">
-            <h2 className="text-lg font-bold mb-4">Update Case</h2>
-
-            {/* Tabs */}
-
-            <Form method="put">
-              <div className="flex justify-between mb-4 border-b border-slate-300">
-                {["Complainant", "Respondent", "Complaint"].map(
-                  (tab, index) => (
-                    <button
-                      key={index}
-                      className={`px-4 py-2 ${
-                        activeTab === index + 1
-                          ? "border-b-4 border-blue-500 font-bold cursor-pointer"
-                          : "cursor-pointer"
-                      }`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setActiveTab(index + 1);
-                      }}
-                    >
-                      {tab}
-                    </button>
-                  )
-                )}
-              </div>
-
-              {/* Tab Content */}
-              <div
-                style={{
-                  display: activeTab === 1 ? "block" : "none",
-                }}
-              >
-                <div className="flex flex-col gap-2">
-                  <div className="grid grid-cols-[2fr_1fr] gap-2">
-                    <div className="flex flex-col gap-1 w-full">
-                      <label htmlFor="complainant_name" className="text-sm">
-                        Name
-                      </label>
-                      <input
-                        id="complainant_name"
-                        type="text"
-                        value={selectedData.complainantName}
-                        placeholder="Enter Complainant Name"
-                        onChange={(e) =>
-                          handleInputSelectedDataChange(
-                            "complainantName",
-                            e.target.value
-                          )
-                        }
-                        name="complainant_name"
-                        className="border border-slate-300 rounded p-2 w-full"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1 w-full">
-                      <label htmlFor="complainant_number" className="text-sm">
-                        Phone Number
-                      </label>
-                      <input
-                        id="complainant_number"
-                        type="text"
-                        value={selectedData.complainantNumber}
-                        placeholder="09XXXXXXXXX"
-                        name="complainant_number"
-                        onChange={(e) =>
-                          handleInputSelectedDataChange(
-                            "complainantNumber",
-                            e.target.value
-                          )
-                        }
-                        className="border border-slate-300 rounded p-2 w-full"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1 w-full">
-                    <label htmlFor="complainant_email" className="text-sm">
-                      Email
-                    </label>
-                    <input
-                      id="complainant_email"
-                      type="text"
-                      value={selectedData.complainantEmail}
-                      placeholder="sample@email.com"
-                      name="complainant_email"
-                      onChange={(e) =>
-                        handleInputSelectedDataChange(
-                          "complainantEmail",
-                          e.target.value
-                        )
-                      }
-                      className="border border-slate-300 rounded p-2 w-full"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: activeTab === 2 ? "block" : "none",
-                }}
-              >
-                {/* Complaint Details */}
-                <div className="flex flex-col gap-2">
-                  <div className="grid grid-cols-[2fr_1fr] gap-2">
-                    <div className="flex flex-col gap-1 w-full">
-                      <label htmlFor="respondent_name" className="text-sm">
-                        Name
-                      </label>
-                      <input
-                        onChange={(e) =>
-                          handleInputSelectedDataChange(
-                            "respondentName",
-                            e.target.value
-                          )
-                        }
-                        name="respondent_name"
-                        value={selectedData.respondentName}
-                        id="respondent_name"
-                        type="text"
-                        placeholder="Enter Respondent Name"
-                        className="border border-slate-300 rounded p-2 w-full"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1 w-full">
-                      <label htmlFor="Respondent_number" className="text-sm">
-                        Phone Number
-                      </label>
-                      <input
-                        onChange={(e) =>
-                          handleInputSelectedDataChange(
-                            "respondentNumber",
-                            e.target.value
-                          )
-                        }
-                        name="responded_number"
-                        value={selectedData.respondentNumber}
-                        id="Respondent_number"
-                        type="text"
-                        placeholder="09XXXXXXXX"
-                        className="border border-slate-300 rounded p-2 w-full"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1 w-full">
-                    <label htmlFor="respondent_email" className="text-sm">
-                      Email
-                    </label>
-                    <input
-                      onChange={(e) =>
-                        handleInputSelectedDataChange(
-                          "respondentEmail",
-                          e.target.value
-                        )
-                      }
-                      name="responded_email"
-                      value={selectedData.respondentEmail}
-                      id="respondent_email"
-                      type="text"
-                      placeholder="sample@email.com"
-                      className="border border-slate-300 rounded p-2 w-full"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: activeTab === 3 ? "block" : "none",
-                }}
-              >
-                {/* Complaint Details */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-col gap-1 w-full">
-                    <label htmlFor="complainant_name" className="text-sm">
-                      Case Type
-                    </label>
-                    <select
-                      onChange={(e) =>
-                        handleInputSelectedDataChange(
-                          "caseType",
-                          e.target.value
-                        )
-                      }
-                      value={selectedData.caseType}
-                      name="casetype"
-                      id="complainant_name"
-                      className="border border-slate-300 rounded p-2 w-full"
-                    >
-                      <option>Select Case Type</option>
-                      <option> Case Type 1</option>
-                      <option> Case Type 2</option>
-                      <option> Case Type 3</option>
-                      <option> Case Type 4</option>
-                      <option> Case Type 5</option>
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col gap-1 w-full">
-                    <label htmlFor="complainant_name" className="text-sm">
-                      Case Description
-                    </label>
-                    <textarea
-                      name="casedescription"
-                      onChange={(e) =>
-                        handleInputSelectedDataChange(
-                          "caseDescription",
-                          e.target.value
-                        )
-                      }
-                      value={selectedData.caseDescription}
-                      placeholder="Complaint Description"
-                      className="border border-slate-300 rounded p-2 w-full resize-none"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1 w-full">
-                    <label htmlFor="complainant_name" className="text-sm">
-                      Scheduled Date
-                    </label>
-                    <input
-                      name="scheduled_date"
-                      onChange={(e) =>
-                        handleInputSelectedDataChange(
-                          "scheduledDate",
-                          e.target.value
-                        )
-                      }
-                      value={selectedData.scheduledDate}
-                      type="date"
-                      placeholder="Complaint Description"
-                      className="border border-slate-300 rounded p-2 w-full resize-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex justify-end gap-2 mt-4">
-                <button
-                  type="button"
-                  className="bg-gray-300 rounded cursor-pointer px-4 py-2"
-                  onClick={handleCloseSelectedModal}
-                >
-                  Cancel
-                </button>
-                {activeTab === 3 && (
-                  <button
-                    type="submit"
-                    className="bg-blue-500 cursor-pointer text-white rounded px-4 py-2"
-                  >
-                    {navigation.state == "submitting" ? "Loading" : "Submit"}
-                  </button>
-                )}
-              </div>
-            </Form>
-          </div>
-        </div>
-      )}
-    </div>
+    </Box>
   );
 };
 

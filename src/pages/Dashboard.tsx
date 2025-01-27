@@ -1,63 +1,79 @@
 import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
+import { Box, Text } from "@chakra-ui/react";
 const Dashboard = () => {
   const [navigationList, setNavigationList] = useState("case");
   const navigate = useNavigate();
   return (
-    <div className="w-full h-screen">
-      <div className="w-full h-[70px] sticky top-0 z-20 bg-blue-500 flex justify-between items-center px-4">
-        <div className="flex items-center gap-16">
-          <div className="flex items-center gap-2">
+    <Box>
+      <Box background={"blue.500"} display={"flex"} paddingX={5} paddingY={2}>
+        <Box display={"flex"} alignItems={"center"} gap={10}>
+          <Box display={"flex"} alignItems={"center"} gap={3}>
             <img src={logo} alt="logo" width={50} height={50} />
-            <div className="flex flex-col">
-              <h1 className="text-white font-display text-lg font-bold">
+            <Box>
+              <Text fontWeight={"bold"} color={"white"}>
                 Brgy. Ampayon
-              </h1>
-              <h2 className="text-white text-xs font-display">Butuan City</h2>
-            </div>
-          </div>
+              </Text>
+              <Text fontSize={"sm"} color={"white"}>
+                Butuan City
+              </Text>
+            </Box>
+          </Box>
 
-          <ul className="flex items-center gap-8">
-            <li
+          <Box as={"ul"} display={"flex"} alignItems={"center"} gap={5}>
+            <Box
+              as={"li"}
               onClick={() => {
                 navigate("/dashboard");
                 setNavigationList("case");
               }}
-              className={`text-white text-sm py-2 px-3 font-display cursor-pointer ${
-                navigationList === "case" ? "bg-blue-600" : ""
-              }  hover:bg-blue-600 rounded`}
+              paddingY={2}
+              paddingX={3}
+              background={navigationList === "case" ? "blue.600" : ""}
+              color={"white"}
+              cursor={"pointer"}
+              rounded={"sm"}
             >
-              Case
-            </li>
-            <li
+              Cases
+            </Box>
+
+            <Box
+              as={"li"}
               onClick={() => {
                 navigate("archives");
                 setNavigationList("archives");
               }}
-              className={`text-white text-sm py-2 px-3 font-display cursor-pointer ${
-                navigationList === "archives" ? "bg-blue-600" : ""
-              }  hover:bg-blue-600 rounded`}
+              paddingY={2}
+              paddingX={3}
+              background={navigationList === "archives" ? "blue.600" : ""}
+              color={"white"}
+              cursor={"pointer"}
+              rounded={"sm"}
             >
               Archives
-            </li>
-            <li
+            </Box>
+            <Box
+              as="li"
               onClick={() => {
                 navigate("report");
                 setNavigationList("report");
               }}
-              className={`text-white text-sm py-2 px-3 font-display cursor-pointer ${
-                navigationList === "report" ? "bg-blue-600" : ""
-              }  hover:bg-blue-600 rounded`}
+              paddingY={2}
+              paddingX={3}
+              background={navigationList === "report" ? "blue.600" : ""}
+              color={"white"}
+              cursor={"pointer"}
+              rounded={"sm"}
             >
               Report
-            </li>
-          </ul>
-        </div>
-      </div>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
 
-      <div className="w-full p-5 font-display">{<Outlet />}</div>
-    </div>
+      <Box className="w-full p-5 font-display">{<Outlet />}</Box>
+    </Box>
   );
 };
 
