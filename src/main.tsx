@@ -11,6 +11,12 @@ import { Provider } from "@/components/ui/provider";
 import ArchivesPage from "./dashboardpages/ArchivesPage";
 import ReportPage from "./dashboardpages/ReportPage";
 import "./index.css";
+import UsersPage, {
+  action as UsersPageAction,
+  loader as UserPageLoader,
+} from "./dashboardpages/UsersPage";
+import BarangayCases from "./systemComponents/BarangayCases";
+import Settings from "./pages/Settings";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -28,6 +34,12 @@ const router = createBrowserRouter([
         action: CasePageAction,
       },
       {
+        path: "users",
+        element: <UsersPage />,
+        action: UsersPageAction,
+        loader: UserPageLoader,
+      },
+      {
         path: "archives",
         element: <ArchivesPage />,
       },
@@ -35,7 +47,15 @@ const router = createBrowserRouter([
         path: "report",
         element: <ReportPage />,
       },
+      {
+        path: "barangayCases",
+        element: <BarangayCases />,
+      },
     ],
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
   },
 ]);
 

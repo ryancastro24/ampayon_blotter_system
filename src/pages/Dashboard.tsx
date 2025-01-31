@@ -1,13 +1,22 @@
 import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Text, IconButton } from "@chakra-ui/react";
+import { HiMiniCog8Tooth } from "react-icons/hi2";
 const Dashboard = () => {
   const [navigationList, setNavigationList] = useState("case");
   const navigate = useNavigate();
   return (
-    <Box>
-      <Box background={"blue.500"} display={"flex"} paddingX={5} paddingY={2}>
+    <Box width={"full"}>
+      <Box
+        width={"full"}
+        background={"blue.500"}
+        display={"flex"}
+        justifyContent={"space-between"}
+        alignItems={"center"}
+        paddingX={5}
+        paddingY={2}
+      >
         <Box display={"flex"} alignItems={"center"} gap={10}>
           <Box display={"flex"} alignItems={"center"} gap={3}>
             <img src={logo} alt="logo" width={50} height={50} />
@@ -36,6 +45,22 @@ const Dashboard = () => {
               rounded={"sm"}
             >
               Cases
+            </Box>
+
+            <Box
+              as={"li"}
+              onClick={() => {
+                navigate("users");
+                setNavigationList("users");
+              }}
+              paddingY={2}
+              paddingX={3}
+              background={navigationList === "users" ? "blue.600" : ""}
+              color={"white"}
+              cursor={"pointer"}
+              rounded={"sm"}
+            >
+              Users
             </Box>
 
             <Box
@@ -70,6 +95,14 @@ const Dashboard = () => {
             </Box>
           </Box>
         </Box>
+        <IconButton
+          onClick={() => navigate("/settings")}
+          colorPalette={"blue"}
+          size={"sm"}
+          variant={"solid"}
+        >
+          <HiMiniCog8Tooth />
+        </IconButton>
       </Box>
 
       <Box className="w-full p-5 font-display">{<Outlet />}</Box>

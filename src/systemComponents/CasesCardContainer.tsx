@@ -71,6 +71,7 @@ const CasesCardContainer = ({
   return (
     <Box>
       <Card.Root
+        variant={"subtle"}
         key={index}
         width={"full"}
         padding={5}
@@ -122,13 +123,13 @@ const CasesCardContainer = ({
           </Box>
 
           <Box display={"flex"} alignItems={"center"} gap={1}>
-            <IconButton size={"xs"} variant={"subtle"}>
+            <IconButton size={"xs"} variant={"surface"} colorPalette={"blue"}>
               <TbDownload />
             </IconButton>
 
             <MenuRoot>
               <MenuTrigger asChild>
-                <IconButton size={"xs"} variant={"subtle"}>
+                <IconButton size={"xs"} variant={"solid"} colorPalette={"blue"}>
                   <Icon>
                     <IoIosArrowDropdownCircle />
                   </Icon>

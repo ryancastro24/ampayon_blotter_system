@@ -393,9 +393,19 @@ const CasesPage = () => {
   }
 
   return (
-    <Box padding={5}>
+    <Box
+      data-state="open"
+      _open={{
+        animation: "fade-in 300ms ease-out",
+      }}
+      padding={5}
+    >
       {/* Search and Add New Case */}
-      <Box className="flex items-center justify-between gap-2">
+      <Box
+        display={"flex"}
+        justifyContent={"space-between"}
+        alignItems={"center"}
+      >
         <Box className="flex items-center gap-2">
           <Input
             type="search"
@@ -407,7 +417,7 @@ const CasesPage = () => {
 
           <DialogRoot>
             <DialogTrigger asChild>
-              <Button colorPalette={"blue"} size="sm">
+              <Button colorPalette={"blue"} size="sm" variant={"subtle"}>
                 Add new case
               </Button>
             </DialogTrigger>
@@ -598,9 +608,10 @@ const CasesPage = () => {
         <Box className="flex justify-center items-center gap-2">
           <IconButton
             size={"xs"}
-            variant={"subtle"}
+            variant={"surface"}
             disabled={currentPage === 1}
             onClick={handlePrevPage}
+            colorPalette={"blue"}
           >
             <IoIosArrowBack />
           </IconButton>
@@ -609,8 +620,9 @@ const CasesPage = () => {
           </span>
           <IconButton
             size={"xs"}
-            variant={"subtle"}
+            variant={"surface"}
             disabled={currentPage === totalPages}
+            colorPalette={"blue"}
             onClick={handleNextPage}
           >
             <IoIosArrowForward />
@@ -635,7 +647,7 @@ const CasesPage = () => {
         gap={4}
       >
         {paginatedCases.map((val, index) => (
-          <CasesCardContainer {...val} index={index} />
+          <CasesCardContainer key={index} {...val} index={index} />
         ))}
       </Box>
 
