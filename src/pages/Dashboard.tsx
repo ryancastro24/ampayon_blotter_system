@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigation, useNavigate, Outlet } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { Box, Text, IconButton } from "@chakra-ui/react";
 import { HiMiniCog8Tooth } from "react-icons/hi2";
+import Loading from "@/systemComponents/Loading";
 const Dashboard = () => {
   const [navigationList, setNavigationList] = useState("case");
+  const navigation = useNavigation();
   const navigate = useNavigate();
   return (
     <Box width={"full"}>
@@ -105,7 +107,11 @@ const Dashboard = () => {
         </IconButton>
       </Box>
 
-      <Box className="w-full p-5 font-display">{<Outlet />}</Box>
+      {navigation.state === "loading" ? (
+        <Loading />
+      ) : (
+        <Box className="w-full p-5 font-display">{<Outlet />}</Box>
+      )}
     </Box>
   );
 };

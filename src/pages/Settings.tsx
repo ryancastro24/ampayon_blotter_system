@@ -34,280 +34,295 @@ import {
 } from "@/components/ui/dialog";
 const Settings = () => {
   const navigate = useNavigate();
+
   return (
-    <Box width={"full"} height={"full"} padding={5}>
-      <Box display={"flex"} flexDirection={"column"} gap={5}>
-        <Box>
-          <Button
-            display={"flex"}
-            alignItems={"center"}
-            gap={2}
-            colorPalette={"blue"}
-            variant={"subtle"}
-            onClick={() => navigate("/dashboard")}
-          >
-            <IoChevronBackCircle /> Back To dashboard
-          </Button>
-        </Box>
-
-        <Box paddingLeft={5} display={"flex"} flexDir={"column"} gap={6}>
-          <Box
-            display={"flex"}
-            alignItems={"center"}
-            justifyContent={"space-between"}
-            width={"full"}
-          >
-            <Box>
-              <Text fontSize={"2xl"} fontWeight={"bold"}>
-                Settings
-              </Text>
-              <Text fontSize={"md"}>Update your data</Text>
-            </Box>
-            <Box>
-              <DialogRoot>
-                <DialogTrigger asChild>
-                  <Button
-                    display={"flex"}
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                    gap={2}
-                    colorPalette={"blue"}
-                    variant={"solid"}
-                  >
-                    <BiSolidMessageSquareEdit />
-                    Update Data
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Update Data</DialogTitle>
-                  </DialogHeader>
-                  <DialogBody display={"flex"} flexDir={"column"} gap={5}>
-                    <Field
-                      label="Barangay Captain"
-                      errorText="This field is required"
-                    >
-                      <Input
-                        required
-                        id="barangay_captain"
-                        type="text"
-                        placeholder="Enter New Baranggay Captain"
-                        name="barangay_captain"
-                      />
-                    </Field>
-
-                    <Field
-                      label="Barangay Secretary"
-                      errorText="This field is required"
-                    >
-                      <Input
-                        required
-                        id="barangay_captain"
-                        type="text"
-                        placeholder="Enter New Barangay Secretary"
-                        name="barangay_captain"
-                      />
-                    </Field>
-
-                    <Field
-                      label="Change Password"
-                      errorText="This field is required"
-                    >
-                      <PasswordInput />
-                    </Field>
-                  </DialogBody>
-                  <DialogFooter>
-                    <DialogActionTrigger asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogActionTrigger>
-                    <Button colorPalette={"blue"} variant={"solid"}>
-                      Save
-                    </Button>
-                  </DialogFooter>
-                  <DialogCloseTrigger />
-                </DialogContent>
-              </DialogRoot>
-            </Box>
+    <>
+      <Box width={"full"} height={"full"} padding={5}>
+        <Box display={"flex"} flexDirection={"column"} gap={5}>
+          <Box>
+            <Button
+              display={"flex"}
+              alignItems={"center"}
+              gap={2}
+              colorPalette={"blue"}
+              variant={"subtle"}
+              onClick={() => navigate("/dashboard")}
+            >
+              <IoChevronBackCircle /> Back To dashboard
+            </Button>
           </Box>
 
-          {/* location */}
-          <Box display={"flex"} flexDir={"column"} gap={2}>
-            <Text display={"flex"} alignItems={"center"} gap={1}>
-              <Icon>
-                <FaLocationDot />
-              </Icon>{" "}
-              Location
-            </Text>
-            <Separator />
-
-            <Box marginTop={2} display={"flex"} alignItems={"center"} gap={5}>
-              <Box
-                rounded={"full"}
-                bg={"gray.400"}
-                width={100}
-                height={100}
-              ></Box>
+          <Box paddingLeft={5} display={"flex"} flexDir={"column"} gap={6}>
+            <Box
+              display={"flex"}
+              alignItems={"center"}
+              justifyContent={"space-between"}
+              width={"full"}
+            >
               <Box>
                 <Text fontSize={"2xl"} fontWeight={"bold"}>
-                  Barangay Ampayon
+                  Settings
                 </Text>
-                <Text fontSize={"md"}>Region: Caraga Region</Text>
-                <Text fontSize={"md"}>City: Butuan City</Text>
+                <Text fontSize={"md"}>Update your data</Text>
+              </Box>
+              <Box>
+                <DialogRoot>
+                  <DialogTrigger asChild>
+                    <Button
+                      display={"flex"}
+                      alignItems={"center"}
+                      justifyContent={"center"}
+                      gap={2}
+                      colorPalette={"blue"}
+                      variant={"solid"}
+                    >
+                      <BiSolidMessageSquareEdit />
+                      Update Data
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Update Data</DialogTitle>
+                    </DialogHeader>
+                    <DialogBody display={"flex"} flexDir={"column"} gap={5}>
+                      <Field
+                        label="Barangay Captain"
+                        errorText="This field is required"
+                      >
+                        <Input
+                          required
+                          id="barangay_captain"
+                          type="text"
+                          placeholder="Enter New Baranggay Captain"
+                          name="barangay_captain"
+                        />
+                      </Field>
+
+                      <Field
+                        label="Barangay Secretary"
+                        errorText="This field is required"
+                      >
+                        <Input
+                          required
+                          id="barangay_captain"
+                          type="text"
+                          placeholder="Enter New Barangay Secretary"
+                          name="barangay_captain"
+                        />
+                      </Field>
+
+                      <Field
+                        label="Change Password"
+                        errorText="This field is required"
+                      >
+                        <PasswordInput />
+                      </Field>
+                    </DialogBody>
+                    <DialogFooter>
+                      <DialogActionTrigger asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogActionTrigger>
+                      <Button colorPalette={"blue"} variant={"solid"}>
+                        Save
+                      </Button>
+                    </DialogFooter>
+                    <DialogCloseTrigger />
+                  </DialogContent>
+                </DialogRoot>
               </Box>
             </Box>
-          </Box>
 
-          {/* officials */}
+            {/* location */}
+            <Box display={"flex"} flexDir={"column"} gap={2}>
+              <Text display={"flex"} alignItems={"center"} gap={1}>
+                <Icon>
+                  <FaLocationDot />
+                </Icon>{" "}
+                Location
+              </Text>
+              <Separator />
 
-          <Box display={"flex"} flexDir={"column"} gap={2}>
-            <Text display={"flex"} alignItems={"center"} gap={1}>
-              <Icon>
-                <BsFillPeopleFill />
-              </Icon>{" "}
-              Officials
-            </Text>
-            <Separator />
-
-            <Box marginTop={2} display={"flex"} alignItems={"center"} gap={10}>
-              {/* profile container */}
-              <Box
-                display={"flex"}
-                alignItems={"center"}
-                gap={1}
-                flexDirection={"column"}
-              >
+              <Box marginTop={2} display={"flex"} alignItems={"center"} gap={5}>
                 <Box
-                  width={70}
-                  height={70}
-                  rounded={"md"}
-                  background={"gray.400"}
+                  rounded={"full"}
+                  bg={"gray.400"}
+                  width={100}
+                  height={100}
                 ></Box>
-                <Box
-                  display={"flex"}
-                  flexDir={"column"}
-                  gap={0}
-                  alignItems={"center"}
-                >
-                  <Text fontSize={"md"}>Jhon Doe</Text>
-                  <Text fontSize={"sm"} fontStyle={"italic"}>
-                    Barangay Captain
+                <Box>
+                  <Text fontSize={"2xl"} fontWeight={"bold"}>
+                    Barangay Ampayon
                   </Text>
+                  <Text fontSize={"md"}>Region: Caraga Region</Text>
+                  <Text fontSize={"md"}>City: Butuan City</Text>
                 </Box>
               </Box>
-              {/* profile container */}
+            </Box>
+
+            {/* officials */}
+
+            <Box display={"flex"} flexDir={"column"} gap={2}>
+              <Text display={"flex"} alignItems={"center"} gap={1}>
+                <Icon>
+                  <BsFillPeopleFill />
+                </Icon>{" "}
+                Officials
+              </Text>
+              <Separator />
+
               <Box
+                marginTop={2}
                 display={"flex"}
                 alignItems={"center"}
-                gap={1}
-                flexDirection={"column"}
+                gap={10}
               >
-                <Box
-                  width={70}
-                  height={70}
-                  rounded={"md"}
-                  background={"gray.400"}
-                ></Box>
-
+                {/* profile container */}
                 <Box
                   display={"flex"}
-                  flexDir={"column"}
-                  gap={0}
                   alignItems={"center"}
+                  gap={1}
+                  flexDirection={"column"}
                 >
-                  <Text fontSize={"md"}>Jane Smith</Text>
-                  <Text fontSize={"sm"} fontStyle={"italic"}>
-                    Barangay Secretary
-                  </Text>
-                </Box>
-              </Box>
-
-              <Separator orientation="vertical" height="24" />
-
-              <DialogRoot>
-                <DialogTrigger asChild>
+                  <Box
+                    width={70}
+                    height={70}
+                    rounded={"md"}
+                    background={"gray.400"}
+                  ></Box>
                   <Box
                     display={"flex"}
-                    flexDirection={"column"}
+                    flexDir={"column"}
+                    gap={0}
                     alignItems={"center"}
-                    gap={2}
                   >
-                    <IconButton
-                      colorPalette={"blue"}
-                      variant={"subtle"}
-                      size={"2xl"}
-                    >
-                      <FaPlus />
-                    </IconButton>
-
+                    <Text fontSize={"md"}>Jhon Doe</Text>
                     <Text fontSize={"sm"} fontStyle={"italic"}>
-                      add other officials
+                      Barangay Captain
                     </Text>
                   </Box>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add Barangay Official</DialogTitle>
-                  </DialogHeader>
-                  <DialogBody display={"flex"} flexDirection={"column"} gap={5}>
-                    <Field label="Name" errorText="This field is required">
-                      <Input
-                        required
-                        type="text"
-                        placeholder="Enter Name"
-                        name="name"
-                      />
-                    </Field>
+                </Box>
+                {/* profile container */}
+                <Box
+                  display={"flex"}
+                  alignItems={"center"}
+                  gap={1}
+                  flexDirection={"column"}
+                >
+                  <Box
+                    width={70}
+                    height={70}
+                    rounded={"md"}
+                    background={"gray.400"}
+                  ></Box>
 
-                    <Field label="Position" errorText="This field is required">
-                      <Input
-                        required
-                        type="text"
-                        placeholder="Enter Position"
-                        name="position"
-                      />
-                    </Field>
+                  <Box
+                    display={"flex"}
+                    flexDir={"column"}
+                    gap={0}
+                    alignItems={"center"}
+                  >
+                    <Text fontSize={"md"}>Jane Smith</Text>
+                    <Text fontSize={"sm"} fontStyle={"italic"}>
+                      Barangay Secretary
+                    </Text>
+                  </Box>
+                </Box>
 
-                    <Field
-                      label="Profile Picture"
-                      errorText="This field is required"
+                <Separator orientation="vertical" height="24" />
+
+                <DialogRoot>
+                  <DialogTrigger asChild>
+                    <Box
+                      display={"flex"}
+                      flexDirection={"column"}
+                      alignItems={"center"}
+                      gap={2}
                     >
-                      <FileUploadRoot>
-                        <FileUploadTrigger>
-                          <Button variant="outline">
-                            <HiUpload /> Upload file
-                          </Button>
-                        </FileUploadTrigger>
-                        <FileUploadList />
-                      </FileUploadRoot>
-                    </Field>
-                  </DialogBody>
-                  <DialogFooter>
-                    <DialogActionTrigger asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogActionTrigger>
-                    <Button colorPalette={"blue"} variant={"solid"}>
-                      Save
-                    </Button>
-                  </DialogFooter>
-                  <DialogCloseTrigger />
-                </DialogContent>
-              </DialogRoot>
+                      <IconButton
+                        colorPalette={"blue"}
+                        variant={"subtle"}
+                        size={"2xl"}
+                      >
+                        <FaPlus />
+                      </IconButton>
+
+                      <Text fontSize={"sm"} fontStyle={"italic"}>
+                        add other officials
+                      </Text>
+                    </Box>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Barangay Official</DialogTitle>
+                    </DialogHeader>
+                    <DialogBody
+                      display={"flex"}
+                      flexDirection={"column"}
+                      gap={5}
+                    >
+                      <Field label="Name" errorText="This field is required">
+                        <Input
+                          required
+                          type="text"
+                          placeholder="Enter Name"
+                          name="name"
+                        />
+                      </Field>
+
+                      <Field
+                        label="Position"
+                        errorText="This field is required"
+                      >
+                        <Input
+                          required
+                          type="text"
+                          placeholder="Enter Position"
+                          name="position"
+                        />
+                      </Field>
+
+                      <Field
+                        label="Profile Picture"
+                        errorText="This field is required"
+                      >
+                        <FileUploadRoot>
+                          <FileUploadTrigger>
+                            <Button variant="outline">
+                              <HiUpload /> Upload file
+                            </Button>
+                          </FileUploadTrigger>
+                          <FileUploadList />
+                        </FileUploadRoot>
+                      </Field>
+                    </DialogBody>
+                    <DialogFooter>
+                      <DialogActionTrigger asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogActionTrigger>
+                      <Button colorPalette={"blue"} variant={"solid"}>
+                        Save
+                      </Button>
+                    </DialogFooter>
+                    <DialogCloseTrigger />
+                  </DialogContent>
+                </DialogRoot>
+              </Box>
             </Box>
+
+            {/* logout */}
+
+            <Button
+              colorPalette={"red"}
+              variant={"surface"}
+              width={100}
+              marginTop={10}
+            >
+              Logout
+            </Button>
           </Box>
-
-          {/* logout */}
-
-          <Button
-            colorPalette={"red"}
-            variant={"surface"}
-            width={100}
-            marginTop={10}
-          >
-            Logout
-          </Button>
         </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import CasesPage, {
@@ -10,19 +10,21 @@ import CasesPage, {
 import { Provider } from "@/components/ui/provider";
 import ArchivesPage from "./dashboardpages/ArchivesPage";
 import ReportPage from "./dashboardpages/ReportPage";
-import "./index.css";
 import UsersPage, {
   action as UsersPageAction,
   loader as UserPageLoader,
 } from "./dashboardpages/UsersPage";
 import BarangayCases from "./systemComponents/BarangayCases";
 import Settings from "./pages/Settings";
+
+import "./index.css";
+
+// Router Configuration
 const router = createBrowserRouter([
   {
     path: "/",
     element: <LoginPage />,
   },
-
   {
     path: "/dashboard",
     element: <Dashboard />,
@@ -59,6 +61,7 @@ const router = createBrowserRouter([
   },
 ]);
 
+// Render Application
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider>
