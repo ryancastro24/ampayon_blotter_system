@@ -15,6 +15,7 @@ import { Form } from "react-router-dom";
 import { Field } from "@/components/ui/field";
 import { IoIosArrowDropdownCircle } from "react-icons/io";
 import { PasswordInput } from "@/components/ui/password-input";
+
 import {
   FileUploadList,
   FileUploadRoot,
@@ -408,6 +409,7 @@ const UserCardContainer = ({
                 </DialogRoot>
 
                 {/* remove /delete case */}
+
                 <DialogRoot>
                   <DialogTrigger asChild>
                     <Button
@@ -422,7 +424,10 @@ const UserCardContainer = ({
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <Form method="post">
+                    <Form
+                      method="post"
+                      action={`/dashboard/users/${_id}/destroy`}
+                    >
                       <DialogHeader>
                         <DialogTitle>Delete this case</DialogTitle>
 
@@ -436,7 +441,14 @@ const UserCardContainer = ({
                         <DialogActionTrigger asChild>
                           <Button variant="outline">Cancel</Button>
                         </DialogActionTrigger>
-                        <Button background={"red.500"}>Delete</Button>
+
+                        <Button
+                          loading={navigation.state == "submitting"}
+                          type="submit"
+                          background={"red.500"}
+                        >
+                          Delete
+                        </Button>
                       </DialogFooter>
                       <DialogCloseTrigger />
                     </Form>

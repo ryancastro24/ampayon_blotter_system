@@ -13,6 +13,8 @@ import {
 import { Outlet } from "react-router-dom";
 import UserCardContainer from "@/systemComponents/UserCardContainer";
 import { PasswordInput } from "@/components/ui/password-input";
+import { EmptyState, VStack } from "@chakra-ui/react";
+import { FaUserLargeSlash } from "react-icons/fa6";
 import { HiUpload } from "react-icons/hi";
 import {
   Form,
@@ -352,12 +354,30 @@ const UsersPage = () => {
 
       <Outlet />
 
-      <Text>Available Users</Text>
-      <Grid templateColumns="repeat(4, 1fr  )" gap="6">
-        {usersData.map((val) => (
-          <UserCardContainer key={val._id} {...val} />
-        ))}
-      </Grid>
+      {usersData.length === 0 ? (
+        <EmptyState.Root>
+          <EmptyState.Content>
+            <EmptyState.Indicator>
+              <FaUserLargeSlash />
+            </EmptyState.Indicator>
+            <VStack textAlign="center">
+              <EmptyState.Title>No user available</EmptyState.Title>
+              <EmptyState.Description>
+                Add new users from different cities
+              </EmptyState.Description>
+            </VStack>
+          </EmptyState.Content>
+        </EmptyState.Root>
+      ) : (
+        <>
+          <Text>Available Users</Text>
+          <Grid templateColumns="repeat(4, 1fr  )" gap="6">
+            {usersData.map((val) => (
+              <UserCardContainer key={val._id} {...val} />
+            ))}
+          </Grid>
+        </>
+      )}
     </Box>
   );
 };

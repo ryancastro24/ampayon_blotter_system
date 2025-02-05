@@ -23,6 +23,7 @@ export type UserDataType = {
   region_name: string;
 };
 
+// update user
 export async function addUser(userData: any) {
   console.log("API Base URL:", baseAPI);
 
@@ -32,6 +33,23 @@ export async function addUser(userData: any) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(userData),
+  });
+
+  const result = await response.json();
+  console.log("Backend result:", result);
+
+  return result;
+}
+
+// delete user
+export async function deleteUser(userId: string) {
+  console.log("API Base URL:", baseAPI);
+
+  const response = await fetch(`${baseAPI}/users/${userId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 
   const result = await response.json();
