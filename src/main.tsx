@@ -6,6 +6,7 @@ import LoginPage, { action as LoginAction } from "./pages/LoginPage";
 import Dashboard, { loader as DashboardLoader } from "./pages/Dashboard";
 import CasesPage, {
   action as CasePageAction,
+  loader as CasePageLoader,
 } from "./dashboardpages/CasesPage";
 import { Provider } from "@/components/ui/provider";
 import ArchivesPage from "./dashboardpages/ArchivesPage";
@@ -15,8 +16,9 @@ import UsersPage, {
   loader as UserPageLoader,
 } from "./dashboardpages/UsersPage";
 import BarangayCases from "./systemComponents/BarangayCases";
-import Settings from "./pages/Settings";
+import Settings, { loader as SettingsLoader } from "./pages/Settings";
 import { action as deleteUser } from "./backendapi/deleteapi/destroyUser";
+import { action as deleteCase } from "./backendapi/deleteapi/destroyCase";
 import "./index.css";
 import { redirect } from "react-router-dom";
 import { isAuthenticated } from "./utils/auth";
@@ -43,10 +45,16 @@ const router = createBrowserRouter([
     loader: DashboardLoader,
     children: [
       {
-        path: "/dashboard",
+        path: "cases",
         element: <CasesPage />,
-        index: true,
         action: CasePageAction,
+        loader: CasePageLoader,
+        children: [
+          {
+            path: ":caseId/destroy",
+            action: deleteCase,
+          },
+        ],
       },
       {
         path: "users",
@@ -77,6 +85,7 @@ const router = createBrowserRouter([
   {
     path: "/settings",
     element: <Settings />,
+    loader: SettingsLoader,
   },
 ]);
 

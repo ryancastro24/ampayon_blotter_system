@@ -7,7 +7,6 @@ import {
   Button,
   Input,
   Textarea,
-  createListCollection,
   Separator,
   Icon,
 } from "@chakra-ui/react";
@@ -18,18 +17,8 @@ import { Field } from "@/components/ui/field";
 import { FaCircleMinus } from "react-icons/fa6";
 import { FaCircleXmark } from "react-icons/fa6";
 import { FaCircleCheck } from "react-icons/fa6";
-const caseTypeArray = createListCollection({
-  items: [
-    { label: "Traffic Violation", value: "traffic_violation" },
-    { label: "Property Dispute", value: "property_dispute" },
-    { label: "Noise Complaint", value: "noise_complaint" },
-    { label: "Public Nuisance", value: "public_nuisance" },
-    { label: "Business Licensing", value: "business_licensing" },
-    { label: "Zoning Issue", value: "zoning_issue" },
-    { label: "Environmental Violation", value: "environmental_violation" },
-    { label: "Public Safety", value: "public_safety" },
-  ],
-});
+import { caseTypeArray } from "@/dashboardpages/CasesPage";
+import { FaCheck } from "react-icons/fa";
 import {
   SelectContent,
   SelectItem,
@@ -53,26 +42,43 @@ import { MenuContent, MenuRoot, MenuTrigger } from "@/components/ui/menu";
 type CaseType = {
   case_number: number;
   status: string;
-  index: number;
-  caseType: string;
-  complainant: string;
-  respondent: string;
+  attempt1: boolean;
+  attempt2: boolean;
+  attempt3: boolean;
+  complainant_name: string;
+  respondent_name: string;
+  complainant_number: string;
+  complainant_email: string;
+  respondent_number: string;
+  respondent_email: string;
+  _id: string;
+  case_description: string;
+  case_type: string;
 };
 
+import { useNavigation } from "react-router-dom";
 import { TbDownload } from "react-icons/tb";
 const CasesCardContainer = ({
   case_number,
   status,
-  index,
-  caseType,
-  complainant,
-  respondent,
+  complainant_name,
+  respondent_name,
+  complainant_number,
+  complainant_email,
+  respondent_number,
+  respondent_email,
+  case_description,
+  attempt1,
+  attempt2,
+  attempt3,
+  case_type,
+  _id,
 }: CaseType) => {
+  const navigation = useNavigation();
   return (
     <Box>
       <Card.Root
         variant={"subtle"}
-        key={index}
         width={"full"}
         padding={5}
         display={"flex"}
@@ -102,9 +108,9 @@ const CasesCardContainer = ({
               gap={1}
               fontSize={"sm"}
               color={
-                status === "Settled"
+                status === "settled"
                   ? "green.500"
-                  : status === "Ongoing"
+                  : status === "ongoing"
                   ? "orange.500"
                   : "red.500"
               }
@@ -155,27 +161,28 @@ const CasesCardContainer = ({
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <Form method="post">
+                    <Form method="PUT">
                       <DialogHeader>
                         <DialogTitle>Update Case</DialogTitle>
                       </DialogHeader>
                       <DialogBody>
                         {/* Tabs */}
 
-                        <Tabs.Root defaultValue="members">
+                        <Tabs.Root defaultValue="complainant">
                           <Tabs.List>
-                            <Tabs.Trigger value="members">
+                            <Tabs.Trigger value="complainant">
                               Complainant Details
                             </Tabs.Trigger>
-                            <Tabs.Trigger value="projects">
+                            <Tabs.Trigger value="respondents">
                               Respondent Details
                             </Tabs.Trigger>
-                            <Tabs.Trigger value="tasks">
+                            <Tabs.Trigger value="case">
                               Case Details
                             </Tabs.Trigger>
                           </Tabs.List>
-                          <Tabs.Content value="members">
+                          <Tabs.Content value="complainant">
                             <Box display="flex" flexDirection="column" gap={5}>
+                              <Input type="hidden" name="id" value={_id} />
                               <Field
                                 label="Name"
                                 errorText="This field is required"
@@ -185,7 +192,7 @@ const CasesCardContainer = ({
                                   type="text"
                                   placeholder="Enter Complainant Name"
                                   name="complainant_name"
-                                  defaultValue={complainant}
+                                  defaultValue={complainant_name}
                                 />
                               </Field>
 
@@ -198,6 +205,7 @@ const CasesCardContainer = ({
                                   type="text"
                                   placeholder="09XXXXXXXX"
                                   name="complainant_number"
+                                  defaultValue={complainant_number}
                                 />
                               </Field>
 
@@ -210,12 +218,13 @@ const CasesCardContainer = ({
                                   type="text"
                                   placeholder="sample@email.com"
                                   name="complainant_email"
+                                  defaultValue={complainant_email}
                                 />
                               </Field>
                             </Box>
                           </Tabs.Content>
 
-                          <Tabs.Content value="projects">
+                          <Tabs.Content value="respondents">
                             <Box display="flex" flexDirection="column" gap={5}>
                               <Field
                                 label="Name"
@@ -226,6 +235,7 @@ const CasesCardContainer = ({
                                   type="text"
                                   placeholder="Enter Respondent Name"
                                   name="respondent_name"
+                                  defaultValue={respondent_name}
                                 />
                               </Field>
 
@@ -238,6 +248,7 @@ const CasesCardContainer = ({
                                   type="text"
                                   placeholder="09XXXXXXXX"
                                   name="respondent_number"
+                                  defaultValue={respondent_number}
                                 />
                               </Field>
 
@@ -250,13 +261,15 @@ const CasesCardContainer = ({
                                   type="text"
                                   placeholder="sample@email.com"
                                   name="respondent_email"
+                                  defaultValue={respondent_email}
                                 />
                               </Field>
                             </Box>
                           </Tabs.Content>
-                          <Tabs.Content value="tasks">
+                          <Tabs.Content value="case">
                             <Box display="flex" flexDirection="column" gap={5}>
                               <SelectRoot
+                                name="case_type"
                                 collection={caseTypeArray}
                                 size="sm"
                                 width="320px"
@@ -281,17 +294,7 @@ const CasesCardContainer = ({
                                   placeholder="Case Description..."
                                   name="case_description"
                                   resize={"none"}
-                                />
-                              </Field>
-
-                              <Field
-                                label="Scheduled Date"
-                                errorText="This field is required"
-                              >
-                                <Input
-                                  id="Scheduled_date"
-                                  type="date"
-                                  name="scheduled_date"
+                                  defaultValue={case_description}
                                 />
                               </Field>
                             </Box>
@@ -302,7 +305,15 @@ const CasesCardContainer = ({
                         <DialogActionTrigger asChild>
                           <Button variant="outline">Cancel</Button>
                         </DialogActionTrigger>
-                        <Button background={"blue.500"}>Submit</Button>
+                        <Button
+                          value={"updateCase"}
+                          name="type"
+                          loading={navigation.state === "submitting"}
+                          type="submit"
+                          background={"blue.500"}
+                        >
+                          Update
+                        </Button>
                       </DialogFooter>
                       <DialogCloseTrigger />
                     </Form>
@@ -324,7 +335,10 @@ const CasesCardContainer = ({
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <Form method="post">
+                    <Form
+                      method="post"
+                      action={`/dashboard/cases/${_id}/destroy`}
+                    >
                       <DialogHeader>
                         <DialogTitle>Delete this case</DialogTitle>
 
@@ -338,7 +352,13 @@ const CasesCardContainer = ({
                         <DialogActionTrigger asChild>
                           <Button variant="outline">Cancel</Button>
                         </DialogActionTrigger>
-                        <Button background={"red.500"}>Delete</Button>
+                        <Button
+                          loading={navigation.state === "submitting"}
+                          type="submit"
+                          background={"red.500"}
+                        >
+                          Delete
+                        </Button>
                       </DialogFooter>
                       <DialogCloseTrigger />
                     </Form>
@@ -361,52 +381,61 @@ const CasesCardContainer = ({
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <Form method="post">
-                      <DialogHeader>
-                        <DialogTitle>Case Update</DialogTitle>
+                    <DialogHeader>
+                      <DialogTitle>Case Update</DialogTitle>
 
-                        <Text>Stay Informed About Case Progress</Text>
-                      </DialogHeader>
-                      <DialogBody
-                        display={"flex"}
-                        justifyContent={"space-between"}
-                      >
-                        <Box display={"flex"} flexDirection={"column"} gap={2}>
-                          <Text>Send notification</Text>
-                          <Box display={"flex"} alignItems={"center"} gap={5}>
-                            <IconButton variant={"subtle"} size={"lg"}>
-                              <TbMessage2Share />
+                      <Text>Stay Informed About Case Progress</Text>
+                    </DialogHeader>
+                    <DialogBody
+                      display={"flex"}
+                      justifyContent={"space-between"}
+                    >
+                      <Box display={"flex"} flexDirection={"column"} gap={2}>
+                        <Text>Send notification</Text>
+                        <Box display={"flex"} alignItems={"center"} gap={5}>
+                          <Form method="put">
+                            <Input value={_id} name="id" type="hidden" />
+                            <IconButton
+                              loading={navigation.state === "submitting"}
+                              type={attempt1 ? "button" : "submit"}
+                              name="type"
+                              value={"attempt1"}
+                              variant={attempt1 ? "solid" : "subtle"}
+                              colorPalette={attempt1 ? "green" : ""}
+                              size={"lg"}
+                            >
+                              {attempt1 ? <FaCheck /> : <TbMessage2Share />}
                             </IconButton>
+                          </Form>
 
-                            <IconButton variant={"subtle"} size={"lg"}>
-                              <TbMessage2Share />
-                            </IconButton>
+                          <IconButton variant={"subtle"} size={"lg"}>
+                            <TbMessage2Share />
+                          </IconButton>
 
-                            <IconButton variant={"subtle"} size={"lg"}>
-                              <TbMessage2Share />
-                            </IconButton>
-                          </Box>
+                          <IconButton variant={"subtle"} size={"lg"}>
+                            <TbMessage2Share />
+                          </IconButton>
                         </Box>
+                      </Box>
 
-                        <Box display={"flex"} flexDirection={"column"} gap={2}>
-                          <Text>Case Status</Text>
-                          <Box display={"flex"} alignItems={"center"} gap={3}>
-                            <Button colorPalette={"green"} variant={"subtle"}>
-                              Settled
-                            </Button>
-                            <Button colorPalette={"red"} variant={"subtle"}>
-                              Failed
-                            </Button>
-                          </Box>
+                      <Box display={"flex"} flexDirection={"column"} gap={2}>
+                        <Text>Case Status</Text>
+                        <Box display={"flex"} alignItems={"center"} gap={3}>
+                          <Button colorPalette={"green"} variant={"subtle"}>
+                            Settled
+                          </Button>
+                          <Button colorPalette={"red"} variant={"subtle"}>
+                            Failed
+                          </Button>
                         </Box>
-                      </DialogBody>
-                      <DialogFooter>
-                        <DialogActionTrigger asChild>
-                          <Button variant="outline">Cancel</Button>
-                        </DialogActionTrigger>
-                      </DialogFooter>
-                      <DialogCloseTrigger />
-                    </Form>
+                      </Box>
+                    </DialogBody>
+                    <DialogFooter>
+                      <DialogActionTrigger asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogActionTrigger>
+                    </DialogFooter>
+                    <DialogCloseTrigger />
                   </DialogContent>
                 </DialogRoot>
               </MenuContent>
@@ -421,7 +450,7 @@ const CasesCardContainer = ({
         <Box className="mt-5 flex flex-col gap-2">
           <h2 className="font-display">
             <strong className="italic">Case: </strong>
-            {caseType}
+            {case_type}
           </h2>
 
           <Box className="flex flex-col">
@@ -432,7 +461,7 @@ const CasesCardContainer = ({
               fontSize={"sm"}
             >
               <Text fontStyle={"italic"}>Complainant: </Text>
-              <Text>{complainant}</Text>
+              <Text>{complainant_name}</Text>
             </Text>
             <Text
               display={"flex"}
@@ -441,7 +470,7 @@ const CasesCardContainer = ({
               fontSize={"sm"}
             >
               <Text fontStyle={"italic"}>Respondent: </Text>
-              <Text>{respondent}</Text>
+              <Text>{respondent_name}</Text>
             </Text>
           </Box>
         </Box>

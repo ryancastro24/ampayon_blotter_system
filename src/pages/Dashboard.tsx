@@ -12,7 +12,7 @@ import Loading from "@/systemComponents/Loading";
 import { isAuthenticated } from "@/utils/auth";
 import { redirect } from "react-router-dom";
 export type UserPropType = {
-  _id?: string;
+  id?: string;
   barangay_name?: string;
   city_name?: string;
   region_name?: string;
@@ -84,12 +84,12 @@ const Dashboard = () => {
                 <Box
                   as={"li"}
                   onClick={() => {
-                    navigate("/dashboard");
-                    setNavigationList("case");
+                    navigate("cases");
+                    setNavigationList("cases");
                   }}
                   paddingY={2}
                   paddingX={3}
-                  background={navigationList === "case" ? "blue.600" : ""}
+                  background={navigationList === "cases" ? "blue.600" : ""}
                   color={"white"}
                   cursor={"pointer"}
                   rounded={"sm"}

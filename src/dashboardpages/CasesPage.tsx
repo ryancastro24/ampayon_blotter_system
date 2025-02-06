@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { Form, ActionFunction } from "react-router-dom";
+import {
+  Form,
+  ActionFunction,
+  useLoaderData,
+  useNavigation,
+} from "react-router-dom";
 import { IoFolderOpen } from "react-icons/io5";
 import {
   Button,
@@ -14,16 +19,16 @@ import {
 import { PiSmileySadFill } from "react-icons/pi";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Field } from "@/components/ui/field";
-const caseTypeArray = createListCollection({
+export const caseTypeArray = createListCollection({
   items: [
-    { label: "Traffic Violation", value: "traffic_violation" },
-    { label: "Property Dispute", value: "property_dispute" },
-    { label: "Noise Complaint", value: "noise_complaint" },
-    { label: "Public Nuisance", value: "public_nuisance" },
-    { label: "Business Licensing", value: "business_licensing" },
-    { label: "Zoning Issue", value: "zoning_issue" },
-    { label: "Environmental Violation", value: "environmental_violation" },
-    { label: "Public Safety", value: "public_safety" },
+    { label: "Traffic Violation", value: "Traffic Violation" },
+    { label: "Property Dispute", value: "Property Dispute" },
+    { label: "Noise Complaint", value: "Noise Complaint" },
+    { label: "Public Nuisance", value: "Public Nuisance" },
+    { label: "Business Licensing", value: "Business Licensing" },
+    { label: "Zoning Issue", value: "Zoning Issue" },
+    { label: "Environmental Violation", value: "Environmental Violation" },
+    { label: "Public Safety", value: "Public Safety" },
   ],
 });
 import {
@@ -37,6 +42,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { UserPropType } from "@/pages/Dashboard";
+import { addCase, getCases, updateCase, attempt1 } from "@/backendapi/caseApi";
 export const action: ActionFunction = async ({ request }) => {
   console.log(request.method);
   console.log(request);
@@ -45,17 +52,36 @@ export const action: ActionFunction = async ({ request }) => {
     formData.entries()
   );
 
-  if (request.method == "POST") {
-    console.log("Post Method", data);
+  if (data.type === "attempt1") {
+    const attempt1Data = await attempt1(data?.id);
+
+    return attempt1Data;
   }
 
-  if (request.method == "PUT") {
-    console.log("Put Method", data);
+  if (data.type === "updateCase") {
+    const updatedCaseData = await updateCase(data?.id, data);
+
+    return updatedCaseData;
+  }
+
+  if (request.method == "POST") {
+    console.log(data);
+    const caseData = await addCase(data);
+    return caseData;
   }
 
   return { data };
 };
 
+export const loader = async () => {
+  const user = localStorage.getItem("user");
+
+  const userData: UserPropType = JSON.parse(user as any);
+
+  const casesData = await getCases(userData?.id);
+
+  return { userData, casesData };
+};
 import {
   SelectContent,
   SelectItem,
@@ -66,116 +92,18 @@ import {
 } from "@/components/ui/select";
 import CasesCardContainer from "@/systemComponents/CasesCardContainer";
 
-const cases = [
-  {
-    complainant: "John Doe",
-    respondent: "Jane Smith",
-    dateOfAppointment: "2025-01-25",
-    caseType: "Property Dispute",
-    status: "Ongoing",
-    case_number: 1,
-  },
-  {
-    complainant: "Alice Johnson",
-    respondent: "Bob Williams",
-    dateOfAppointment: "2025-01-26",
-    status: "Ongoing",
-    caseType: "Contract Violation",
-    case_number: 2,
-  },
-  {
-    complainant: "Carlos Martinez",
-    respondent: "Sophia Brown",
-    dateOfAppointment: "2025-01-27",
-    status: "Ongoing",
-    caseType: "Workplace Harassment",
-    case_number: 3,
-  },
-  {
-    complainant: "Emily Davis",
-    respondent: "Michael Wilson",
-    dateOfAppointment: "2025-01-28",
-    status: "Settled",
-    caseType: "Tenant-Landlord Conflict",
-    case_number: 4,
-  },
-  {
-    complainant: "George Lopez",
-    respondent: "Karen Taylor",
-    dateOfAppointment: "2025-01-29",
-    status: "Settled",
-    caseType: "Consumer Rights Violation",
-    case_number: 5,
-  },
-  {
-    complainant: "Hannah Lee",
-    respondent: "Ryan Harris",
-    dateOfAppointment: "2025-01-30",
-    status: "Ongoing",
-    caseType: "Family Dispute",
-    case_number: 6,
-  },
-  {
-    complainant: "Liam Clark",
-    respondent: "Olivia Young",
-    dateOfAppointment: "2025-02-01",
-    status: "Failed",
-    caseType: "Insurance Fraud",
-    case_number: 7,
-  },
-  {
-    complainant: "Noah White",
-    respondent: "Emma Green",
-    dateOfAppointment: "2025-02-02",
-    status: "Ongoing",
-    caseType: "Cybercrime",
-    case_number: 8,
-  },
-  {
-    complainant: "Zoe Adams",
-    respondent: "Mason Thompson",
-    dateOfAppointment: "2025-02-03",
-    status: "Settled",
-    caseType: "Defamation",
-    case_number: 9,
-  },
-  {
-    complainant: "Lucas Scott",
-    respondent: "Lily Turner",
-    dateOfAppointment: "2025-02-04",
-    status: "Ongoing",
-    caseType: "Intellectual Property Dispute",
-    case_number: 10,
-  },
-];
-
 const CasesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
   const [currentPage, setCurrentPage] = useState(1);
+  const { userData, casesData } = useLoaderData();
 
-  const [formData, setFormData] = useState({
-    complainantName: "",
-    complainantNumber: "",
-    complainantEmail: "",
-    respondentName: "",
-    respondentNumber: "",
-    respondentEmail: "",
-    caseType: "",
-    caseDescription: "",
-    scheduledDate: "",
-  });
-
-  const handleInputChange = (field: any, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  const navigation = useNavigation();
 
   const casesPerPage = 8;
-  const filteredCases = cases.filter(
-    (c) =>
-      c.caseType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.complainant.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.respondent.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCases = casesData.filter(
+    (c: any) =>
+      c.complainant_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.respondent_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredCases.length / casesPerPage);
@@ -196,7 +124,7 @@ const CasesPage = () => {
     }
   };
 
-  if (cases.length === 0) {
+  if (casesData.length === 0) {
     return (
       <Box
         display={"flex"}
@@ -224,27 +152,51 @@ const CasesPage = () => {
               <DialogBody>
                 {/* Tabs */}
 
-                <Tabs.Root defaultValue="members">
+                <Tabs.Root defaultValue="complanant">
                   <Tabs.List>
-                    <Tabs.Trigger value="members">
+                    <Tabs.Trigger value="complanant">
                       Complainant Details
                     </Tabs.Trigger>
-                    <Tabs.Trigger value="projects">
+                    <Tabs.Trigger value="respondent">
                       Respondent Details
                     </Tabs.Trigger>
-                    <Tabs.Trigger value="tasks">Case Details</Tabs.Trigger>
+                    <Tabs.Trigger value="casedescription">
+                      Case Details
+                    </Tabs.Trigger>
                   </Tabs.List>
-                  <Tabs.Content value="members">
+                  <Tabs.Content value="complanant">
                     <Box display="flex" flexDirection="column" gap={5}>
+                      <Input
+                        type="hidden"
+                        value={userData.barangay_name}
+                        name="barangay_name"
+                      />
+                      <Input
+                        type="hidden"
+                        value={userData.city_name}
+                        name="city_name"
+                      />
+                      <Input
+                        type="hidden"
+                        value={userData.region_name}
+                        name="region_name"
+                      />
+                      <Input type="hidden" value={userData.id} name="userId" />
+                      <Input
+                        type="hidden"
+                        value={userData.barangay_captain}
+                        name="barangay_captain"
+                      />
+                      <Input
+                        type="hidden"
+                        value={userData.barangay_secretary}
+                        name="barangay_secretary"
+                      />
                       <Field label="Name" errorText="This field is required">
                         <Input
                           id="complainant_name"
                           type="text"
-                          value={formData.complainantName}
                           placeholder="Enter Complainant Name"
-                          onChange={(e) =>
-                            handleInputChange("complainantName", e.target.value)
-                          }
                           name="complainant_name"
                         />
                       </Field>
@@ -256,14 +208,7 @@ const CasesPage = () => {
                         <Input
                           id="complainant_number"
                           type="text"
-                          value={formData.complainantName}
                           placeholder="09XXXXXXXX"
-                          onChange={(e) =>
-                            handleInputChange(
-                              "complainantNumber",
-                              e.target.value
-                            )
-                          }
                           name="complainant_number"
                         />
                       </Field>
@@ -272,31 +217,20 @@ const CasesPage = () => {
                         <Input
                           id="complainant_email"
                           type="text"
-                          value={formData.complainantEmail}
                           placeholder="sample@email.com"
                           name="complainant_email"
-                          onChange={(e) =>
-                            handleInputChange(
-                              "complainantEmail",
-                              e.target.value
-                            )
-                          }
                         />
                       </Field>
                     </Box>
                   </Tabs.Content>
 
-                  <Tabs.Content value="projects">
+                  <Tabs.Content value="respondent">
                     <Box display="flex" flexDirection="column" gap={5}>
                       <Field label="Name" errorText="This field is required">
                         <Input
                           id="respondent_name"
                           type="text"
-                          value={formData.respondentName}
                           placeholder="Enter Respondent Name"
-                          onChange={(e) =>
-                            handleInputChange("respondentName", e.target.value)
-                          }
                           name="respondent_name"
                         />
                       </Field>
@@ -308,14 +242,7 @@ const CasesPage = () => {
                         <Input
                           id="respondent_number"
                           type="text"
-                          value={formData.respondentName}
                           placeholder="09XXXXXXXX"
-                          onChange={(e) =>
-                            handleInputChange(
-                              "respondentNumber",
-                              e.target.value
-                            )
-                          }
                           name="respondent_number"
                         />
                       </Field>
@@ -324,22 +251,19 @@ const CasesPage = () => {
                         <Input
                           id="respondent_email"
                           type="text"
-                          value={formData.respondentEmail}
                           placeholder="sample@email.com"
                           name="respondent_email"
-                          onChange={(e) =>
-                            handleInputChange("respondentEmail", e.target.value)
-                          }
                         />
                       </Field>
                     </Box>
                   </Tabs.Content>
-                  <Tabs.Content value="tasks">
+                  <Tabs.Content value="casedescription">
                     <Box display="flex" flexDirection="column" gap={5}>
                       <SelectRoot
                         collection={caseTypeArray}
                         size="sm"
                         width="320px"
+                        name="case_type"
                       >
                         <SelectLabel>Select framework</SelectLabel>
                         <SelectTrigger>
@@ -363,17 +287,6 @@ const CasesPage = () => {
                           resize={"none"}
                         />
                       </Field>
-
-                      <Field
-                        label="Scheduled Date"
-                        errorText="This field is required"
-                      >
-                        <Input
-                          id="Scheduled_date"
-                          type="date"
-                          name="scheduled_date"
-                        />
-                      </Field>
                     </Box>
                   </Tabs.Content>
                 </Tabs.Root>
@@ -382,7 +295,13 @@ const CasesPage = () => {
                 <DialogActionTrigger asChild>
                   <Button variant="outline">Cancel</Button>
                 </DialogActionTrigger>
-                <Button background={"blue.500"}>Submit</Button>
+                <Button
+                  loading={navigation.state === "submitting"}
+                  type="submit"
+                  background={"blue.500"}
+                >
+                  Submit
+                </Button>
               </DialogFooter>
               <DialogCloseTrigger />
             </Form>
@@ -441,18 +360,42 @@ const CasesPage = () => {
                     </Tabs.List>
                     <Tabs.Content value="members">
                       <Box display="flex" flexDirection="column" gap={5}>
+                        <Input
+                          type="hidden"
+                          value={userData.barangay_name}
+                          name="barangay_name"
+                        />
+                        <Input
+                          type="hidden"
+                          value={userData.city_name}
+                          name="city_name"
+                        />
+                        <Input
+                          type="hidden"
+                          value={userData.region_name}
+                          name="region_name"
+                        />
+                        <Input
+                          type="hidden"
+                          value={userData.id}
+                          name="userId"
+                        />
+                        <Input
+                          type="hidden"
+                          value={userData.barangay_captain}
+                          name="barangay_captain"
+                        />
+                        <Input
+                          type="hidden"
+                          value={userData.barangay_secretary}
+                          name="barangay_secretary"
+                        />
+
                         <Field label="Name" errorText="This field is required">
                           <Input
                             id="complainant_name"
                             type="text"
-                            value={formData.complainantName}
                             placeholder="Enter Complainant Name"
-                            onChange={(e) =>
-                              handleInputChange(
-                                "complainantName",
-                                e.target.value
-                              )
-                            }
                             name="complainant_name"
                           />
                         </Field>
@@ -464,14 +407,7 @@ const CasesPage = () => {
                           <Input
                             id="complainant_number"
                             type="text"
-                            value={formData.complainantName}
                             placeholder="09XXXXXXXX"
-                            onChange={(e) =>
-                              handleInputChange(
-                                "complainantNumber",
-                                e.target.value
-                              )
-                            }
                             name="complainant_number"
                           />
                         </Field>
@@ -480,15 +416,8 @@ const CasesPage = () => {
                           <Input
                             id="complainant_email"
                             type="text"
-                            value={formData.complainantEmail}
                             placeholder="sample@email.com"
                             name="complainant_email"
-                            onChange={(e) =>
-                              handleInputChange(
-                                "complainantEmail",
-                                e.target.value
-                              )
-                            }
                           />
                         </Field>
                       </Box>
@@ -500,14 +429,7 @@ const CasesPage = () => {
                           <Input
                             id="respondent_name"
                             type="text"
-                            value={formData.respondentName}
                             placeholder="Enter Respondent Name"
-                            onChange={(e) =>
-                              handleInputChange(
-                                "respondentName",
-                                e.target.value
-                              )
-                            }
                             name="respondent_name"
                           />
                         </Field>
@@ -519,14 +441,7 @@ const CasesPage = () => {
                           <Input
                             id="respondent_number"
                             type="text"
-                            value={formData.respondentName}
                             placeholder="09XXXXXXXX"
-                            onChange={(e) =>
-                              handleInputChange(
-                                "respondentNumber",
-                                e.target.value
-                              )
-                            }
                             name="respondent_number"
                           />
                         </Field>
@@ -535,15 +450,8 @@ const CasesPage = () => {
                           <Input
                             id="respondent_email"
                             type="text"
-                            value={formData.respondentEmail}
                             placeholder="sample@email.com"
                             name="respondent_email"
-                            onChange={(e) =>
-                              handleInputChange(
-                                "respondentEmail",
-                                e.target.value
-                              )
-                            }
                           />
                         </Field>
                       </Box>
@@ -551,6 +459,7 @@ const CasesPage = () => {
                     <Tabs.Content value="tasks">
                       <Box display="flex" flexDirection="column" gap={5}>
                         <SelectRoot
+                          name="case_type"
                           collection={caseTypeArray}
                           size="sm"
                           width="320px"
@@ -561,7 +470,7 @@ const CasesPage = () => {
                           </SelectTrigger>
                           <SelectContent zIndex={1800}>
                             {caseTypeArray.items.map((movie) => (
-                              <SelectItem item={movie} key={movie.value}>
+                              <SelectItem item={movie} key={movie.label}>
                                 {movie.label}
                               </SelectItem>
                             ))}
@@ -577,17 +486,6 @@ const CasesPage = () => {
                             resize={"none"}
                           />
                         </Field>
-
-                        <Field
-                          label="Scheduled Date"
-                          errorText="This field is required"
-                        >
-                          <Input
-                            id="Scheduled_date"
-                            type="date"
-                            name="scheduled_date"
-                          />
-                        </Field>
                       </Box>
                     </Tabs.Content>
                   </Tabs.Root>
@@ -596,7 +494,13 @@ const CasesPage = () => {
                   <DialogActionTrigger asChild>
                     <Button variant="outline">Cancel</Button>
                   </DialogActionTrigger>
-                  <Button background={"blue.500"}>Submit</Button>
+                  <Button
+                    loading={navigation.state === "submitting"}
+                    type="submit"
+                    background={"blue.500"}
+                  >
+                    Submit
+                  </Button>
                 </DialogFooter>
                 <DialogCloseTrigger />
               </Form>
@@ -636,7 +540,7 @@ const CasesPage = () => {
           <span className="text-lg">
             <IoFolderOpen />
           </span>
-          <span>Available Cases : {cases.length}</span>
+          <span>Available Cases : {casesData.length}</span>
         </h2>
       </Box>
 
@@ -646,8 +550,8 @@ const CasesPage = () => {
         gridTemplateColumns="repeat(4, minmax(0, 1fr))"
         gap={4}
       >
-        {paginatedCases.map((val, index) => (
-          <CasesCardContainer key={index} {...val} index={index} />
+        {paginatedCases.map((val: any) => (
+          <CasesCardContainer key={val._id} {...val} />
         ))}
       </Box>
 

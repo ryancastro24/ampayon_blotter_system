@@ -32,8 +32,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { UserPropType } from "./Dashboard";
+import { useLoaderData } from "react-router-dom";
+
+export const loader = async () => {
+  const user = localStorage.getItem("user");
+
+  const userData: UserPropType = JSON.parse(user as any);
+
+  return { userData };
+};
 const Settings = () => {
   const navigate = useNavigate();
+  const { userData } = useLoaderData();
+
+  const logout = () => {
+    // 🗑️ Remove authToken and user from localStorage
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+
+    // 🔄 Redirect to home page
+    navigate("/");
+  };
 
   return (
     <>
@@ -151,10 +171,10 @@ const Settings = () => {
                 ></Box>
                 <Box>
                   <Text fontSize={"2xl"} fontWeight={"bold"}>
-                    Barangay Ampayon
+                    Barangay {userData.barangay_name}
                   </Text>
-                  <Text fontSize={"md"}>Region: Caraga Region</Text>
-                  <Text fontSize={"md"}>City: Butuan City</Text>
+                  <Text fontSize={"md"}>Region: {userData.region_name}</Text>
+                  <Text fontSize={"md"}>City: {userData.city_name}</Text>
                 </Box>
               </Box>
             </Box>
@@ -195,7 +215,7 @@ const Settings = () => {
                     gap={0}
                     alignItems={"center"}
                   >
-                    <Text fontSize={"md"}>Jhon Doe</Text>
+                    <Text fontSize={"md"}>{userData.barangay_captain}</Text>
                     <Text fontSize={"sm"} fontStyle={"italic"}>
                       Barangay Captain
                     </Text>
@@ -221,7 +241,7 @@ const Settings = () => {
                     gap={0}
                     alignItems={"center"}
                   >
-                    <Text fontSize={"md"}>Jane Smith</Text>
+                    <Text fontSize={"md"}>{userData.barangay_secretary}</Text>
                     <Text fontSize={"sm"} fontStyle={"italic"}>
                       Barangay Secretary
                     </Text>
@@ -312,6 +332,7 @@ const Settings = () => {
             {/* logout */}
 
             <Button
+              onClick={logout}
               colorPalette={"red"}
               variant={"surface"}
               width={100}
