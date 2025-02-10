@@ -61,20 +61,41 @@ export async function updateCase(id: any, updatedData: any) {
 
 // attempt1
 export async function attempt1(id: any) {
-  const date = new Date();
-
-  console.log(id);
-
-  const updateData = {
-    attempt1: true,
-    attempt1Date: date.toISOString(),
-  };
-  const response = await fetch(`${baseAPI}/cases/${id}`, {
+  const response = await fetch(`${baseAPI}/cases/attempt1/${id}`, {
     method: "PUT", // Use "PUT" or "PATCH" for updating
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(updateData), // Send the updated data
+  });
+
+  const result = await response.json();
+  console.log("Backend result:", result);
+
+  return result;
+}
+
+// attempt2
+export async function attempt2(id: any) {
+  const response = await fetch(`${baseAPI}/cases/attempt2/${id}`, {
+    method: "PUT", // Use "PUT" or "PATCH" for updating
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const result = await response.json();
+  console.log("Backend result:", result);
+
+  return result;
+}
+
+// attempt2
+export async function attempt3(id: any) {
+  const response = await fetch(`${baseAPI}/cases/attempt3/${id}`, {
+    method: "PUT", // Use "PUT" or "PATCH" for updating
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 
   const result = await response.json();

@@ -10,6 +10,7 @@ import {
   Separator,
   Icon,
 } from "@chakra-ui/react";
+import { FaFileLines } from "react-icons/fa6";
 import { TbMessage2Share } from "react-icons/tb";
 import { Form } from "react-router-dom";
 import { IoIosArrowDropdownCircle } from "react-icons/io";
@@ -56,7 +57,7 @@ type CaseType = {
   case_type: string;
 };
 
-import { useNavigation } from "react-router-dom";
+import { useNavigation, useNavigate } from "react-router-dom";
 import { TbDownload } from "react-icons/tb";
 const CasesCardContainer = ({
   case_number,
@@ -75,6 +76,7 @@ const CasesCardContainer = ({
   _id,
 }: CaseType) => {
   const navigation = useNavigation();
+  const navigate = useNavigate();
   return (
     <Box>
       <Card.Root
@@ -389,45 +391,87 @@ const CasesCardContainer = ({
                     <DialogBody
                       display={"flex"}
                       justifyContent={"space-between"}
+                      flexDirection={"column"}
+                      gap={10}
                     >
-                      <Box display={"flex"} flexDirection={"column"} gap={2}>
-                        <Text>Send notification</Text>
-                        <Box display={"flex"} alignItems={"center"} gap={5}>
-                          <Form method="put">
-                            <Input value={_id} name="id" type="hidden" />
-                            <IconButton
-                              loading={navigation.state === "submitting"}
-                              type={attempt1 ? "button" : "submit"}
-                              name="type"
-                              value={"attempt1"}
-                              variant={attempt1 ? "solid" : "subtle"}
-                              colorPalette={attempt1 ? "green" : ""}
-                              size={"lg"}
-                            >
-                              {attempt1 ? <FaCheck /> : <TbMessage2Share />}
-                            </IconButton>
-                          </Form>
+                      <Box display={"flex"} justifyContent={"space-between"}>
+                        <Box display={"flex"} flexDirection={"column"} gap={2}>
+                          <Text>Send notification</Text>
+                          <Box display={"flex"} alignItems={"center"} gap={5}>
+                            <Form method="put">
+                              <Input value={_id} name="id" type="hidden" />
+                              <IconButton
+                                loading={navigation.state === "submitting"}
+                                type={attempt1 ? "button" : "submit"}
+                                name="type"
+                                value={"attempt1"}
+                                variant={attempt1 ? "solid" : "subtle"}
+                                colorPalette={attempt1 ? "green" : ""}
+                                size={"lg"}
+                              >
+                                {attempt1 ? <FaCheck /> : <TbMessage2Share />}
+                              </IconButton>
+                            </Form>
 
-                          <IconButton variant={"subtle"} size={"lg"}>
-                            <TbMessage2Share />
-                          </IconButton>
+                            <Form method="put">
+                              <Input value={_id} name="id" type="hidden" />
+                              <IconButton
+                                loading={navigation.state === "submitting"}
+                                type={attempt2 ? "button" : "submit"}
+                                name="type"
+                                value={"attempt2"}
+                                variant={attempt2 ? "solid" : "subtle"}
+                                colorPalette={attempt2 ? "green" : ""}
+                                size={"lg"}
+                              >
+                                {attempt2 ? <FaCheck /> : <TbMessage2Share />}
+                              </IconButton>
+                            </Form>
 
-                          <IconButton variant={"subtle"} size={"lg"}>
-                            <TbMessage2Share />
-                          </IconButton>
+                            <Form method="put">
+                              <Input value={_id} name="id" type="hidden" />
+                              <IconButton
+                                loading={navigation.state === "submitting"}
+                                type={attempt3 ? "button" : "submit"}
+                                name="type"
+                                value={"attempt3"}
+                                variant={attempt3 ? "solid" : "subtle"}
+                                colorPalette={attempt3 ? "green" : ""}
+                                size={"lg"}
+                              >
+                                {attempt3 ? <FaCheck /> : <TbMessage2Share />}
+                              </IconButton>
+                            </Form>
+                          </Box>
+                        </Box>
+
+                        <Box display={"flex"} flexDirection={"column"} gap={2}>
+                          <Text>Case Status</Text>
+                          <Box display={"flex"} alignItems={"center"} gap={3}>
+                            <Button colorPalette={"green"} variant={"subtle"}>
+                              Settled
+                            </Button>
+                            <Button colorPalette={"red"} variant={"subtle"}>
+                              Failed
+                            </Button>
+                          </Box>
                         </Box>
                       </Box>
 
-                      <Box display={"flex"} flexDirection={"column"} gap={2}>
-                        <Text>Case Status</Text>
-                        <Box display={"flex"} alignItems={"center"} gap={3}>
-                          <Button colorPalette={"green"} variant={"subtle"}>
-                            Settled
-                          </Button>
-                          <Button colorPalette={"red"} variant={"subtle"}>
-                            Failed
-                          </Button>
-                        </Box>
+                      <Box>
+                        <Button
+                          onClick={() => navigate(`/casedetails/${_id}`)}
+                          colorPalette={"blue"}
+                          variant={"surface"}
+                          display={"flex"}
+                          alignItems={"center"}
+                          gap={2}
+                        >
+                          <Icon size={"sm"}>
+                            <FaFileLines />
+                          </Icon>
+                          Case Details
+                        </Button>
                       </Box>
                     </DialogBody>
                     <DialogFooter>

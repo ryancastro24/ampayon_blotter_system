@@ -11,6 +11,7 @@ import CasesPage, {
 import { Provider } from "@/components/ui/provider";
 import ArchivesPage from "./dashboardpages/ArchivesPage";
 import ReportPage from "./dashboardpages/ReportPage";
+import CaseDetails from "./systemComponents/CaseDetails";
 import UsersPage, {
   action as UsersPageAction,
   loader as UserPageLoader,
@@ -86,6 +87,11 @@ const router = createBrowserRouter([
     path: "/settings",
     element: <Settings />,
     loader: SettingsLoader,
+  },
+
+  {
+    path: "/casedetails/:id",
+    element: <CaseDetails />,
   },
 ]);
 

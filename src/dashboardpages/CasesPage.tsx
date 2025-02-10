@@ -43,7 +43,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { UserPropType } from "@/pages/Dashboard";
-import { addCase, getCases, updateCase, attempt1 } from "@/backendapi/caseApi";
+import {
+  addCase,
+  getCases,
+  updateCase,
+  attempt1,
+  attempt2,
+  attempt3,
+} from "@/backendapi/caseApi";
 export const action: ActionFunction = async ({ request }) => {
   console.log(request.method);
   console.log(request);
@@ -58,6 +65,17 @@ export const action: ActionFunction = async ({ request }) => {
     return attempt1Data;
   }
 
+  if (data.type === "attempt2") {
+    const attempt1Data = await attempt2(data?.id);
+
+    return attempt1Data;
+  }
+
+  if (data.type === "attempt3") {
+    const attempt1Data = await attempt3(data?.id);
+
+    return attempt1Data;
+  }
   if (data.type === "updateCase") {
     const updatedCaseData = await updateCase(data?.id, data);
 
