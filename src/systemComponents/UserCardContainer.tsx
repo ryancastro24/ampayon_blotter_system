@@ -367,6 +367,13 @@ const UserCardContainer = ({
 
                           <Tabs.Content value="credentials">
                             <Box display="flex" flexDirection="column" gap={5}>
+                              <Input
+                                required
+                                id="id"
+                                type="hidden"
+                                name="id"
+                                value={_id}
+                              />
                               <Field
                                 label="Username"
                                 errorText="This field is required"

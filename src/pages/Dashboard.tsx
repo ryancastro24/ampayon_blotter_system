@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   useNavigation,
   useNavigate,
@@ -10,7 +9,8 @@ import { Box, Text, IconButton } from "@chakra-ui/react";
 import { HiMiniCog8Tooth } from "react-icons/hi2";
 import Loading from "@/systemComponents/Loading";
 import { isAuthenticated } from "@/utils/auth";
-import { redirect } from "react-router-dom";
+import { redirect, useLocation } from "react-router-dom";
+
 export type UserPropType = {
   id?: string;
   barangay_name?: string;
@@ -35,9 +35,10 @@ export const loader = async () => {
 };
 const Dashboard = () => {
   const { userData } = useLoaderData();
-  const [navigationList, setNavigationList] = useState("case");
+  const location = useLocation();
   const navigation = useNavigation();
   const navigate = useNavigate();
+
   return (
     <Box width={"full"}>
       <Box
@@ -68,11 +69,12 @@ const Dashboard = () => {
                 as={"li"}
                 onClick={() => {
                   navigate("users");
-                  setNavigationList("users");
                 }}
                 paddingY={2}
                 paddingX={3}
-                background={navigationList === "users" ? "blue.600" : ""}
+                background={
+                  location.pathname === "/dashboard/users" ? "blue.600" : ""
+                }
                 color={"white"}
                 cursor={"pointer"}
                 rounded={"sm"}
@@ -85,11 +87,12 @@ const Dashboard = () => {
                   as={"li"}
                   onClick={() => {
                     navigate("cases");
-                    setNavigationList("cases");
                   }}
                   paddingY={2}
                   paddingX={3}
-                  background={navigationList === "cases" ? "blue.600" : ""}
+                  background={
+                    location.pathname === "/dashboard/cases" ? "blue.600" : ""
+                  }
                   color={"white"}
                   cursor={"pointer"}
                   rounded={"sm"}
@@ -101,11 +104,14 @@ const Dashboard = () => {
                   as={"li"}
                   onClick={() => {
                     navigate("archives");
-                    setNavigationList("archives");
                   }}
                   paddingY={2}
                   paddingX={3}
-                  background={navigationList === "archives" ? "blue.600" : ""}
+                  background={
+                    location.pathname === "/dashboard/archives"
+                      ? "blue.600"
+                      : ""
+                  }
                   color={"white"}
                   cursor={"pointer"}
                   rounded={"sm"}
@@ -116,11 +122,12 @@ const Dashboard = () => {
                   as="li"
                   onClick={() => {
                     navigate("report");
-                    setNavigationList("report");
                   }}
                   paddingY={2}
                   paddingX={3}
-                  background={navigationList === "report" ? "blue.600" : ""}
+                  background={
+                    location.pathname === "/dashboard/report" ? "blue.600" : ""
+                  }
                   color={"white"}
                   cursor={"pointer"}
                   rounded={"sm"}

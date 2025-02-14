@@ -20,6 +20,7 @@ import { FaCircleXmark } from "react-icons/fa6";
 import { FaCircleCheck } from "react-icons/fa6";
 import { caseTypeArray } from "@/dashboardpages/CasesPage";
 import { FaCheck } from "react-icons/fa";
+
 import {
   SelectContent,
   SelectItem,
@@ -55,10 +56,14 @@ type CaseType = {
   _id: string;
   case_description: string;
   case_type: string;
+  region_name: string;
+  city_name: string;
+  barangay_name: string;
+  barangay_captain: string;
+  barangay_secretary: string;
 };
 
 import { useNavigation, useNavigate } from "react-router-dom";
-import { TbDownload } from "react-icons/tb";
 const CasesCardContainer = ({
   case_number,
   status,
@@ -73,10 +78,12 @@ const CasesCardContainer = ({
   attempt2,
   attempt3,
   case_type,
+
   _id,
 }: CaseType) => {
   const navigation = useNavigation();
   const navigate = useNavigate();
+
   return (
     <Box>
       <Card.Root
@@ -131,10 +138,6 @@ const CasesCardContainer = ({
           </Box>
 
           <Box display={"flex"} alignItems={"center"} gap={1}>
-            <IconButton size={"xs"} variant={"surface"} colorPalette={"blue"}>
-              <TbDownload />
-            </IconButton>
-
             <MenuRoot>
               <MenuTrigger asChild>
                 <IconButton size={"xs"} variant={"solid"} colorPalette={"blue"}>

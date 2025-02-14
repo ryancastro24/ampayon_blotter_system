@@ -103,3 +103,45 @@ export async function attempt3(id: any) {
 
   return result;
 }
+
+// get specific case
+export async function getSpecificCase(id: any) {
+  const response = await fetch(`${baseAPI}/cases/getSpecificCaseOnly/${id}`, {
+    method: "GET", // Use "PUT" or "PATCH" for updating
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const result = await response.json();
+
+  return result;
+}
+
+export async function uploadDoucmentaryImages(id: any, data: any) {
+  console.log("data", data);
+  const response = await fetch(
+    `${baseAPI}/cases/uploadDocumentaryImages/${id}`,
+    {
+      method: "PUT", // Use "PUT" or "PATCH" for updating
+      body: data, // Send the updated data
+    }
+  );
+
+  const result = await response.json();
+  console.log("Backend result:", result);
+
+  return result;
+}
+
+export async function uploadCaseForms(id: any, data: any) {
+  const response = await fetch(`${baseAPI}/cases/caseForms/${id}`, {
+    method: "PUT", // Use "PUT" or "PATCH" for updating
+    body: data, // Send the updated data
+  });
+
+  const result = await response.json();
+  console.log("Backend result:", result);
+
+  return result;
+}

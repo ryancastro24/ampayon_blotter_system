@@ -28,7 +28,7 @@ import {
   FileUploadRoot,
   FileUploadTrigger,
 } from "@/components/ui/file-upload";
-import { getUsers, addUser } from "@/backendapi/usersApi";
+import { getUsers, addUser, updateUser } from "@/backendapi/usersApi";
 import {
   NativeSelectField,
   NativeSelectRoot,
@@ -93,8 +93,8 @@ export const action: ActionFunction = async ({ request }) => {
     return userData;
   } else if (request.method == "PUT") {
     console.log("update data:", data);
-
-    return data;
+    const updatedData = await updateUser(data.id, data);
+    return updatedData;
   }
 
   return { data };

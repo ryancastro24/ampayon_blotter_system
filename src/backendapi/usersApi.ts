@@ -43,13 +43,29 @@ export async function addUser(userData: any) {
 
 // delete user
 export async function deleteUser(userId: string) {
-  console.log("API Base URL:", baseAPI);
-
   const response = await fetch(`${baseAPI}/users/${userId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
     },
+  });
+
+  const result = await response.json();
+  console.log("Backend result:", result);
+
+  return result;
+}
+
+// update user
+
+// Update case
+export async function updateUser(id: any, updatedData: any) {
+  const response = await fetch(`${baseAPI}/users/${id}`, {
+    method: "PUT", // Use "PUT" or "PATCH" for updating
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updatedData), // Send the updated data
   });
 
   const result = await response.json();
