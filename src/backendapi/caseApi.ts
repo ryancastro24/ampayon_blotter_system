@@ -26,6 +26,17 @@ export async function getCases(id: string | undefined) {
   return result;
 }
 
+// get settled and failed cases
+export async function getSettleAndFailedCases(id: string | undefined) {
+  const casesData = await fetch(
+    `${baseAPI}/cases/archivecases/cases/data/${id}`
+  );
+  const result = await casesData.json();
+
+  console.log("backend result:", result);
+  return result;
+}
+
 // delete case
 export async function deleteCase(userId: string) {
   const response = await fetch(`${baseAPI}/cases/${userId}`, {
@@ -143,5 +154,28 @@ export async function uploadCaseForms(id: any, data: any) {
   const result = await response.json();
   console.log("Backend result:", result);
 
+  return result;
+}
+
+// get all cases by status
+// get Permonth Cases
+export async function getGroupedCases(id: string | undefined) {
+  const groupedCasesData = await fetch(
+    `${baseAPI}/cases/groupedcases/cases/data/${id}`
+  );
+  const result = await groupedCasesData.json();
+
+  console.log("backend result:", result);
+  return result;
+}
+
+// get Permonth Cases
+export async function getPermonthCases(id: string | undefined) {
+  const perMonthCasedata = await fetch(
+    `${baseAPI}/cases/permonthCases/cases/data/${id}`
+  );
+  const result = await perMonthCasedata.json();
+
+  console.log("getPermonthCases backend result:", result);
   return result;
 }

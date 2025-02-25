@@ -3,7 +3,51 @@ import { PieChart } from "@mui/x-charts/PieChart";
 import { Box, Card, Text, IconButton, Icon, Separator } from "@chakra-ui/react";
 import { TbDownload } from "react-icons/tb";
 import { IoCalendarClear } from "react-icons/io5";
+import { UserPropType } from "@/pages/Dashboard";
+import { getPermonthCases, getGroupedCases } from "@/backendapi/caseApi";
+import { useLoaderData } from "react-router-dom";
+import { ClientOnly } from "@chakra-ui/react";
+import { EmptyState } from "@/components/ui/empty-state";
+import Loading from "@/systemComponents/Loading";
+import { PiSmileySadFill } from "react-icons/pi";
+export const loader = async () => {
+  const user = localStorage.getItem("user");
+
+  const userData: UserPropType = JSON.parse(user as any);
+
+  const perMonthCasesData = await getPermonthCases(userData?.id);
+  const groupedCases = await getGroupedCases(userData?.id);
+
+  return { userData, perMonthCasesData, groupedCases };
+};
 const ReportPage = () => {
+  const { perMonthCasesData, groupedCases } = useLoaderData() as any;
+
+  console.log(groupedCases[0].value);
+
+  if (
+    groupedCases[0].value == 0 &&
+    groupedCases[1].value == 0 &&
+    groupedCases[2].value == 0
+  ) {
+    return (
+      <ClientOnly fallback={<Loading />}>
+        <Box
+          display={"flex"}
+          justifyContent={"center"}
+          alignItems={"center"}
+          flexDirection={"column"}
+        >
+          <EmptyState
+            icon={<PiSmileySadFill />}
+            title="No Case Available"
+            description="Add case to display analytics graphs"
+          />
+        </Box>
+      </ClientOnly>
+    );
+  }
+
   return (
     <Box paddingX={10} paddingY={20}>
       <Box
@@ -49,11 +93,7 @@ const ReportPage = () => {
             <PieChart
               series={[
                 {
-                  data: [
-                    { id: 0, value: 10, label: "series A", color: "#4CAF50" },
-                    { id: 1, value: 15, label: "series B", color: "#FF9800" },
-                    { id: 2, value: 20, label: "series C", color: "#F44336" },
-                  ],
+                  data: groupedCases,
                 },
               ]}
               width={500}
@@ -97,21 +137,10 @@ const ReportPage = () => {
 
           <Card.Body>
             <BarChart
-              xAxis={[
-                {
-                  id: "barCategories",
-                  data: ["Jan", "Feb", "Mar", "Apr", "Jun", "Jul"],
-                  scaleType: "band",
-                },
-              ]}
-              series={[
-                {
-                  data: [2, 5, 3, 4, 5, 8],
-                  color: "#2196F3",
-                },
-              ]}
-              width={500}
-              height={300}
+              xAxis={perMonthCasesData.xAxis}
+              series={perMonthCasesData.series}
+              width={perMonthCasesData.width}
+              height={perMonthCasesData.height}
             />
           </Card.Body>
         </Card.Root>

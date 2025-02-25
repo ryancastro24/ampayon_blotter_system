@@ -1,124 +1,39 @@
 import { useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { ActionFunction } from "react-router-dom";
+import { useLoaderData } from "react-router-dom";
 import { IoFolderOpen } from "react-icons/io5";
 import { Input, Box, IconButton, Button } from "@chakra-ui/react";
 import { LuDownload } from "react-icons/lu";
-export const action: ActionFunction = async ({ request }) => {
-  console.log(request.method);
-  console.log(request);
-  const formData = await request.formData();
-  const data: Record<string, FormDataEntryValue> = Object.fromEntries(
-    formData.entries()
-  );
+import { getSettleAndFailedCases } from "@/backendapi/caseApi";
+import { ClientOnly } from "@chakra-ui/react";
+import { EmptyState } from "@/components/ui/empty-state";
+import Loading from "@/systemComponents/Loading";
+import { PiSmileySadFill } from "react-icons/pi";
+import { UserPropType } from "@/pages/Dashboard";
+export const loader = async () => {
+  const user = localStorage.getItem("user");
 
-  if (request.method == "POST") {
-    console.log("Post Method", data);
-  }
+  const userData: UserPropType = JSON.parse(user as any);
 
-  if (request.method == "PUT") {
-    console.log("Put Method", data);
-  }
+  const casesData = await getSettleAndFailedCases(userData?.id);
 
-  return { data };
+  return { userData, casesData };
 };
 
 import CasesCardContainer from "@/systemComponents/CasesCardContainer";
-
-const cases = [
-  {
-    complainant: "John Doe",
-    respondent: "Jane Smith",
-    dateOfAppointment: "2025-01-25",
-    caseType: "Property Dispute",
-    status: "Ongoing",
-    case_number: 1,
-  },
-  {
-    complainant: "Alice Johnson",
-    respondent: "Bob Williams",
-    dateOfAppointment: "2025-01-26",
-    status: "Ongoing",
-    caseType: "Contract Violation",
-    case_number: 2,
-  },
-  {
-    complainant: "Carlos Martinez",
-    respondent: "Sophia Brown",
-    dateOfAppointment: "2025-01-27",
-    status: "Ongoing",
-    caseType: "Workplace Harassment",
-    case_number: 3,
-  },
-  {
-    complainant: "Emily Davis",
-    respondent: "Michael Wilson",
-    dateOfAppointment: "2025-01-28",
-    status: "Settled",
-    caseType: "Tenant-Landlord Conflict",
-    case_number: 4,
-  },
-  {
-    complainant: "George Lopez",
-    respondent: "Karen Taylor",
-    dateOfAppointment: "2025-01-29",
-    status: "Settled",
-    caseType: "Consumer Rights Violation",
-    case_number: 5,
-  },
-  {
-    complainant: "Hannah Lee",
-    respondent: "Ryan Harris",
-    dateOfAppointment: "2025-01-30",
-    status: "Ongoing",
-    caseType: "Family Dispute",
-    case_number: 6,
-  },
-  {
-    complainant: "Liam Clark",
-    respondent: "Olivia Young",
-    dateOfAppointment: "2025-02-01",
-    status: "Failed",
-    caseType: "Insurance Fraud",
-    case_number: 7,
-  },
-  {
-    complainant: "Noah White",
-    respondent: "Emma Green",
-    dateOfAppointment: "2025-02-02",
-    status: "Ongoing",
-    caseType: "Cybercrime",
-    case_number: 8,
-  },
-  {
-    complainant: "Zoe Adams",
-    respondent: "Mason Thompson",
-    dateOfAppointment: "2025-02-03",
-    status: "Settled",
-    caseType: "Defamation",
-    case_number: 9,
-  },
-  {
-    complainant: "Lucas Scott",
-    respondent: "Lily Turner",
-    dateOfAppointment: "2025-02-04",
-    status: "Ongoing",
-    caseType: "Intellectual Property Dispute",
-    case_number: 10,
-  },
-];
 
 const ArchivesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
 
+  const { casesData } = useLoaderData() as any;
+
   const casesPerPage = 8;
-  const filteredCases = cases.filter(
-    (c) =>
-      c.caseType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.complainant.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.respondent.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCases = casesData.filter(
+    (c: any) =>
+      c.complainant_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.respondent_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredCases.length / casesPerPage);
@@ -139,6 +54,24 @@ const ArchivesPage = () => {
     }
   };
 
+  if (casesData.length === 0) {
+    return (
+      <ClientOnly fallback={<Loading />}>
+        <Box
+          display={"flex"}
+          justifyContent={"center"}
+          alignItems={"center"}
+          flexDirection={"column"}
+        >
+          <EmptyState
+            icon={<PiSmileySadFill />}
+            title="Empty Archives"
+            description="No cases available, manage ongoing cases"
+          />
+        </Box>
+      </ClientOnly>
+    );
+  }
   return (
     <Box
       data-state="open"
@@ -194,7 +127,7 @@ const ArchivesPage = () => {
           <span className="text-lg">
             <IoFolderOpen />
           </span>
-          <span>Available Cases : {cases.length}</span>
+          <span>Available Cases : {casesData.length}</span>
         </h2>
       </Box>
 
@@ -204,8 +137,8 @@ const ArchivesPage = () => {
         gridTemplateColumns="repeat(4, minmax(0, 1fr))"
         gap={4}
       >
-        {paginatedCases.map((val, index) => (
-          <CasesCardContainer key={index} {...val} index={index} />
+        {paginatedCases.map((val: any) => (
+          <CasesCardContainer key={val._id} {...val} />
         ))}
       </Box>
 

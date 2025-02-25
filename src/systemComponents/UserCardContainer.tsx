@@ -2,10 +2,10 @@ import {
   Text,
   Card,
   Box,
-  Badge,
   Tabs,
   IconButton,
   Button,
+  Separator,
   Input,
   Icon,
 } from "@chakra-ui/react";
@@ -85,6 +85,10 @@ const UserCardContainer = ({
   barangay_secretary,
   username,
   region_name,
+  ongoingCase,
+  failedCase,
+  settledCase,
+  totalCases,
 }: UserDataType) => {
   const navigation = useNavigation();
   const navigate = useNavigate();
@@ -138,29 +142,77 @@ const UserCardContainer = ({
         <Card.Body
           position={"relative"}
           display={"flex"}
-          alignItems={"center"}
-          flexDirection={"row"}
+          flexDirection={"column"}
           gap={2}
         >
           <Box
-            width={"70px"}
-            height={"70px"}
-            background={"gray.300"}
-            rounded={"full"}
-          ></Box>
-          <Box>
+            display={"flex"}
+            flexDirection={"row"}
+            alignItems={"center"}
+            gap="2"
+          >
+            <Box
+              width={"50px"}
+              height={"50px"}
+              background={"gray.300"}
+              rounded={"full"}
+            ></Box>
             <Box>
-              <Text fontSize={"md"}>Brgy. {barangay_name}</Text>
-              <Text fontSize={"xs"}>{city_name} City</Text>
-            </Box>
-
-            <Box>
-              <Badge colorPalette="green" marginTop={2}>
-                Total Case: 10
-              </Badge>
+              <Box>
+                <Text fontSize={"md"}>Brgy. {barangay_name}</Text>
+                <Text fontSize={"xs"}>{city_name} City</Text>
+              </Box>
             </Box>
           </Box>
 
+          <Separator />
+          <Box
+            display={"flex"}
+            flexDirection={"row"}
+            alignItems={"center"}
+            gap="2"
+            justifyContent={"space-between"}
+          >
+            <Box
+              display={"flex"}
+              alignItems={"center"}
+              gap={2}
+              flexDirection={"column"}
+            >
+              <Text fontSize={"xs"}> Ongoing </Text>
+              <Text> {ongoingCase}</Text>
+            </Box>
+
+            <Box
+              display={"flex"}
+              alignItems={"center"}
+              gap={2}
+              flexDirection={"column"}
+            >
+              <Text fontSize={"xs"}>Failed</Text>
+              <Text> {failedCase}</Text>
+            </Box>
+
+            <Box
+              display={"flex"}
+              alignItems={"center"}
+              gap={2}
+              flexDirection={"column"}
+            >
+              <Text fontSize={"xs"}> Settled </Text>
+              <Text>{settledCase}</Text>
+            </Box>
+
+            <Box
+              display={"flex"}
+              alignItems={"center"}
+              gap={2}
+              flexDirection={"column"}
+            >
+              <Text fontSize={"xs"}> Total</Text>
+              <Text>{totalCases}</Text>
+            </Box>
+          </Box>
           <Box position={"absolute"} right={2} top={2}>
             <MenuRoot>
               <MenuTrigger asChild>

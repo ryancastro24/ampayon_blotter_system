@@ -422,7 +422,9 @@ const CaseDetails = () => {
               Description
             </Text>
 
-            <Text>{caseDetails.case_description}</Text>
+            <Text textAlign={"justify"} fontSize={"sm"}>
+              {caseDetails.case_description}
+            </Text>
           </Box>
 
           <Box display={"flex"} flexDirection={"column"} gap={3}>

@@ -83,7 +83,7 @@ const Settings = () => {
                 <Text fontSize={"2xl"} fontWeight={"bold"}>
                   Settings
                 </Text>
-                <Text fontSize={"md"}>Update your data</Text>
+                <Text fontSize={"sm"}>Update your data</Text>
               </Box>
               <Box>
                 <DialogRoot>

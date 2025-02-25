@@ -125,9 +125,9 @@ const CasesCardContainer = ({
               }
             >
               <span>
-                {status === "Settled" ? (
+                {status === "settled" ? (
                   <FaCircleCheck />
-                ) : status === "Ongoing" ? (
+                ) : status === "ongoing" ? (
                   <FaCircleMinus />
                 ) : (
                   <FaCircleXmark />

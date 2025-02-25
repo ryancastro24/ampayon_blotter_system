@@ -21,6 +21,10 @@ export type UserDataType = {
   barangay_name: string;
   city_name: string;
   region_name: string;
+  ongoingCase: number;
+  failedCase: number;
+  settledCase: number;
+  totalCases: number;
 };
 
 // update user
