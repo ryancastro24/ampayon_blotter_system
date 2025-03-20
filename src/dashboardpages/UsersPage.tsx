@@ -1,4 +1,12 @@
-import { Box, Tabs, Input, Button, Grid, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Tabs,
+  Input,
+  Button,
+  Grid,
+  Text,
+  GridItem,
+} from "@chakra-ui/react";
 import {
   DialogActionTrigger,
   DialogBody,
@@ -47,7 +55,10 @@ interface City {
   code: string;
   name: string;
 }
-
+interface Province {
+  code: string;
+  name: string;
+}
 interface Barangay {
   code: string;
   name: string;
@@ -58,9 +69,14 @@ const fetchRegions = async (): Promise<Region[]> => {
   return res.json();
 };
 
-const fetchCities = async (regionCode: string): Promise<City[]> => {
+const fetchProvinces = async (regionCode: string): Promise<Province[]> => {
+  const res = await fetch(`${API_BASE_URL}/regions/${regionCode}/provinces`);
+  return res.json();
+};
+
+const fetchCities = async (provinceCode: string): Promise<City[]> => {
   const res = await fetch(
-    `${API_BASE_URL}/regions/${regionCode}/cities-municipalities`
+    `${API_BASE_URL}/provinces/${provinceCode}/cities-municipalities`
   );
   return res.json();
 };
@@ -113,9 +129,12 @@ const UsersPage = () => {
   const [regions, setRegions] = useState<Region[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [barangays, setBarangays] = useState<Barangay[]>([]);
+  const [provinces, setProvinces] = useState<Province[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<string>("");
+  const [selectedProvince, setSelectedProvince] = useState<string>("");
   const [selectedCity, setSelectedCity] = useState<string>("");
   const [selectedRegionCode, setSelectedRegionCode] = useState<string>("");
+  const [selectedProvinceCode, setSelectedProvinceCode] = useState<string>("");
   const [selectedCityCode, setSelectedCityCode] = useState<string>("");
   console.log("regions", regions);
 
@@ -134,10 +153,25 @@ const UsersPage = () => {
     setBarangays([]);
 
     if (regionCode) {
-      const citiesData = await fetchCities(regionCode);
+      const provincesData = await fetchProvinces(regionCode);
+      setProvinces(provincesData);
+    }
+  };
+
+  const handleProvinceChange = async (e: ChangeEvent<HTMLSelectElement>) => {
+    const provinceName = e.target.value;
+    const provinceCode =
+      e.target.selectedOptions[0].getAttribute("data-code") || "";
+    setSelectedProvinceCode(provinceCode); // Store the region code separately
+    setSelectedProvince(provinceName);
+
+    if (provinceCode) {
+      const citiesData = await fetchCities(provinceCode);
+      console.log(citiesData);
       setCities(citiesData);
     }
   };
+
   const handleCityChange = async (e: ChangeEvent<HTMLSelectElement>) => {
     const cityName = e.target.value;
     const cityCode =
@@ -215,6 +249,32 @@ const UsersPage = () => {
                         />
                       </NativeSelectRoot>
                     </Field>
+
+                    <Field label="Province" errorText="This field is required">
+                      <NativeSelectRoot>
+                        <NativeSelectField
+                          name="province_name"
+                          value={selectedProvince}
+                          onChange={handleProvinceChange}
+                        >
+                          <option value="">Select Province</option>
+                          {provinces.map((province) => (
+                            <option
+                              key={province.code}
+                              value={province.name}
+                              data-code={province.code}
+                            >
+                              {province.name}
+                            </option>
+                          ))}
+                        </NativeSelectField>
+                        <input
+                          type="hidden"
+                          name="province_code"
+                          value={selectedProvinceCode}
+                        />
+                      </NativeSelectRoot>
+                    </Field>
                     <Field label="City" errorText="This field is required">
                       <NativeSelectRoot>
                         <NativeSelectField
@@ -267,31 +327,69 @@ const UsersPage = () => {
 
                   <Tabs.Content value="officials">
                     <Box display="flex" flexDirection="column" gap={5}>
-                      <Field
-                        label="Barangay Captain"
-                        errorText="This field is required"
-                      >
-                        <Input
-                          required
-                          id="barangay_captain"
-                          type="text"
-                          placeholder="Enter Baranggay Captain"
-                          name="barangay_captain"
-                        />
-                      </Field>
+                      <Grid width={"100%"} templateColumns="60% 40%" gap={2}>
+                        <GridItem>
+                          <Field
+                            label="Barangay Captain"
+                            errorText="This field is required"
+                          >
+                            <Input
+                              required
+                              id="barangay_captain"
+                              type="text"
+                              placeholder="Enter Baranggay Captain"
+                              name="barangay_captain"
+                            />
+                          </Field>
+                        </GridItem>
 
-                      <Field
-                        label="Barangay Secretary"
-                        errorText="This field is required"
-                      >
-                        <Input
-                          required
-                          id="barangay_secretary"
-                          type="text"
-                          placeholder="Enter Barangay Secretary"
-                          name="barangay_secretary"
-                        />
-                      </Field>
+                        <GridItem>
+                          <Field
+                            label="Contact Number"
+                            errorText="This field is required"
+                          >
+                            <Input
+                              required
+                              id="barangay_captain_contact_number"
+                              type="text"
+                              placeholder="09XXXXXXX"
+                              name="barangay_captain_contact_number"
+                            />
+                          </Field>
+                        </GridItem>
+                      </Grid>
+
+                      <Grid templateColumns="60% 40%" gap={4}>
+                        <GridItem>
+                          <Field
+                            label="Barangay Secretary"
+                            errorText="This field is required"
+                          >
+                            <Input
+                              required
+                              id="barangay_secretary"
+                              type="text"
+                              placeholder="Enter Barangay Secretary"
+                              name="barangay_secretary"
+                            />
+                          </Field>
+                        </GridItem>
+
+                        <GridItem>
+                          <Field
+                            label="Contact Number"
+                            errorText="This field is required"
+                          >
+                            <Input
+                              required
+                              id="barangay_secretary_contact_number"
+                              type="text"
+                              placeholder="09XXXXXXXX"
+                              name="barangay_secretary_contact_number"
+                            />
+                          </Field>
+                        </GridItem>
+                      </Grid>
 
                       <Field
                         label="Barangay Logo"

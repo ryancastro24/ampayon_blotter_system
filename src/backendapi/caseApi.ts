@@ -115,6 +115,23 @@ export async function attempt3(id: any) {
   return result;
 }
 
+// get all specific barangay case
+export async function getAllCasesPerBarangay(id: any) {
+  const response = await fetch(
+    `${baseAPI}/cases/allCasesPerBarangay/cases/data/${id}`,
+    {
+      method: "GET", // Use "PUT" or "PATCH" for updating
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const result = await response.json();
+
+  return result;
+}
+
 // get specific case
 export async function getSpecificCase(id: any) {
   const response = await fetch(`${baseAPI}/cases/getSpecificCaseOnly/${id}`, {

@@ -11,6 +11,7 @@ import CasesPage, {
 import { Provider } from "@/components/ui/provider";
 import ArchivesPage, {
   loader as ArchivesPageLoader,
+  action as ArchivesPageAction,
 } from "./dashboardpages/ArchivesPage";
 import ReportPage, {
   loader as ReportPageLoader,
@@ -23,15 +24,25 @@ import UsersPage, {
   action as UsersPageAction,
   loader as UserPageLoader,
 } from "./dashboardpages/UsersPage";
-import BarangayCases from "./systemComponents/BarangayCases";
-import Settings, { loader as SettingsLoader } from "./pages/Settings";
+import BarangayCases, {
+  loader as BarangayCasesLoader,
+} from "./systemComponents/BarangayCases";
+import Settings, {
+  loader as SettingsLoader,
+  action as SettingsAction,
+} from "./pages/Settings";
 import { action as deleteUser } from "./backendapi/deleteapi/destroyUser";
 import { action as deleteCase } from "./backendapi/deleteapi/destroyCase";
 import "./index.css";
+import IndexPage, {
+  loader as IndexPageLoader,
+} from "./systemComponents/IndexPage";
 import { redirect } from "react-router-dom";
 import { isAuthenticated } from "./utils/auth";
 import { Box } from "@chakra-ui/react";
-
+import { ToastContainer } from "react-toastify";
+import ErrorComponent from "./systemComponents/ErrorComponent";
+import OverallReport from "./dashboardpages/OverallReport";
 // Loader to protect /landing page route
 const landingPageLoader = () => {
   if (isAuthenticated()) {
@@ -47,12 +58,18 @@ const router = createBrowserRouter([
     element: <LoginPage />,
     action: LoginAction,
     loader: landingPageLoader,
+    errorElement: <ErrorComponent />,
   },
   {
     path: "/dashboard",
     element: <Dashboard />,
     loader: DashboardLoader,
     children: [
+      {
+        index: true,
+        element: <IndexPage />,
+        loader: IndexPageLoader,
+      },
       {
         path: "cases",
         element: <CasesPage />,
@@ -81,6 +98,7 @@ const router = createBrowserRouter([
         path: "archives",
         element: <ArchivesPage />,
         loader: ArchivesPageLoader,
+        action: ArchivesPageAction,
       },
       {
         path: "report",
@@ -88,8 +106,14 @@ const router = createBrowserRouter([
         loader: ReportPageLoader,
       },
       {
-        path: "barangayCases",
+        path: "barangayCases/:id",
         element: <BarangayCases />,
+        loader: BarangayCasesLoader,
+      },
+
+      {
+        path: "overallreport",
+        element: <OverallReport />,
       },
     ],
   },
@@ -97,6 +121,7 @@ const router = createBrowserRouter([
     path: "/settings",
     element: <Settings />,
     loader: SettingsLoader,
+    action: SettingsAction,
   },
 
   {
@@ -113,6 +138,8 @@ createRoot(document.getElementById("root")!).render(
     <Provider>
       <Box fontFamily={"Poppins"}>
         <RouterProvider router={router} />
+
+        <ToastContainer position="top-right" autoClose={3000} />
       </Box>
     </Provider>
   </StrictMode>

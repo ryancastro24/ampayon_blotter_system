@@ -9,6 +9,14 @@ export async function getUsers() {
   return result;
 }
 
+export async function getUserProfile(id: string | undefined) {
+  console.log(baseAPI);
+  const usersData = await fetch(`${baseAPI}/users/${id}`);
+  const result = await usersData.json();
+
+  console.log("backend result:", result);
+  return result;
+}
 export type UserDataType = {
   _id: string;
   region_code: number;
@@ -75,5 +83,13 @@ export async function updateUser(id: any, updatedData: any) {
   const result = await response.json();
   console.log("Backend result:", result);
 
+  return result;
+}
+
+// update user
+export async function getUserDetails(id: string) {
+  const response = await fetch(`${baseAPI}/users/${id}`);
+  const result = await response.json();
+  console.log("Backend result:", result);
   return result;
 }

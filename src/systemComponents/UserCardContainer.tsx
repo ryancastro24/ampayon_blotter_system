@@ -234,7 +234,7 @@ const UserCardContainer = ({
               >
                 <Box width={"full"}>
                   <Button
-                    onClick={() => navigate("/dashboard/barangayCases")}
+                    onClick={() => navigate(`/dashboard/barangayCases/${_id}`)}
                     width={"full"}
                     colorPalette={"green"}
                     variant={"subtle"}

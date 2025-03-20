@@ -7,6 +7,7 @@ import {
   useNavigation,
 } from "react-router-dom";
 import { IoFolderOpen } from "react-icons/io5";
+
 import {
   Button,
   Input,
@@ -61,6 +62,23 @@ export const action: ActionFunction = async ({ request }) => {
     formData.entries()
   );
 
+  if (data.type === "settledButton") {
+    const attempt1Data = await updateCase(data?.id, data);
+
+    return attempt1Data;
+  }
+
+  if (data.type === "failedButton") {
+    const attempt1Data = await updateCase(data?.id, data);
+
+    return attempt1Data;
+  }
+
+  if (data.type === "attempt1") {
+    const attempt1Data = await attempt1(data?.id);
+
+    return attempt1Data;
+  }
   if (data.type === "attempt1") {
     const attempt1Data = await attempt1(data?.id);
 
@@ -637,7 +655,11 @@ const CasesPage = () => {
           gap={4}
         >
           {paginatedCases.map((val: any) => (
-            <CasesCardContainer key={val._id} {...val} />
+            <CasesCardContainer
+              key={val._id}
+              {...val}
+              userType={userData.userType}
+            />
           ))}
         </Box>
 

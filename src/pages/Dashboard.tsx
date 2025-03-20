@@ -65,22 +65,42 @@ const Dashboard = () => {
 
           <Box as={"ul"} display={"flex"} alignItems={"center"} gap={5}>
             {userData.userType === "admin" ? (
-              <Box
-                as={"li"}
-                onClick={() => {
-                  navigate("users");
-                }}
-                paddingY={2}
-                paddingX={3}
-                background={
-                  location.pathname === "/dashboard/users" ? "blue.600" : ""
-                }
-                color={"white"}
-                cursor={"pointer"}
-                rounded={"sm"}
-              >
-                Users
-              </Box>
+              <>
+                <Box
+                  as={"li"}
+                  onClick={() => {
+                    navigate("users");
+                  }}
+                  paddingY={2}
+                  paddingX={3}
+                  background={
+                    location.pathname === "/dashboard/users" ? "blue.600" : ""
+                  }
+                  color={"white"}
+                  cursor={"pointer"}
+                  rounded={"sm"}
+                >
+                  Users
+                </Box>
+                <Box
+                  as={"li"}
+                  onClick={() => {
+                    navigate("overallreport");
+                  }}
+                  paddingY={2}
+                  paddingX={3}
+                  background={
+                    location.pathname === "/dashboard/overallreport"
+                      ? "blue.600"
+                      : ""
+                  }
+                  color={"white"}
+                  cursor={"pointer"}
+                  rounded={"sm"}
+                >
+                  Report
+                </Box>
+              </>
             ) : (
               <>
                 <Box

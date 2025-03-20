@@ -10,6 +10,73 @@ import { EmptyState } from "@/components/ui/empty-state";
 import Loading from "@/systemComponents/Loading";
 import { PiSmileySadFill } from "react-icons/pi";
 import { UserPropType } from "@/pages/Dashboard";
+import "jspdf-autotable";
+import jsPDF from "jspdf";
+import { ActionFunction } from "react-router-dom";
+import {
+  addCase,
+  updateCase,
+  attempt1,
+  attempt2,
+  attempt3,
+} from "@/backendapi/caseApi";
+
+export const action: ActionFunction = async ({ request }) => {
+  console.log(request.method);
+  console.log(request);
+  const formData = await request.formData();
+  const data: Record<string, FormDataEntryValue> = Object.fromEntries(
+    formData.entries()
+  );
+
+  if (data.type === "settledButton") {
+    const attempt1Data = await updateCase(data?.id, data);
+
+    return attempt1Data;
+  }
+
+  if (data.type === "failedButton") {
+    const attempt1Data = await updateCase(data?.id, data);
+
+    return attempt1Data;
+  }
+
+  if (data.type === "attempt1") {
+    const attempt1Data = await attempt1(data?.id);
+
+    return attempt1Data;
+  }
+  if (data.type === "attempt1") {
+    const attempt1Data = await attempt1(data?.id);
+
+    return attempt1Data;
+  }
+
+  if (data.type === "attempt2") {
+    const attempt1Data = await attempt2(data?.id);
+
+    return attempt1Data;
+  }
+
+  if (data.type === "attempt3") {
+    const attempt1Data = await attempt3(data?.id);
+
+    return attempt1Data;
+  }
+  if (data.type === "updateCase") {
+    const updatedCaseData = await updateCase(data?.id, data);
+
+    return updatedCaseData;
+  }
+
+  if (request.method == "POST") {
+    console.log(data);
+    const caseData = await addCase(data);
+    return caseData;
+  }
+
+  return { data };
+};
 export const loader = async () => {
   const user = localStorage.getItem("user");
 
@@ -27,7 +94,9 @@ const ArchivesPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { casesData } = useLoaderData() as any;
+  const { casesData, userData } = useLoaderData() as any;
+
+  console.log(casesData);
 
   const casesPerPage = 8;
   const filteredCases = casesData.filter(
@@ -52,6 +121,177 @@ const ArchivesPage = () => {
     if (currentPage > 1) {
       setCurrentPage((prev) => prev - 1);
     }
+  };
+
+  const generatePDF = () => {
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const marginLeft = 20;
+    const contentWidth = 170;
+    let yPosition = 20;
+
+    // Add Sample Logo
+    const logoUrl =
+      "https://fastly.picsum.photos/id/60/200/200.jpg?hmac=MjMlhHlJlU_z3Z1DXohWUex2M-Gs7dtbqv4EJ4pSg3E";
+
+    pdf.addImage(logoUrl, "PNG", marginLeft, yPosition, 30, 30);
+
+    // Header (Centered)
+    pdf.setFontSize(12);
+    pdf.text("REPUBLIC OF THE PHILIPPINES", 105, yPosition + 5, {
+      align: "center",
+    });
+    pdf.text(
+      `${userData.region_name} Administrative Region`,
+      105,
+      yPosition + 10,
+      {
+        align: "center",
+      }
+    );
+    pdf.text(userData.barangay_name, 105, yPosition + 15, { align: "center" });
+    pdf.text(
+      `${userData.city_name.toUpperCase()} ${
+        userData.city_name.includes("City") ? "" : "CITY"
+      }`,
+      105,
+      yPosition + 20,
+      { align: "center" }
+    );
+
+    yPosition += 35;
+
+    pdf.setFontSize(16);
+    pdf.text("TRANSMITTAL FORM", 105, yPosition, { align: "center" });
+
+    yPosition += 10;
+
+    pdf.setFontSize(12);
+    pdf.text(`Transmittal No: 12-1-31, 2024`, marginLeft, yPosition);
+    pdf.text("(year/mo)", 160, yPosition);
+
+    yPosition += 10;
+
+    pdf.setFontSize(14);
+    pdf.text(
+      "MONTHLY TRANSMITTAL OF FINAL REPORTS DECEMBER, 2024",
+      105,
+      yPosition,
+      { align: "center" }
+    );
+
+    yPosition += 15;
+
+    pdf.setFontSize(12);
+    pdf.text("TO: CITY COURT DILG", marginLeft, yPosition);
+
+    yPosition += 8;
+
+    pdf.setFontSize(10);
+    pdf.text(
+      "Enclosed herein are the final reports of the settlements of disputes and arbitration awards made by",
+      marginLeft,
+      yPosition,
+      { maxWidth: contentWidth }
+    );
+    yPosition += 5;
+    pdf.text(
+      "the Punong Barangay / Pangkat Tagapagsundo in the following cases:",
+      marginLeft,
+      yPosition,
+      { maxWidth: contentWidth }
+    );
+
+    yPosition += 10;
+
+    // Table Setup
+    const tableX = marginLeft;
+    const colWidths = [40, 50, 30, 50];
+    const rowHeight = 10;
+
+    // Table Headers
+    const headers = [
+      "BRGY. CASE NO.",
+      "COMPLAINANT/S",
+      "TITLE",
+      "RESPONDENT/S",
+    ];
+
+    headers.forEach((header, index) => {
+      pdf.rect(
+        tableX + colWidths.slice(0, index).reduce((a, b) => a + b, 0),
+        yPosition,
+        colWidths[index],
+        rowHeight
+      );
+      pdf.text(
+        header,
+        tableX + colWidths.slice(0, index).reduce((a, b) => a + b, 0) + 5,
+        yPosition + 6
+      );
+    });
+
+    yPosition += rowHeight;
+
+    // Function to format createdAt into "MM-YYYY-XXX"
+    const formatCaseNumber = (createdAt: any, index: number) => {
+      const date = new Date(createdAt);
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // Get month (01-12)
+      const year = date.getFullYear(); // Get year (YYYY)
+      const caseNumber = String(index + 1).padStart(3, "0"); // Format index as 3-digit (001, 002, ...)
+      return `${month}-${year}-${caseNumber}`;
+    };
+
+    // Table Data
+    casesData.forEach((row: any, index: number) => {
+      const rowData = [
+        formatCaseNumber(row.createdAt, index), // BRGY. CASE NO.
+        row.complainant_name, // COMPLAINANT/S
+        "V.S.", // TITLE
+        row.respondent_name, // RESPONDENT/S
+      ];
+
+      rowData.forEach((text, colIndex) => {
+        pdf.rect(
+          tableX + colWidths.slice(0, colIndex).reduce((a, b) => a + b, 0),
+          yPosition,
+          colWidths[colIndex],
+          rowHeight
+        );
+        pdf.text(
+          text,
+          tableX + colWidths.slice(0, colIndex).reduce((a, b) => a + b, 0) + 5,
+          yPosition + 6
+        );
+      });
+
+      yPosition += rowHeight;
+    });
+
+    yPosition += 15;
+
+    // Footer
+    pdf.setFontSize(12);
+    pdf.text("Prepared by:", marginLeft, yPosition);
+    pdf.text(
+      userData.barangay_secretary.toUpperCase(),
+      marginLeft,
+      yPosition + 10
+    );
+    pdf.text("Barangay Secretary", marginLeft, yPosition + 15);
+    pdf.text("_________________________", marginLeft, yPosition + 20);
+
+    pdf.text("Attested by:", 120, yPosition);
+    pdf.text(userData.barangay_captain.toUpperCase(), 120, yPosition + 10);
+    pdf.text("Punong Barangay / Lupon Chairman", 120, yPosition + 15);
+    pdf.text("_________________________", 120, yPosition + 20);
+
+    // Save PDF
+    pdf.save("monthly_transmittal.pdf");
   };
 
   if (casesData.length === 0) {
@@ -91,7 +331,11 @@ const ArchivesPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
 
-          <Button colorPalette={"blue"} variant={"subtle"}>
+          <Button
+            onClick={generatePDF}
+            colorPalette={"blue"}
+            variant={"subtle"}
+          >
             Generate Report
             <LuDownload />
           </Button>
@@ -138,7 +382,11 @@ const ArchivesPage = () => {
         gap={4}
       >
         {paginatedCases.map((val: any) => (
-          <CasesCardContainer key={val._id} {...val} />
+          <CasesCardContainer
+            key={val._id}
+            {...val}
+            userType={userData.userType}
+          />
         ))}
       </Box>
 

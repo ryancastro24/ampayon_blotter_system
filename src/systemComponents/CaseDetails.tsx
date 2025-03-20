@@ -51,12 +51,17 @@ import {
   uploadCaseForms,
 } from "@/backendapi/caseApi";
 import { FiDownload, FiUpload } from "react-icons/fi";
+import { UserPropType } from "@/pages/Dashboard";
 export async function loader({ params }: LoaderFunctionArgs) {
   const { id } = params;
 
+  const user = localStorage.getItem("user");
+
+  const userData: UserPropType = JSON.parse(user as any);
+
   const caseDetails = await getSpecificCase(id);
 
-  return { caseDetails };
+  return { caseDetails, userData };
 }
 
 export const action: ActionFunction = async ({ request }) => {
@@ -104,7 +109,7 @@ export const action: ActionFunction = async ({ request }) => {
 const CaseDetails = () => {
   const navigate = useNavigate();
   const navigation = useNavigation();
-  const { caseDetails } = useLoaderData();
+  const { caseDetails, userData } = useLoaderData();
 
   // Initialize state with items from local storage (if any)
   const [selectedImages, setSelectedImages] = useState(() => {
@@ -168,6 +173,7 @@ const CaseDetails = () => {
           <DialogRoot>
             <DialogTrigger asChild>
               <Button
+                disabled={userData.userType === "admin"}
                 size={"xs"}
                 colorPalette={"blue"}
                 variant={"surface"}
@@ -246,6 +252,7 @@ const CaseDetails = () => {
           <DialogRoot size={"lg"}>
             <DialogTrigger asChild>
               <Button
+                disabled={userData.userType === "admin"}
                 size={"xs"}
                 colorPalette={"blue"}
                 variant={"solid"}
@@ -500,6 +507,7 @@ const CaseDetails = () => {
                   </InputGroup>
                 </FileUploadRoot>
                 <Button
+                  disabled={userData.userType === "admin"}
                   loading={navigation.state === "submitting"}
                   type="submit"
                   colorPalette={"blue"}
@@ -515,6 +523,7 @@ const CaseDetails = () => {
           <Box>
             <Box>
               <Button
+                disabled={userData.userType === "admin"}
                 width={"80px"}
                 height={"80px"}
                 colorPalette={"red"}

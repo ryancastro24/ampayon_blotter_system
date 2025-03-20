@@ -10,6 +10,9 @@ import { ClientOnly } from "@chakra-ui/react";
 import { EmptyState } from "@/components/ui/empty-state";
 import Loading from "@/systemComponents/Loading";
 import { PiSmileySadFill } from "react-icons/pi";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+
 export const loader = async () => {
   const user = localStorage.getItem("user");
 
@@ -20,10 +23,37 @@ export const loader = async () => {
 
   return { userData, perMonthCasesData, groupedCases };
 };
+
 const ReportPage = () => {
   const { perMonthCasesData, groupedCases } = useLoaderData() as any;
 
-  console.log(groupedCases[0].value);
+  const generatePDF = async () => {
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 500)); // Ensure elements are fully rendered
+
+    const pieChartElement = document.getElementById("pieChart");
+    const barChartElement = document.getElementById("barChart");
+
+    if (pieChartElement && barChartElement) {
+      const pieCanvas = await html2canvas(pieChartElement, { useCORS: true });
+      const pieImageData = pieCanvas.toDataURL("image/png");
+      pdf.addImage(pieImageData, "PNG", 10, 10, 180, 90);
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const barCanvas = await html2canvas(barChartElement, { useCORS: true });
+      const barImageData = barCanvas.toDataURL("image/png");
+      pdf.addImage(barImageData, "PNG", 10, 110, 180, 90);
+
+      pdf.save("report.pdf");
+    } else {
+      console.error("Chart elements not found!");
+    }
+  };
 
   if (
     groupedCases[0].value == 0 &&
@@ -81,7 +111,12 @@ const ReportPage = () => {
             </Box>
 
             <Box>
-              <IconButton size={"md"} colorPalette={"blue"} variant={"subtle"}>
+              <IconButton
+                size={"md"}
+                colorPalette={"blue"}
+                variant={"subtle"}
+                onClick={generatePDF}
+              >
                 <TbDownload />
               </IconButton>
             </Box>
@@ -127,7 +162,12 @@ const ReportPage = () => {
             </Box>
 
             <Box>
-              <IconButton size={"md"} colorPalette={"blue"} variant={"subtle"}>
+              <IconButton
+                size={"md"}
+                colorPalette={"blue"}
+                variant={"subtle"}
+                onClick={generatePDF}
+              >
                 <TbDownload />
               </IconButton>
             </Box>

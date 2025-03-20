@@ -1,93 +1,40 @@
 import { Box, Text, Separator, Grid, Button } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
+import {
+  useNavigate,
+  LoaderFunctionArgs,
+  useLoaderData,
+} from "react-router-dom";
 import CasesCardContainer from "./CasesCardContainer";
 import { IoChevronBackCircle } from "react-icons/io5";
 import { FaLocationDot } from "react-icons/fa6";
 import { IoFolderOpen } from "react-icons/io5";
-const cases = [
-  {
-    complainant: "John Doe",
-    respondent: "Jane Smith",
-    dateOfAppointment: "2025-01-25",
-    caseType: "Property Dispute",
-    status: "Ongoing",
-    case_number: 1,
-  },
-  {
-    complainant: "Alice Johnson",
-    respondent: "Bob Williams",
-    dateOfAppointment: "2025-01-26",
-    status: "Ongoing",
-    caseType: "Contract Violation",
-    case_number: 2,
-  },
-  {
-    complainant: "Carlos Martinez",
-    respondent: "Sophia Brown",
-    dateOfAppointment: "2025-01-27",
-    status: "Ongoing",
-    caseType: "Workplace Harassment",
-    case_number: 3,
-  },
-  {
-    complainant: "Emily Davis",
-    respondent: "Michael Wilson",
-    dateOfAppointment: "2025-01-28",
-    status: "Settled",
-    caseType: "Tenant-Landlord Conflict",
-    case_number: 4,
-  },
-  {
-    complainant: "George Lopez",
-    respondent: "Karen Taylor",
-    dateOfAppointment: "2025-01-29",
-    status: "Settled",
-    caseType: "Consumer Rights Violation",
-    case_number: 5,
-  },
-  {
-    complainant: "Hannah Lee",
-    respondent: "Ryan Harris",
-    dateOfAppointment: "2025-01-30",
-    status: "Ongoing",
-    caseType: "Family Dispute",
-    case_number: 6,
-  },
-  {
-    complainant: "Liam Clark",
-    respondent: "Olivia Young",
-    dateOfAppointment: "2025-02-01",
-    status: "Failed",
-    caseType: "Insurance Fraud",
-    case_number: 7,
-  },
-  {
-    complainant: "Noah White",
-    respondent: "Emma Green",
-    dateOfAppointment: "2025-02-02",
-    status: "Ongoing",
-    caseType: "Cybercrime",
-    case_number: 8,
-  },
-  {
-    complainant: "Zoe Adams",
-    respondent: "Mason Thompson",
-    dateOfAppointment: "2025-02-03",
-    status: "Settled",
-    caseType: "Defamation",
-    case_number: 9,
-  },
-  {
-    complainant: "Lucas Scott",
-    respondent: "Lily Turner",
-    dateOfAppointment: "2025-02-04",
-    status: "Ongoing",
-    caseType: "Intellectual Property Dispute",
-    case_number: 10,
-  },
-];
+import { getAllCasesPerBarangay } from "@/backendapi/caseApi";
+import { getUserDetails } from "@/backendapi/usersApi";
+import { UserPropType } from "@/pages/Dashboard";
+export const loader = async ({ params }: LoaderFunctionArgs) => {
+  const { id } = params; // Extract `id` from URL parameters
+
+  const user = localStorage.getItem("user");
+
+  const userData: UserPropType = JSON.parse(user as any);
+
+  if (!id) {
+    throw new Response("Missing user ID", { status: 400 });
+  }
+
+  const casesData = await getAllCasesPerBarangay(id);
+  const userDetails = await getUserDetails(id);
+
+  console.log(casesData);
+
+  return { casesData, userDetails, userData };
+};
+
 const BarangayCases = () => {
   const navigate = useNavigate();
+  const { casesData, userDetails, userData } = useLoaderData();
+
+  console.log(userData.userType);
   return (
     <Box
       data-state="open"
@@ -125,7 +72,7 @@ const BarangayCases = () => {
             fontWeight={"bold"}
           >
             <FaLocationDot />
-            Barangay Ampayon
+            Barangay {userDetails.barangay_name}
           </Text>
           <Text
             color="gray.500"
@@ -134,14 +81,14 @@ const BarangayCases = () => {
             gap={1}
             fontSize={"sm"}
           >
-            <IoFolderOpen /> Total: 52 Cases
+            <IoFolderOpen /> Total Cases: {casesData.length}
           </Text>
         </Box>
       </Box>
 
       <Grid templateColumns="repeat(4, 1fr)" gap="6">
-        {cases.map((val, index) => (
-          <CasesCardContainer key={index} {...val} index={index} />
+        {casesData.map((val: any) => (
+          <CasesCardContainer {...val} userType={userData.userType} />
         ))}
       </Grid>
     </Box>

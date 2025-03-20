@@ -10,6 +10,7 @@ import {
   Separator,
   Icon,
 } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { FaFileLines } from "react-icons/fa6";
 import { TbMessage2Share } from "react-icons/tb";
 import { Form } from "react-router-dom";
@@ -61,11 +62,13 @@ type CaseType = {
   barangay_name: string;
   barangay_captain: string;
   barangay_secretary: string;
+  userType: string;
 };
 
 import { useNavigation, useNavigate } from "react-router-dom";
 const CasesCardContainer = ({
   case_number,
+  userType,
   status,
   complainant_name,
   respondent_name,
@@ -78,12 +81,16 @@ const CasesCardContainer = ({
   attempt2,
   attempt3,
   case_type,
-
   _id,
 }: CaseType) => {
   const navigation = useNavigation();
   const navigate = useNavigate();
 
+  const [buttonClicked, setButtonClicked] = useState("");
+
+  useEffect(() => {
+    setButtonClicked("");
+  }, [navigation.state]);
   return (
     <Box>
       <Card.Root
@@ -152,224 +159,242 @@ const CasesCardContainer = ({
                 gap={2}
                 alignItems={"start"}
               >
-                <DialogRoot>
-                  <DialogTrigger asChild>
-                    <Button
-                      colorPalette={"blue"}
-                      width={"full"}
-                      display={"flex"}
-                      justifyContent={"start"}
-                      size="sm"
-                      variant={"subtle"}
-                    >
-                      Update Case
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <Form method="PUT">
-                      <DialogHeader>
-                        <DialogTitle>Update Case</DialogTitle>
-                      </DialogHeader>
-                      <DialogBody>
-                        {/* Tabs */}
+                {userType === "user" && (
+                  <DialogRoot>
+                    <DialogTrigger asChild>
+                      <Button
+                        colorPalette={"blue"}
+                        width={"full"}
+                        display={"flex"}
+                        justifyContent={"start"}
+                        size="sm"
+                        variant={"subtle"}
+                      >
+                        Update Case
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <Form method="PUT">
+                        <DialogHeader>
+                          <DialogTitle>Update Case</DialogTitle>
+                        </DialogHeader>
+                        <DialogBody>
+                          {/* Tabs */}
 
-                        <Tabs.Root defaultValue="complainant">
-                          <Tabs.List>
-                            <Tabs.Trigger value="complainant">
-                              Complainant Details
-                            </Tabs.Trigger>
-                            <Tabs.Trigger value="respondents">
-                              Respondent Details
-                            </Tabs.Trigger>
-                            <Tabs.Trigger value="case">
-                              Case Details
-                            </Tabs.Trigger>
-                          </Tabs.List>
-                          <Tabs.Content value="complainant">
-                            <Box display="flex" flexDirection="column" gap={5}>
-                              <Input type="hidden" name="id" value={_id} />
-                              <Field
-                                label="Name"
-                                errorText="This field is required"
+                          <Tabs.Root defaultValue="complainant">
+                            <Tabs.List>
+                              <Tabs.Trigger value="complainant">
+                                Complainant Details
+                              </Tabs.Trigger>
+                              <Tabs.Trigger value="respondents">
+                                Respondent Details
+                              </Tabs.Trigger>
+                              <Tabs.Trigger value="case">
+                                Case Details
+                              </Tabs.Trigger>
+                            </Tabs.List>
+                            <Tabs.Content value="complainant">
+                              <Box
+                                display="flex"
+                                flexDirection="column"
+                                gap={5}
                               >
-                                <Input
-                                  id="complainant_name"
-                                  type="text"
-                                  placeholder="Enter Complainant Name"
-                                  name="complainant_name"
-                                  defaultValue={complainant_name}
-                                />
-                              </Field>
+                                <Input type="hidden" name="id" value={_id} />
+                                <Field
+                                  label="Name"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    id="complainant_name"
+                                    type="text"
+                                    placeholder="Enter Complainant Name"
+                                    name="complainant_name"
+                                    defaultValue={complainant_name}
+                                  />
+                                </Field>
 
-                              <Field
-                                label="Phone Number"
-                                errorText="This field is required"
-                              >
-                                <Input
-                                  id="complainant_number"
-                                  type="text"
-                                  placeholder="09XXXXXXXX"
-                                  name="complainant_number"
-                                  defaultValue={complainant_number}
-                                />
-                              </Field>
+                                <Field
+                                  label="Phone Number"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    id="complainant_number"
+                                    type="text"
+                                    placeholder="09XXXXXXXX"
+                                    name="complainant_number"
+                                    defaultValue={complainant_number}
+                                  />
+                                </Field>
 
-                              <Field
-                                label="Email"
-                                errorText="This field is required"
-                              >
-                                <Input
-                                  id="complainant_email"
-                                  type="text"
-                                  placeholder="sample@email.com"
-                                  name="complainant_email"
-                                  defaultValue={complainant_email}
-                                />
-                              </Field>
-                            </Box>
-                          </Tabs.Content>
+                                <Field
+                                  label="Email"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    id="complainant_email"
+                                    type="text"
+                                    placeholder="sample@email.com"
+                                    name="complainant_email"
+                                    defaultValue={complainant_email}
+                                  />
+                                </Field>
+                              </Box>
+                            </Tabs.Content>
 
-                          <Tabs.Content value="respondents">
-                            <Box display="flex" flexDirection="column" gap={5}>
-                              <Field
-                                label="Name"
-                                errorText="This field is required"
+                            <Tabs.Content value="respondents">
+                              <Box
+                                display="flex"
+                                flexDirection="column"
+                                gap={5}
                               >
-                                <Input
-                                  id="respondent_name"
-                                  type="text"
-                                  placeholder="Enter Respondent Name"
-                                  name="respondent_name"
-                                  defaultValue={respondent_name}
-                                />
-                              </Field>
+                                <Field
+                                  label="Name"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    id="respondent_name"
+                                    type="text"
+                                    placeholder="Enter Respondent Name"
+                                    name="respondent_name"
+                                    defaultValue={respondent_name}
+                                  />
+                                </Field>
 
-                              <Field
-                                label="Phone Number"
-                                errorText="This field is required"
-                              >
-                                <Input
-                                  id="respondent_number"
-                                  type="text"
-                                  placeholder="09XXXXXXXX"
-                                  name="respondent_number"
-                                  defaultValue={respondent_number}
-                                />
-                              </Field>
+                                <Field
+                                  label="Phone Number"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    id="respondent_number"
+                                    type="text"
+                                    placeholder="09XXXXXXXX"
+                                    name="respondent_number"
+                                    defaultValue={respondent_number}
+                                  />
+                                </Field>
 
-                              <Field
-                                label="Email"
-                                errorText="This field is required"
+                                <Field
+                                  label="Email"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    id="respondent_email"
+                                    type="text"
+                                    placeholder="sample@email.com"
+                                    name="respondent_email"
+                                    defaultValue={respondent_email}
+                                  />
+                                </Field>
+                              </Box>
+                            </Tabs.Content>
+                            <Tabs.Content value="case">
+                              <Box
+                                display="flex"
+                                flexDirection="column"
+                                gap={5}
                               >
-                                <Input
-                                  id="respondent_email"
-                                  type="text"
-                                  placeholder="sample@email.com"
-                                  name="respondent_email"
-                                  defaultValue={respondent_email}
-                                />
-                              </Field>
-                            </Box>
-                          </Tabs.Content>
-                          <Tabs.Content value="case">
-                            <Box display="flex" flexDirection="column" gap={5}>
-                              <SelectRoot
-                                name="case_type"
-                                collection={caseTypeArray}
-                                size="sm"
-                                width="320px"
-                              >
-                                <SelectLabel>Select framework</SelectLabel>
-                                <SelectTrigger>
-                                  <SelectValueText placeholder="Select Case Type" />
-                                </SelectTrigger>
-                                <SelectContent zIndex={1800}>
-                                  {caseTypeArray.items.map((val: any) => (
-                                    <SelectItem item={val} key={val.value}>
-                                      {val.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </SelectRoot>
-                              <Field
-                                label="Case Description"
-                                errorText="This field is required"
-                              >
-                                <Textarea
-                                  placeholder="Case Description..."
-                                  name="case_description"
-                                  resize={"none"}
-                                  defaultValue={case_description}
-                                />
-                              </Field>
-                            </Box>
-                          </Tabs.Content>
-                        </Tabs.Root>
-                      </DialogBody>
-                      <DialogFooter>
-                        <DialogActionTrigger asChild>
-                          <Button variant="outline">Cancel</Button>
-                        </DialogActionTrigger>
-                        <Button
-                          value={"updateCase"}
-                          name="type"
-                          loading={navigation.state === "submitting"}
-                          type="submit"
-                          background={"blue.500"}
-                        >
-                          Update
-                        </Button>
-                      </DialogFooter>
-                      <DialogCloseTrigger />
-                    </Form>
-                  </DialogContent>
-                </DialogRoot>
+                                <SelectRoot
+                                  name="case_type"
+                                  collection={caseTypeArray}
+                                  size="sm"
+                                  width="320px"
+                                >
+                                  <SelectLabel>Select framework</SelectLabel>
+                                  <SelectTrigger>
+                                    <SelectValueText placeholder="Select Case Type" />
+                                  </SelectTrigger>
+                                  <SelectContent zIndex={1800}>
+                                    {caseTypeArray.items.map((val: any) => (
+                                      <SelectItem item={val} key={val.value}>
+                                        {val.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </SelectRoot>
+                                <Field
+                                  label="Case Description"
+                                  errorText="This field is required"
+                                >
+                                  <Textarea
+                                    placeholder="Case Description..."
+                                    name="case_description"
+                                    resize={"none"}
+                                    defaultValue={case_description}
+                                  />
+                                </Field>
+                              </Box>
+                            </Tabs.Content>
+                          </Tabs.Root>
+                        </DialogBody>
+                        <DialogFooter>
+                          <DialogActionTrigger asChild>
+                            <Button variant="outline">Cancel</Button>
+                          </DialogActionTrigger>
+                          <Button
+                            value={"updateCase"}
+                            name="type"
+                            loading={navigation.state === "submitting"}
+                            type="submit"
+                            background={"blue.500"}
+                          >
+                            Update
+                          </Button>
+                        </DialogFooter>
+                        <DialogCloseTrigger />
+                      </Form>
+                    </DialogContent>
+                  </DialogRoot>
+                )}
 
                 {/* remove /delete case */}
-                <DialogRoot>
-                  <DialogTrigger asChild>
-                    <Button
-                      colorPalette={"red"}
-                      size="sm"
-                      variant={"subtle"}
-                      width={"full"}
-                      display={"flex"}
-                      justifyContent={"start"}
-                    >
-                      Remove
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <Form
-                      method="post"
-                      action={`/dashboard/cases/${_id}/destroy`}
-                    >
-                      <DialogHeader>
-                        <DialogTitle>Delete this case</DialogTitle>
 
-                        <Text>Are you sure you want to delete this case?</Text>
-                      </DialogHeader>
-                      <DialogBody>
-                        {/* Tabs */}
-                        <Text></Text>
-                      </DialogBody>
-                      <DialogFooter>
-                        <DialogActionTrigger asChild>
-                          <Button variant="outline">Cancel</Button>
-                        </DialogActionTrigger>
-                        <Button
-                          loading={navigation.state === "submitting"}
-                          type="submit"
-                          background={"red.500"}
-                        >
-                          Delete
-                        </Button>
-                      </DialogFooter>
-                      <DialogCloseTrigger />
-                    </Form>
-                  </DialogContent>
-                </DialogRoot>
+                {userType === "user" && (
+                  <DialogRoot>
+                    <DialogTrigger asChild>
+                      <Button
+                        colorPalette={"red"}
+                        size="sm"
+                        variant={"subtle"}
+                        width={"full"}
+                        display={"flex"}
+                        justifyContent={"start"}
+                      >
+                        Remove
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <Form
+                        method="post"
+                        action={`/dashboard/cases/${_id}/destroy`}
+                      >
+                        <DialogHeader>
+                          <DialogTitle>Delete this case</DialogTitle>
 
+                          <Text>
+                            Are you sure you want to delete this case?
+                          </Text>
+                        </DialogHeader>
+                        <DialogBody>
+                          {/* Tabs */}
+                          <Text></Text>
+                        </DialogBody>
+                        <DialogFooter>
+                          <DialogActionTrigger asChild>
+                            <Button variant="outline">Cancel</Button>
+                          </DialogActionTrigger>
+                          <Button
+                            loading={navigation.state === "submitting"}
+                            type="submit"
+                            background={"red.500"}
+                          >
+                            Delete
+                          </Button>
+                        </DialogFooter>
+                        <DialogCloseTrigger />
+                      </Form>
+                    </DialogContent>
+                  </DialogRoot>
+                )}
                 {/* actions */}
 
                 <DialogRoot>
@@ -404,13 +429,18 @@ const CasesCardContainer = ({
                             <Form method="put">
                               <Input value={_id} name="id" type="hidden" />
                               <IconButton
-                                loading={navigation.state === "submitting"}
+                                disabled={userType === "admin"}
+                                loading={
+                                  navigation.state === "submitting" &&
+                                  buttonClicked == "attempt1"
+                                }
                                 type={attempt1 ? "button" : "submit"}
                                 name="type"
                                 value={"attempt1"}
                                 variant={attempt1 ? "solid" : "subtle"}
                                 colorPalette={attempt1 ? "green" : ""}
                                 size={"lg"}
+                                onClick={() => setButtonClicked("attempt1")}
                               >
                                 {attempt1 ? <FaCheck /> : <TbMessage2Share />}
                               </IconButton>
@@ -419,13 +449,18 @@ const CasesCardContainer = ({
                             <Form method="put">
                               <Input value={_id} name="id" type="hidden" />
                               <IconButton
-                                loading={navigation.state === "submitting"}
+                                disabled={userType === "admin"}
+                                loading={
+                                  navigation.state === "submitting" &&
+                                  buttonClicked == "attempt2"
+                                }
                                 type={attempt2 ? "button" : "submit"}
                                 name="type"
                                 value={"attempt2"}
                                 variant={attempt2 ? "solid" : "subtle"}
                                 colorPalette={attempt2 ? "green" : ""}
                                 size={"lg"}
+                                onClick={() => setButtonClicked("attempt2")}
                               >
                                 {attempt2 ? <FaCheck /> : <TbMessage2Share />}
                               </IconButton>
@@ -434,13 +469,18 @@ const CasesCardContainer = ({
                             <Form method="put">
                               <Input value={_id} name="id" type="hidden" />
                               <IconButton
-                                loading={navigation.state === "submitting"}
+                                disabled={userType === "admin"}
+                                loading={
+                                  navigation.state === "submitting" &&
+                                  buttonClicked == "attempt3"
+                                }
                                 type={attempt3 ? "button" : "submit"}
                                 name="type"
                                 value={"attempt3"}
                                 variant={attempt3 ? "solid" : "subtle"}
                                 colorPalette={attempt3 ? "green" : ""}
                                 size={"lg"}
+                                onClick={() => setButtonClicked("attempt3")}
                               >
                                 {attempt3 ? <FaCheck /> : <TbMessage2Share />}
                               </IconButton>
@@ -451,12 +491,58 @@ const CasesCardContainer = ({
                         <Box display={"flex"} flexDirection={"column"} gap={2}>
                           <Text>Case Status</Text>
                           <Box display={"flex"} alignItems={"center"} gap={3}>
-                            <Button colorPalette={"green"} variant={"subtle"}>
-                              Settled
-                            </Button>
-                            <Button colorPalette={"red"} variant={"subtle"}>
-                              Failed
-                            </Button>
+                            <Form method="PUT">
+                              <Input type="hidden" name="id" value={_id} />
+
+                              <Input
+                                type="hidden"
+                                name="status"
+                                value={"settled"}
+                              />
+                              <Button
+                                loading={
+                                  navigation.state === "submitting" &&
+                                  buttonClicked == "settled"
+                                }
+                                name="type"
+                                type="submit"
+                                value={"settledButton"}
+                                disabled={userType === "admin"}
+                                colorPalette={"green"}
+                                onClick={() => setButtonClicked("settled")}
+                                variant={
+                                  status === "settled" ? "solid" : "subtle"
+                                }
+                              >
+                                Settled
+                              </Button>
+                            </Form>
+
+                            <Form method="PUT">
+                              <Input type="hidden" name="id" value={_id} />
+                              <Input
+                                type="hidden"
+                                name="status"
+                                value={"failed"}
+                              />
+                              <Button
+                                loading={
+                                  navigation.state === "submitting" &&
+                                  buttonClicked == "failed"
+                                }
+                                onClick={() => setButtonClicked("failed")}
+                                name="type"
+                                value={"failedButton"}
+                                disabled={userType === "admin"}
+                                colorPalette={"red"}
+                                variant={
+                                  status === "failed" ? "solid" : "subtle"
+                                }
+                                type="submit"
+                              >
+                                Failed
+                              </Button>
+                            </Form>
                           </Box>
                         </Box>
                       </Box>
