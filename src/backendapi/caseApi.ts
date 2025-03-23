@@ -196,3 +196,78 @@ export async function getPermonthCases(id: string | undefined) {
   console.log("getPermonthCases backend result:", result);
   return result;
 }
+
+export async function getCasesGroupedByBarangay() {
+  const casesData = await fetch(
+    `${baseAPI}/cases/getCasesGroupedByBarangay/data/`
+  );
+  const result = await casesData.json();
+
+  console.log("backend result:", result);
+  return result;
+}
+
+export async function getAllCasesStatus() {
+  const casesData = await fetch(`${baseAPI}/cases/getAllCasesStatus/data/`);
+  const result = await casesData.json();
+
+  console.log("backend result:", result);
+  return result;
+}
+
+export async function getAllCasesPerMonth() {
+  const casesData = await fetch(`${baseAPI}/cases/getAllCasesPerMonth/data/`);
+  const result = await casesData.json();
+
+  console.log("backend result:", result);
+  return result;
+}
+
+interface DeleteFormItemData {
+  caseId: string;
+  arrayType: string;
+  itemUrl: string;
+}
+
+interface DeleteDocumentationImages {
+  caseId: string;
+  photoUrls: string;
+}
+export async function deleteFormItem(data: DeleteFormItemData) {
+  const response = await fetch(`${baseAPI}/cases/remove-case-form`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      caseId: data.caseId,
+      arrayType: data.arrayType,
+      itemUrl: data.itemUrl,
+    }),
+  });
+
+  const result = await response.json();
+  console.log("Backend result:", result);
+
+  return result;
+}
+
+export async function deleteDocumentationImages(
+  data: DeleteDocumentationImages
+) {
+  const response = await fetch(`${baseAPI}/cases/remove-documentation-photos`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      caseId: data.caseId,
+      photoUrls: data.photoUrls,
+    }),
+  });
+
+  const result = await response.json();
+  console.log("Backend result:", result);
+
+  return result;
+}

@@ -42,7 +42,9 @@ import { isAuthenticated } from "./utils/auth";
 import { Box } from "@chakra-ui/react";
 import { ToastContainer } from "react-toastify";
 import ErrorComponent from "./systemComponents/ErrorComponent";
-import OverallReport from "./dashboardpages/OverallReport";
+import OverallReport, {
+  loader as OverallReportLoader,
+} from "./dashboardpages/OverallReport";
 // Loader to protect /landing page route
 const landingPageLoader = () => {
   if (isAuthenticated()) {
@@ -114,6 +116,7 @@ const router = createBrowserRouter([
       {
         path: "overallreport",
         element: <OverallReport />,
+        loader: OverallReportLoader,
       },
     ],
   },
