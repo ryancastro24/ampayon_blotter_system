@@ -7,6 +7,7 @@ import {
   Text,
   GridItem,
 } from "@chakra-ui/react";
+
 import {
   DialogActionTrigger,
   DialogBody,
@@ -31,18 +32,14 @@ import {
   useNavigation,
 } from "react-router-dom";
 import { Field } from "@/components/ui/field";
-import {
-  FileUploadList,
-  FileUploadRoot,
-  FileUploadTrigger,
-} from "@/components/ui/file-upload";
+
 import { getUsers, addUser, updateUser } from "@/backendapi/usersApi";
 import {
   NativeSelectField,
   NativeSelectRoot,
 } from "@/components/ui/native-select";
 
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent, useRef } from "react";
 const API_BASE_URL = "https://psgc.gitlab.io/api"; // PSGC API Base URL
 
 // Define types for the data fetched
@@ -95,25 +92,28 @@ export const loader = async () => {
 };
 
 export const action: ActionFunction = async ({ request }) => {
-  console.log(request.method);
-  console.log(request);
   const formData = await request.formData();
-  const data: Record<string, FormDataEntryValue> = Object.fromEntries(
-    formData.entries()
-  );
 
-  if (request.method == "POST") {
-    console.log(data);
-    const userData = await addUser(data);
+  if (request.method === "POST") {
+    console.log("Form Data Entries:");
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
 
+    // Verify file data
+    const file = formData.get("file");
+    console.log("File data:", file);
+
+    const userData = await addUser(formData);
     return userData;
-  } else if (request.method == "PUT") {
+  } else if (request.method === "PUT") {
+    const data = Object.fromEntries(formData.entries());
     console.log("update data:", data);
     const updatedData = await updateUser(data.id, data);
     return updatedData;
   }
 
-  return { data };
+  return null;
 };
 
 import { UserDataType } from "@/backendapi/usersApi";
@@ -136,6 +136,10 @@ const UsersPage = () => {
   const [selectedRegionCode, setSelectedRegionCode] = useState<string>("");
   const [selectedProvinceCode, setSelectedProvinceCode] = useState<string>("");
   const [selectedCityCode, setSelectedCityCode] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedBarangay, setSelectedBarangay] = useState<string>("");
+  const [selectedBarangayCode, setSelectedBarangayCode] = useState<string>("");
   console.log("regions", regions);
 
   useEffect(() => {
@@ -185,6 +189,26 @@ const UsersPage = () => {
     }
   };
 
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      console.log("Selected file:", file);
+    }
+  };
+
+  const handleBarangayChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const barangayName = e.target.value;
+    const barangayCode =
+      e.target.options[e.target.selectedIndex].getAttribute("data-code") || "";
+    setSelectedBarangay(barangayName);
+    setSelectedBarangayCode(barangayCode);
+    console.log("Selected Barangay:", {
+      name: barangayName,
+      code: barangayCode,
+    });
+  };
+
   return (
     <Box
       data-state="open"
@@ -205,7 +229,7 @@ const UsersPage = () => {
             </Button>
           </DialogTrigger>
           <DialogContent>
-            <Form method="post">
+            <Form method="post" encType="multipart/form-data">
               <DialogHeader>
                 <DialogTitle>Add New User</DialogTitle>
               </DialogHeader>
@@ -284,43 +308,47 @@ const UsersPage = () => {
                         >
                           <option value="">Select City</option>
                           {cities.map((city) => (
-                            <>
-                              <option
-                                key={city.code}
-                                value={city.name}
-                                data-code={city.code}
-                              >
-                                {city.name}
-                              </option>
-                              <input
-                                type="hidden"
-                                name="city_code"
-                                value={selectedCityCode}
-                              />
-                            </>
+                            <option
+                              key={city.code}
+                              value={city.name}
+                              data-code={city.code}
+                            >
+                              {city.name}
+                            </option>
                           ))}
                         </NativeSelectField>
+                        <input
+                          type="hidden"
+                          name="city_code"
+                          value={selectedCityCode}
+                        />
                       </NativeSelectRoot>
                     </Field>
                     {/* Barangay Selector (Disabled if no city selected) */}
 
                     <Field label="Barangay" errorText="This field is required">
                       <NativeSelectRoot>
-                        <NativeSelectField name="barangay_name">
+                        <NativeSelectField
+                          name="barangay_name"
+                          value={selectedBarangay}
+                          onChange={handleBarangayChange}
+                        >
                           <option value="">Select Barangay</option>
                           {barangays.map((barangay) => (
-                            <>
-                              <option key={barangay.code} value={barangay.name}>
-                                {barangay.name}
-                              </option>
-                              <input
-                                type="hidden"
-                                name="barangay_code"
-                                value={barangay.code}
-                              />
-                            </>
+                            <option
+                              key={barangay.code}
+                              value={barangay.name}
+                              data-code={barangay.code}
+                            >
+                              {barangay.name}
+                            </option>
                           ))}
                         </NativeSelectField>
+                        <input
+                          type="hidden"
+                          name="barangay_code"
+                          value={selectedBarangayCode}
+                        />
                       </NativeSelectRoot>
                     </Field>
                   </Tabs.Content>
@@ -395,14 +423,28 @@ const UsersPage = () => {
                         label="Barangay Logo"
                         errorText="This field is required"
                       >
-                        <FileUploadRoot name="file_logo">
-                          <FileUploadTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <HiUpload /> Upload file
-                            </Button>
-                          </FileUploadTrigger>
-                          <FileUploadList />
-                        </FileUploadRoot>
+                        <input
+                          type="file"
+                          name="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          style={{ display: "none" }}
+                          ref={fileInputRef}
+                          required
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <HiUpload />{" "}
+                          {selectedFile ? selectedFile.name : "Upload file"}
+                        </Button>
+                        {selectedFile && (
+                          <Text fontSize="sm" mt={2}>
+                            Selected file: {selectedFile.name}
+                          </Text>
+                        )}
                       </Field>
                     </Box>
                   </Tabs.Content>

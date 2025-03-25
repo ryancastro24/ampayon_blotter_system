@@ -4,8 +4,8 @@ import {
   Outlet,
   useLoaderData,
 } from "react-router-dom";
-import logo from "../assets/logo.png";
-import { Box, Text, IconButton } from "@chakra-ui/react";
+
+import { Box, Text, IconButton, Avatar } from "@chakra-ui/react";
 import { HiMiniCog8Tooth } from "react-icons/hi2";
 import Loading from "@/systemComponents/Loading";
 import { isAuthenticated } from "@/utils/auth";
@@ -20,6 +20,7 @@ export type UserPropType = {
   token?: string;
   barangay_captain?: string;
   barangay_secretary?: string;
+  barangay_profile_picture?: string;
 };
 
 export const loader = async () => {
@@ -52,7 +53,12 @@ const Dashboard = () => {
       >
         <Box display={"flex"} alignItems={"center"} gap={10}>
           <Box display={"flex"} alignItems={"center"} gap={3}>
-            <img src={logo} alt="logo" width={50} height={50} />
+            <Avatar.Root>
+              <Avatar.Fallback>
+                {userData.barangay_name.slice(0, 2)}
+              </Avatar.Fallback>
+              <Avatar.Image src={userData.barangay_profile_picture} />
+            </Avatar.Root>
             <Box>
               <Text fontWeight={"bold"} color={"white"}>
                 {userData.barangay_name}

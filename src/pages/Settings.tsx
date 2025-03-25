@@ -8,6 +8,7 @@ import {
   Input,
   ClientOnly,
   Grid,
+  Avatar,
   GridItem,
 } from "@chakra-ui/react";
 import { HiUpload } from "react-icons/hi";
@@ -238,12 +239,12 @@ const Settings = () => {
               <Separator />
 
               <Box marginTop={2} display={"flex"} alignItems={"center"} gap={5}>
-                <Box
-                  rounded={"full"}
-                  bg={"gray.400"}
-                  width={100}
-                  height={100}
-                ></Box>
+                <Avatar.Root size="2xl">
+                  <Avatar.Fallback>
+                    {userData.barangay_name.slice(0, 2)}
+                  </Avatar.Fallback>
+                  <Avatar.Image src={userData.barangay_profile_picture} />
+                </Avatar.Root>
                 <Box>
                   <Text fontSize={"2xl"} fontWeight={"bold"}>
                     Barangay {userData.barangay_name}

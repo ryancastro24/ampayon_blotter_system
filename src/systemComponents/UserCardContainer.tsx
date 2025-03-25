@@ -8,6 +8,7 @@ import {
   Separator,
   Input,
   Icon,
+  Avatar,
 } from "@chakra-ui/react";
 import { UserDataType } from "@/backendapi/usersApi";
 import { HiUpload } from "react-icons/hi";
@@ -89,6 +90,7 @@ const UserCardContainer = ({
   failedCase,
   settledCase,
   totalCases,
+  barangay_profile_picture,
 }: UserDataType) => {
   const navigation = useNavigation();
   const navigate = useNavigate();
@@ -151,12 +153,10 @@ const UserCardContainer = ({
             alignItems={"center"}
             gap="2"
           >
-            <Box
-              width={"50px"}
-              height={"50px"}
-              background={"gray.300"}
-              rounded={"full"}
-            ></Box>
+            <Avatar.Root>
+              <Avatar.Fallback>{barangay_name.slice(0, 2)}</Avatar.Fallback>
+              <Avatar.Image src={barangay_profile_picture} />
+            </Avatar.Root>
             <Box>
               <Box>
                 <Text fontSize={"md"}>Brgy. {barangay_name}</Text>

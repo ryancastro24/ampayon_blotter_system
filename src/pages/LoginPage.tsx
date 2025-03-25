@@ -1,6 +1,7 @@
 import { Field } from "@/components/ui/field";
 import { Button, Card, Input, Text } from "@chakra-ui/react";
-import logo from "../assets/logo.png";
+import logo from "../assets/blotter_system_logo.png";
+
 import { PasswordInput } from "@/components/ui/password-input";
 import {
   ActionFunction,
@@ -43,7 +44,7 @@ const LoginPage = () => {
         <Form method="POST">
           <div>
             <div className="flex flex-col items-center gap-5  w-full h-full ">
-              <img src={logo} alt="logo" width={120} height={120} />
+              <img src={logo} alt="logo" width={200} height={200} />
               {/* input field */}
               <div className="flex flex-col gap-1 w-full">
                 <Field

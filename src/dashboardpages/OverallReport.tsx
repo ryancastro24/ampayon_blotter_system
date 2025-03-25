@@ -4,6 +4,8 @@ import { PieChart } from "@mui/x-charts/PieChart";
 import { TbDownload } from "react-icons/tb";
 import { IoCalendarClear } from "react-icons/io5";
 import jsPDF from "jspdf";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PiSmileySadFill } from "react-icons/pi";
 import html2canvas from "html2canvas";
 import {
   getCasesGroupedByBarangay,
@@ -23,6 +25,23 @@ export const loader = async () => {
 const OverallReport = () => {
   const { casesGroupedByBarangay, allCasesStatus, allCasesPerMonth } =
     useLoaderData();
+
+  // Check if data is empty or undefined
+  if (
+    !casesGroupedByBarangay?.length ||
+    !allCasesStatus ||
+    !allCasesPerMonth?.length
+  ) {
+    return (
+      <Box paddingX={10} paddingY={10}>
+        <EmptyState
+          icon={<PiSmileySadFill />}
+          title="No Reports Available"
+          description="There are currently no reports. Please check back later"
+        />
+      </Box>
+    );
+  }
 
   console.log("casesGroupedByBarangay", casesGroupedByBarangay);
   console.log("allCasesStatus", allCasesStatus);

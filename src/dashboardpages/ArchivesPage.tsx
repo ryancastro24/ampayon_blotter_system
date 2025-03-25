@@ -132,13 +132,13 @@ const ArchivesPage = () => {
 
     const marginLeft = 20;
     const contentWidth = 170;
-    let yPosition = 20;
+    let yPosition = 10;
 
-    // Add Sample Logo
-    const logoUrl =
-      "https://fastly.picsum.photos/id/60/200/200.jpg?hmac=MjMlhHlJlU_z3Z1DXohWUex2M-Gs7dtbqv4EJ4pSg3E";
+    // Add Logo at the top center
+    const logoUrl = userData.barangay_profile_picture;
+    pdf.addImage(logoUrl, "PNG", 90, yPosition, 30, 30); // Centered at x=87.5 (page width/2 - logo width/2)
 
-    pdf.addImage(logoUrl, "PNG", marginLeft, yPosition, 30, 30);
+    yPosition += 35; // Move down after logo
 
     // Header (Centered)
     pdf.setFontSize(12);
@@ -171,14 +171,28 @@ const ArchivesPage = () => {
     yPosition += 10;
 
     pdf.setFontSize(12);
-    pdf.text(`Transmittal No: 12-1-31, 2024`, marginLeft, yPosition);
-    pdf.text("(year/mo)", 160, yPosition);
+    pdf.text(
+      `Transmittal No: ${new Date().getDate()}${
+        new Date().getMonth() + 1
+      }${new Date().getFullYear()}-01`,
+      marginLeft,
+      yPosition
+    );
+    pdf.text(
+      `(${new Date().getFullYear()}/${(new Date().getMonth() + 1)
+        .toString()
+        .padStart(2, "0")})`,
+      160,
+      yPosition
+    );
 
     yPosition += 10;
 
     pdf.setFontSize(14);
     pdf.text(
-      "MONTHLY TRANSMITTAL OF FINAL REPORTS DECEMBER, 2024",
+      `MONTHLY TRANSMITTAL OF FINAL REPORTS ${new Date()
+        .toLocaleString("default", { month: "long" })
+        .toUpperCase()}, ${new Date().getFullYear()}`,
       105,
       yPosition,
       { align: "center" }

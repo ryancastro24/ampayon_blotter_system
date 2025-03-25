@@ -32,19 +32,18 @@ export type UserDataType = {
   ongoingCase: number;
   failedCase: number;
   settledCase: number;
+  barangay_profile_picture: string;
   totalCases: number;
 };
 
 // update user
-export async function addUser(userData: any) {
+export async function addUser(userData: FormData) {
   console.log("API Base URL:", baseAPI);
+  console.log("Sending FormData:", userData);
 
-  const response = await fetch(`${baseAPI}/users`, {
+  const response = await fetch(`${baseAPI}/users/addUser`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userData),
+    body: userData,
   });
 
   const result = await response.json();
