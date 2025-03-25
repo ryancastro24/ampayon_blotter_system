@@ -27,7 +27,10 @@ export const loader = async () => {
 const ReportPage = () => {
   const { perMonthCasesData, groupedCases } = useLoaderData() as any;
 
-  console.log();
+  // Add detailed logging to understand the data structure
+  console.log("Full perMonthCasesData:", perMonthCasesData);
+  console.log("xAxis data:", perMonthCasesData?.xAxis);
+  console.log("series data:", perMonthCasesData?.series);
 
   const generatePiechartPDF = async () => {
     const pdf = new jsPDF({
@@ -149,6 +152,63 @@ const ReportPage = () => {
   };
 
   const generateBarchartPDF = async () => {
+    // Add data validation check with detailed logging
+    if (!perMonthCasesData) {
+      console.error("perMonthCasesData is undefined");
+      alert("Unable to generate report: Data is not loaded");
+      return;
+    }
+
+    // Log the full perMonthCasesData object for debugging
+    console.log("Full perMonthCasesData:", perMonthCasesData);
+
+    // Check if xAxis exists and has the expected structure
+    if (!perMonthCasesData.xAxis) {
+      console.error("xAxis is missing from perMonthCasesData");
+      alert("Unable to generate report: Month data is missing");
+      return;
+    }
+
+    // Check if xAxis.data exists and is an array
+    const xAxisData = perMonthCasesData.xAxis[0].data;
+
+    console.log("xAxisData:", xAxisData);
+    if (!Array.isArray(xAxisData)) {
+      console.error("xAxis.data is not an array:", xAxisData);
+      alert("Unable to generate report: Invalid month data format");
+      return;
+    }
+
+    // Check series data with more detailed logging
+    if (!perMonthCasesData.series) {
+      console.error("series is missing from perMonthCasesData");
+      alert("Unable to generate report: Case data is missing");
+      return;
+    }
+
+    if (
+      !Array.isArray(perMonthCasesData.series) ||
+      perMonthCasesData.series.length === 0
+    ) {
+      console.error(
+        "series is empty or not an array:",
+        perMonthCasesData.series
+      );
+      alert("Unable to generate report: No case data available");
+      return;
+    }
+
+    const seriesData = perMonthCasesData.series[0]?.data;
+    if (!Array.isArray(seriesData)) {
+      console.error("series[0].data is not an array:", seriesData);
+      alert("Unable to generate report: Invalid case data format");
+      return;
+    }
+
+    // Log the validated data
+    console.log("Validated xAxis data:", xAxisData);
+    console.log("Validated series data:", seriesData);
+
     const pdf = new jsPDF({
       orientation: "portrait",
       unit: "mm",
@@ -187,15 +247,15 @@ const ReportPage = () => {
     // Title for Chart (Centered)
     pdf.setFont("courier", "normal");
     pdf.setFontSize(16);
-    pdf.text("January - June Cases Report", 105, 50, { align: "center" });
+    pdf.text("Monthly Cases Report", 105, 50, { align: "center" });
 
     await new Promise((resolve) => setTimeout(resolve, 500)); // Ensure rendering
 
-    // Capture Pie Chart (Centered Below Header)
+    // Capture Bar Chart (Centered Below Header)
     const barChartElement = document.getElementById("barChart");
     if (barChartElement) {
-      const pieCanvas = await html2canvas(barChartElement, { useCORS: true });
-      const barImageData = pieCanvas.toDataURL("image/png");
+      const barCanvas = await html2canvas(barChartElement, { useCORS: true });
+      const barImageData = barCanvas.toDataURL("image/png");
       pdf.addImage(barImageData, "PNG", 15, 65, 180, 90);
     } else {
       console.error("Bar chart element not found!");
@@ -205,12 +265,12 @@ const ReportPage = () => {
     // Summary Title (Left-aligned)
     pdf.setFontSize(14);
     pdf.setFont("courier", "bold");
-    pdf.text("Summary of Results", 15, 165);
+    pdf.text("Monthly Summary", 15, 165);
 
     // Table Position & Dimensions
     const tableStartX = 15;
     const tableStartY = 175;
-    const colWidths = [140, 40]; // Column widths (Status | Number of Cases)
+    const colWidths = [140, 40]; // Column widths (Month | Number of Cases)
     const rowHeight = 12; // Increased for better padding
 
     // Table Headers
@@ -224,7 +284,7 @@ const ReportPage = () => {
       pdf.rect(xPos, tableStartY, colWidths[index], rowHeight); // Draw cell border
 
       if (index === 0) {
-        // Left-align "Status" header
+        // Left-align "Month" header
         pdf.text(header, xPos + 5, tableStartY + 8);
       } else {
         // Center "Number of Cases" header
@@ -234,27 +294,34 @@ const ReportPage = () => {
       }
     });
 
-    // Table Data
-    const tableData = [
-      ["January", groupedCases[0].value.toString()],
-      ["February", groupedCases[1].value.toString()],
-      ["March", groupedCases[2].value.toString()],
-      ["April", groupedCases[0].value.toString()],
-      ["May", groupedCases[1].value.toString()],
-      ["June", groupedCases[2].value.toString()],
-    ];
+    // Table Data - Use the actual data from perMonthCasesData with type safety
+    const months = xAxisData;
+    const caseCounts = seriesData;
+
+    const tableData: [string, string][] = months.map(
+      (month: string, index: number) => {
+        const count = caseCounts[index];
+        if (count === undefined) {
+          console.error(
+            `Missing case count for month ${month} at index ${index}`
+          );
+          return [month, "0"];
+        }
+        return [month, count.toString()];
+      }
+    );
 
     let currentY = tableStartY + rowHeight;
     pdf.setFont("courier", "normal");
 
-    tableData.forEach((row) => {
-      row.forEach((cell, index) => {
+    tableData.forEach((row: [string, string]) => {
+      row.forEach((cell: string, index: number) => {
         let xPos =
           tableStartX + colWidths.slice(0, index).reduce((a, b) => a + b, 0);
         pdf.rect(xPos, currentY, colWidths[index], rowHeight); // Draw cell border
 
         if (index === 0) {
-          // Left-align "Status" column
+          // Left-align "Month" column
           pdf.text(cell, xPos + 5, currentY + 8);
         } else {
           // Center the "Number of Cases" column
@@ -267,7 +334,135 @@ const ReportPage = () => {
     });
 
     // Save the PDF
-    pdf.save("report.pdf");
+    pdf.save("monthly_cases_report.pdf");
+  };
+
+  const generateBarangayStatsPDF = async () => {
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    // Get today's date
+    const today = new Date().toLocaleDateString();
+
+    // Set global font to Courier
+    pdf.setFont("courier", "normal");
+
+    // Add Logo (Top Left)
+    const logoElement = document.getElementById("logo");
+    if (logoElement) {
+      const logoCanvas = await html2canvas(logoElement, { useCORS: true });
+      const logoImageData = logoCanvas.toDataURL("image/png");
+      pdf.addImage(logoImageData, "PNG", 15, 10, 30, 30);
+    }
+
+    // Header Text (Centered)
+    pdf.setFont("courier", "bold");
+    pdf.setFontSize(14);
+    pdf.text("REPUBLIC OF THE PHILIPPINES", 105, 15, { align: "center" });
+
+    pdf.setFont("courier", "normal");
+    pdf.setFontSize(12);
+    pdf.text("Department of Interior and Local Government", 105, 22, {
+      align: "center",
+    });
+
+    // Date (Right-aligned)
+    pdf.setFontSize(10);
+    pdf.text(`Date: ${today}`, 190, 35, { align: "right" });
+
+    // Title for Chart (Centered)
+    pdf.setFont("courier", "normal");
+    pdf.setFontSize(16);
+    pdf.text("Barangay Case Statistics Report", 105, 50, { align: "center" });
+
+    // Capture Bar Chart (Centered Below Header)
+    const barChartElement = document.getElementById("barChart");
+    if (barChartElement) {
+      const barCanvas = await html2canvas(barChartElement, { useCORS: true });
+      const barImageData = barCanvas.toDataURL("image/png");
+      pdf.addImage(barImageData, "PNG", 15, 65, 180, 90);
+    } else {
+      console.error("Bar chart element not found!");
+      return;
+    }
+
+    // Summary Title (Left-aligned)
+    pdf.setFontSize(14);
+    pdf.setFont("courier", "bold");
+    pdf.text("Detailed Statistics by Barangay", 15, 165);
+
+    // Table Position & Dimensions
+    const tableStartX = 15;
+    const tableStartY = 175;
+    const colWidths = [60, 30, 30, 30, 30]; // Widths for Barangay, Failed, Settled, Ongoing, Total
+    const rowHeight = 12;
+
+    // Table Headers
+    const headers = ["Barangay", "Failed", "Settled", "Ongoing", "Total"];
+    pdf.setFontSize(12);
+    pdf.setFont("courier", "bold");
+
+    headers.forEach((header, index) => {
+      let xPos =
+        tableStartX + colWidths.slice(0, index).reduce((a, b) => a + b, 0);
+      pdf.rect(xPos, tableStartY, colWidths[index], rowHeight);
+      pdf.text(header, xPos + colWidths[index] / 2, tableStartY + 8, {
+        align: "center",
+      });
+    });
+
+    // Process and calculate statistics from perMonthCasesData
+    const barangayStats = perMonthCasesData.series.reduce(
+      (acc: any, series: any) => {
+        const barangay = series.name;
+        const failed = series.data.filter(
+          (status: string) => status === "Failed"
+        ).length;
+        const settled = series.data.filter(
+          (status: string) => status === "Settled"
+        ).length;
+        const ongoing = series.data.filter(
+          (status: string) => status === "Ongoing"
+        ).length;
+        const total = failed + settled + ongoing;
+
+        acc[barangay] = { failed, settled, ongoing, total };
+        return acc;
+      },
+      {}
+    );
+
+    // Create table data from statistics
+    const tableData = Object.entries(barangayStats).map(
+      ([barangay, stats]: [string, any]) => [
+        barangay,
+        stats.failed.toString(),
+        stats.settled.toString(),
+        stats.ongoing.toString(),
+        stats.total.toString(),
+      ]
+    );
+
+    let currentY = tableStartY + rowHeight;
+    pdf.setFont("courier", "normal");
+
+    tableData.forEach((row) => {
+      row.forEach((cell, index) => {
+        let xPos =
+          tableStartX + colWidths.slice(0, index).reduce((a, b) => a + b, 0);
+        pdf.rect(xPos, currentY, colWidths[index], rowHeight);
+        pdf.text(cell, xPos + colWidths[index] / 2, currentY + 8, {
+          align: "center",
+        });
+      });
+      currentY += rowHeight;
+    });
+
+    // Save the PDF
+    pdf.save("barangay_statistics_report.pdf");
   };
 
   if (

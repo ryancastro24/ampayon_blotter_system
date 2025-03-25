@@ -287,20 +287,25 @@ const CaseDetails = () => {
     <>
       <Toaster />
       <Grid
-        templateColumns="repeat(2, 1fr)"
-        gap="5"
+        templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+        gap={{ base: "3", md: "5" }}
         width={"full"}
         height={"full"}
-        padding={5}
+        padding={{ base: "3", md: "5" }}
       >
         <Box
           width={"full"}
           height={"full"}
           display={"flex"}
           flexDirection={"column"}
-          gap={5}
+          gap={{ base: "3", md: "5" }}
         >
-          <Box display={"flex"} alignItems={"center"} gap={5}>
+          <Box
+            display={"flex"}
+            alignItems={"center"}
+            gap={{ base: "2", md: "5" }}
+            flexWrap="wrap"
+          >
             <Button
               size={"xs"}
               width={"80px"}
@@ -444,7 +449,14 @@ const CaseDetails = () => {
                       </EmptyState.Root>
                     </Box>
                   ) : (
-                    <Grid templateColumns="repeat(3, 1fr)" gap="6">
+                    <Grid
+                      templateColumns={{
+                        base: "1fr",
+                        sm: "repeat(2, 1fr)",
+                        md: "repeat(3, 1fr)",
+                      }}
+                      gap="6"
+                    >
                       {caseDetails.caseForms.map((val: string) => {
                         const fileName = val.split("/").pop(); // Extract file name from URL
 
@@ -521,16 +533,29 @@ const CaseDetails = () => {
             </DialogRoot>
           </Box>
 
-          <Box display={"flex"} flexDirection={"column"} gap={5}>
-            <Text fontSize={20} fontStyle={"italic"}>
+          <Box
+            display={"flex"}
+            flexDirection={"column"}
+            gap={{ base: "3", md: "5" }}
+          >
+            <Text fontSize={{ base: "18", md: "20" }} fontStyle={"italic"}>
               Case Details
             </Text>
 
             <Box>
-              <Box display={"flex"} gap={10} alignItems={"center"}>
+              <Box
+                display={"flex"}
+                gap={{ base: "5", md: "10" }}
+                alignItems={"center"}
+                flexDirection={{ base: "column", md: "row" }}
+              >
                 <Box display={"flex"} flexDirection={"column"} gap={1}>
                   <Text>Complainant</Text>
-                  <Box width={150} height={150} background={"gray.300"}></Box>
+                  <Box
+                    width={{ base: "120px", md: "150px" }}
+                    height={{ base: "120px", md: "150px" }}
+                    background={"gray.300"}
+                  ></Box>
                   <Text> Name: {caseDetails.complainant_name}</Text>
 
                   <Collapsible.Root unmountOnExit>
@@ -566,7 +591,11 @@ const CaseDetails = () => {
 
                 <Box display={"flex"} flexDirection={"column"} gap={1}>
                   <Text>Respondent</Text>
-                  <Box width={150} height={150} background={"gray.300"}></Box>
+                  <Box
+                    width={{ base: "120px", md: "150px" }}
+                    height={{ base: "120px", md: "150px" }}
+                    background={"gray.300"}
+                  ></Box>
                   <Text> Name: {caseDetails.respondent_name}</Text>
 
                   <Collapsible.Root unmountOnExit>
@@ -603,7 +632,7 @@ const CaseDetails = () => {
             </Box>
 
             <Box>
-              <Text fontSize={18} fontWeight={"bold"}>
+              <Text fontSize={{ base: "16", md: "18" }} fontWeight={"bold"}>
                 Description
               </Text>
 
@@ -613,11 +642,17 @@ const CaseDetails = () => {
             </Box>
 
             <Box display={"flex"} flexDirection={"column"} gap={3}>
-              <Text fontSize={18} fontWeight={"bold"}>
+              <Text fontSize={{ base: "16", md: "18" }} fontWeight={"bold"}>
                 Witnesses
               </Text>
 
-              <Box display={"flex"} alignItems={"center"} gap={5}>
+              <Box
+                display={"flex"}
+                alignItems={"center"}
+                gap={{ base: "3", md: "5" }}
+                flexWrap="wrap"
+                justifyContent={{ base: "center", md: "flex-start" }}
+              >
                 <Box display={"flex"} flexDirection={"column"} gap={1}>
                   <Box width={100} height={100} background={"gray.300"}></Box>
                   <Text fontSize={"sm"}> Name: Jane Smith</Text>
@@ -644,16 +679,18 @@ const CaseDetails = () => {
         </Box>
 
         <Box
-          padding={4}
+          padding={{ base: "2", md: "4" }}
           width={"full"}
           display={"flex"}
           flexDirection={"column"}
-          gap={5}
+          gap={{ base: "3", md: "5" }}
         >
           <Box
             display="flex"
             justifyContent="space-between"
             alignItems="center"
+            flexWrap="wrap"
+            gap={2}
           >
             <Text>Documentation</Text>
             {selectedImages.length > 0 && (
@@ -682,7 +719,7 @@ const CaseDetails = () => {
           </Box>
 
           <Box display={"flex"} alignItems={"flex-end"} gap={5}>
-            <Box width={450}>
+            <Box width={{ base: "full", md: "450px" }}>
               <Form method="PUT" encType="multipart/form-data">
                 <Input name="id" value={caseDetails._id} type="hidden" />
                 <Box display={"flex"} flexDirection={"column"} gap={2}>
@@ -727,7 +764,6 @@ const CaseDetails = () => {
                 </Box>
               </Form>
             </Box>
-            <Box></Box>
           </Box>
 
           {caseDetails.documentationPhotos.length === 0 ? (
@@ -748,7 +784,14 @@ const CaseDetails = () => {
             </Box>
           ) : (
             <>
-              <Grid templateColumns="repeat(3, 1fr)" gap="6">
+              <Grid
+                templateColumns={{
+                  base: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  md: "repeat(3, 1fr)",
+                }}
+                gap={{ base: "4", md: "6" }}
+              >
                 {currentImages.map((val: string) => (
                   <CheckboxCard.Root
                     key={val}
@@ -769,7 +812,7 @@ const CaseDetails = () => {
                         alt="Documentation Photo"
                         border={1}
                         borderColor={"gray.300"}
-                        height={150}
+                        height={{ base: "120px", md: "150px" }}
                       />
                     </CheckboxCard.Content>
                   </CheckboxCard.Root>

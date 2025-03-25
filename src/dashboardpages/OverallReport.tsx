@@ -235,56 +235,78 @@ const OverallReport = () => {
     // Title for Chart (Centered)
     pdf.setFont("courier", "normal");
     pdf.setFontSize(16);
-    pdf.text("Resolution Status of Cases", 105, 50, { align: "center" });
+    pdf.text("Case Resolution Trends Analysis", 105, 50, { align: "center" });
 
-    // Capture Pie Chart (Centered Below Header)
-    const pieChartElement = document.getElementById("lineGraph");
-    if (pieChartElement) {
-      const pieCanvas = await html2canvas(pieChartElement, { useCORS: true });
-      const pieImageData = pieCanvas.toDataURL("image/png");
-      pdf.addImage(pieImageData, "PNG", 15, 65, 180, 100);
+    // Capture Line Graph (Centered Below Header)
+    const lineGraphElement = document.getElementById("lineGraph");
+    if (lineGraphElement) {
+      const lineCanvas = await html2canvas(lineGraphElement, { useCORS: true });
+      const lineImageData = lineCanvas.toDataURL("image/png");
+      pdf.addImage(lineImageData, "PNG", 15, 65, 180, 100);
     } else {
-      console.error("Pie chart element not found!");
+      console.error("Line graph element not found!");
       return;
     }
 
     // Summary Title (Left-aligned)
     pdf.setFontSize(14);
     pdf.setFont("courier", "bold");
-    pdf.text("Summary of Results", 15, 195);
+    pdf.text("Monthly Growth Analysis", 15, 195);
 
     // Table Position & Dimensions
     const tableStartX = 15;
     const tableStartY = 205;
-    const colWidths = [140, 40]; // Column widths (Status | Number of Cases)
-    const rowHeight = 12; // Increased for better padding
+    const colWidths = [100, 80]; // Column widths (Status | Growth Rate)
+    const rowHeight = 12;
 
     // Table Headers
-    const headers = ["Status", "Number of Cases"];
+    const headers = ["Status", "Monthly Growth"];
     pdf.setFontSize(12);
     pdf.setFont("courier", "bold");
 
     headers.forEach((header, index) => {
       let xPos =
         tableStartX + colWidths.slice(0, index).reduce((a, b) => a + b, 0);
-      pdf.rect(xPos, tableStartY, colWidths[index], rowHeight); // Draw cell border
+      pdf.rect(xPos, tableStartY, colWidths[index], rowHeight);
 
       if (index === 0) {
-        // Left-align "Status" header
         pdf.text(header, xPos + 5, tableStartY + 8);
       } else {
-        // Center "Number of Cases" header
         pdf.text(header, xPos + colWidths[index] / 2, tableStartY + 8, {
           align: "center",
         });
       }
     });
 
-    // Table Data
+    // Calculate growth rates from actual data
+    const calculateGrowthRate = (current: number, previous: number) => {
+      if (previous === 0) return "0%";
+      const growth = ((current - previous) / previous) * 100;
+      return `${growth.toFixed(1)}%`;
+    };
+
     const tableData = [
-      ["Failed", allCasesStatus.total_failed.toString()],
-      ["Ongoing", allCasesStatus.total_ongoing.toString()],
-      ["Settled", allCasesStatus.total_settled.toString()],
+      [
+        "Failed",
+        calculateGrowthRate(
+          allCasesStatus.total_failed,
+          allCasesStatus.previous_failed || 0
+        ),
+      ],
+      [
+        "Ongoing",
+        calculateGrowthRate(
+          allCasesStatus.total_ongoing,
+          allCasesStatus.previous_ongoing || 0
+        ),
+      ],
+      [
+        "Settled",
+        calculateGrowthRate(
+          allCasesStatus.total_settled,
+          allCasesStatus.previous_settled || 0
+        ),
+      ],
     ];
 
     let currentY = tableStartY + rowHeight;
@@ -294,13 +316,11 @@ const OverallReport = () => {
       row.forEach((cell, index) => {
         let xPos =
           tableStartX + colWidths.slice(0, index).reduce((a, b) => a + b, 0);
-        pdf.rect(xPos, currentY, colWidths[index], rowHeight); // Draw cell border
+        pdf.rect(xPos, currentY, colWidths[index], rowHeight);
 
         if (index === 0) {
-          // Left-align "Status" column
           pdf.text(cell, xPos + 5, currentY + 8);
         } else {
-          // Center the "Number of Cases" column
           pdf.text(cell, xPos + colWidths[index] / 2, currentY + 8, {
             align: "center",
           });
@@ -310,8 +330,165 @@ const OverallReport = () => {
     });
 
     // Save the PDF
-    pdf.save("report.pdf");
+    pdf.save("case_trends_report.pdf");
   };
+
+  const generateBarangayStatsPDF = async () => {
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    // Get today's date
+    const today = new Date().toLocaleDateString();
+
+    // Set global font to Courier
+    pdf.setFont("courier", "normal");
+
+    // Add Logo (Top Left)
+    const logoElement = document.getElementById("logo");
+    if (logoElement) {
+      const logoCanvas = await html2canvas(logoElement, { useCORS: true });
+      const logoImageData = logoCanvas.toDataURL("image/png");
+      pdf.addImage(logoImageData, "PNG", 15, 10, 30, 30);
+    }
+
+    // Header Text (Centered)
+    pdf.setFont("courier", "bold");
+    pdf.setFontSize(14);
+    pdf.text("REPUBLIC OF THE PHILIPPINES", 105, 15, { align: "center" });
+
+    pdf.setFont("courier", "normal");
+    pdf.setFontSize(12);
+    pdf.text("Department of Interior and Local Government", 105, 22, {
+      align: "center",
+    });
+
+    // Date (Right-aligned)
+    pdf.setFontSize(10);
+    pdf.text(`Date: ${today}`, 190, 35, { align: "right" });
+
+    // Title for Chart (Centered)
+    pdf.setFont("courier", "normal");
+    pdf.setFontSize(16);
+    pdf.text("Barangay Case Statistics Report", 105, 50, { align: "center" });
+
+    // Capture Bar Chart (Centered Below Header)
+    const barChartElement = document.getElementById("barChart");
+    if (barChartElement) {
+      const barCanvas = await html2canvas(barChartElement, { useCORS: true });
+      const barImageData = barCanvas.toDataURL("image/png");
+      pdf.addImage(barImageData, "PNG", 15, 65, 180, 90);
+    } else {
+      console.error("Bar chart element not found!");
+      return;
+    }
+
+    // Summary Title (Left-aligned)
+    pdf.setFontSize(14);
+    pdf.setFont("courier", "bold");
+    pdf.text("Detailed Statistics by Barangay", 15, 165);
+
+    // Table Position & Dimensions
+    const tableStartX = 15;
+    const tableStartY = 175;
+    const colWidths = [60, 30, 30, 30, 30]; // Widths for Barangay, Failed, Settled, Ongoing, Total
+    const rowHeight = 12;
+
+    // Table Headers
+    const headers = ["Barangay", "Failed", "Settled", "Ongoing", "Total"];
+    pdf.setFontSize(12);
+    pdf.setFont("courier", "bold");
+
+    headers.forEach((header, index) => {
+      let xPos =
+        tableStartX + colWidths.slice(0, index).reduce((a, b) => a + b, 0);
+      pdf.rect(xPos, tableStartY, colWidths[index], rowHeight);
+      pdf.text(header, xPos + colWidths[index] / 2, tableStartY + 8, {
+        align: "center",
+      });
+    });
+
+    // Create table data from casesGroupedByBarangay with dynamic data
+    const tableData = casesGroupedByBarangay.map((item: any) => {
+      // Calculate total cases for this barangay
+      const total = item.failed + item.settled + item.ongoing;
+
+      // Log the data to verify
+      console.log("Processing barangay:", {
+        name: item.barangay_name,
+        failed: item.failed,
+        settled: item.settled,
+        ongoing: item.ongoing,
+        total: total,
+      });
+
+      return [
+        item.barangay_name,
+        item.failed.toString(),
+        item.settled.toString(),
+        item.ongoing.toString(),
+        total.toString(),
+      ];
+    });
+
+    // Calculate grand totals
+    const grandTotals = tableData.reduce(
+      (acc: [string, number, number, number, number], row: string[]) => {
+        return [
+          "Total",
+          acc[1] + parseInt(row[1]),
+          acc[2] + parseInt(row[2]),
+          acc[3] + parseInt(row[3]),
+          acc[4] + parseInt(row[4]),
+        ];
+      },
+      ["Total", 0, 0, 0, 0]
+    );
+
+    // Convert numbers to strings in grand totals
+    grandTotals[1] = grandTotals[1].toString();
+    grandTotals[2] = grandTotals[2].toString();
+    grandTotals[3] = grandTotals[3].toString();
+    grandTotals[4] = grandTotals[4].toString();
+
+    // Add the total row to the table data
+    tableData.push(grandTotals);
+
+    let currentY = tableStartY + rowHeight;
+    pdf.setFont("courier", "normal");
+
+    // Render each row with proper formatting
+    tableData.forEach((row: string[], rowIndex: number) => {
+      // Use bold font for the total row
+      if (rowIndex === tableData.length - 1) {
+        pdf.setFont("courier", "bold");
+      }
+
+      row.forEach((cell: string, index: number) => {
+        let xPos =
+          tableStartX +
+          colWidths.slice(0, index).reduce((a: number, b: number) => a + b, 0);
+        pdf.rect(xPos, currentY, colWidths[index], rowHeight);
+
+        // Center all columns
+        pdf.text(cell, xPos + colWidths[index] / 2, currentY + 8, {
+          align: "center",
+        });
+      });
+      currentY += rowHeight;
+
+      // Reset to normal font after total row
+      if (rowIndex === tableData.length - 1) {
+        pdf.setFont("courier", "normal");
+      }
+    });
+
+    // Save the PDF
+    pdf.save("barangay_statistics_report.pdf");
+  };
+
   return (
     <Box paddingX={10} paddingY={10}>
       <Text fontSize="xl" mb={4} textAlign="left">
@@ -345,7 +522,12 @@ const OverallReport = () => {
             </Box>
 
             <Box>
-              <IconButton size={"md"} colorPalette={"blue"} variant={"subtle"}>
+              <IconButton
+                onClick={generateBarangayStatsPDF}
+                size={"md"}
+                colorPalette={"blue"}
+                variant={"subtle"}
+              >
                 <TbDownload />
               </IconButton>
             </Box>
@@ -353,7 +535,7 @@ const OverallReport = () => {
           <Separator my={3} />
           <Card.Body>
             <Box width="500px" overflowX="auto">
-              <Box>
+              <Box id="barChart">
                 <BarChart
                   xAxis={[{ scaleType: "band", data: barangayNames }]}
                   series={barSeriesData}
