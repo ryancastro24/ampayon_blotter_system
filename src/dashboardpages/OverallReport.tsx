@@ -524,7 +524,7 @@ const OverallReport = () => {
           >
             <Box display={"flex"} flexDirection={"column"} gap={1}>
               <Text margin={0} fontSize={"xl"} fontWeight={"bold"}>
-                Realtime Case Status
+                Number of Cases Per Barangay
               </Text>
               <Text
                 color={"gray.500"}
@@ -575,7 +575,7 @@ const OverallReport = () => {
           >
             <Box display={"flex"} flexDirection={"column"} gap={1}>
               <Text margin={0} fontSize={"xl"} fontWeight={"bold"}>
-                Realtime Case Status
+                Total Cases
               </Text>
               <Text
                 color={"gray.500"}
@@ -648,7 +648,7 @@ const OverallReport = () => {
           >
             <Box display={"flex"} flexDirection={"column"} gap={1}>
               <Text margin={0} fontSize={"xl"} fontWeight={"bold"}>
-                Realtime Case Status
+                Number of Cases Per Month
               </Text>
               <Text
                 color={"gray.500"}

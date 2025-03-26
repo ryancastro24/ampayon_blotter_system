@@ -271,3 +271,35 @@ export async function deleteDocumentationImages(
 
   return result;
 }
+
+export async function uploadComplainantPhoto(id: any, data: any) {
+  console.log("data", data);
+  const response = await fetch(
+    `${baseAPI}/cases/updateComplainantProfilePicture/${id}`,
+    {
+      method: "PUT", // Use "PUT" or "PATCH" for updating
+      body: data, // Send the updated data
+    }
+  );
+
+  const result = await response.json();
+  console.log("Backend result:", result);
+
+  return result;
+}
+
+export async function uploadRespondentPhoto(id: any, data: any) {
+  console.log("data", data);
+  const response = await fetch(
+    `${baseAPI}/cases/updateRespondentProfilePicture/${id}`,
+    {
+      method: "PUT", // Use "PUT" or "PATCH" for updating
+      body: data, // Send the updated data
+    }
+  );
+
+  const result = await response.json();
+  console.log("Backend result:", result);
+
+  return result;
+}

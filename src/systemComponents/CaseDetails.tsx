@@ -10,7 +10,10 @@ import {
   CheckboxCard,
   Input,
   VStack,
+  IconButton,
 } from "@chakra-ui/react";
+
+import defaultUser from "@/assets/default-user.jpg";
 
 import { Toaster, toaster } from "@/components/ui/toaster";
 import { IoIosWarning } from "react-icons/io";
@@ -31,7 +34,11 @@ import { useState, useEffect } from "react";
 import { RiDeleteBin2Fill } from "react-icons/ri";
 import { InputGroup } from "@/components/ui/input-group";
 import { CloseButton } from "@/components/ui/close-button";
-import { IoIosArrowDown } from "react-icons/io";
+import {
+  IoIosArrowDown,
+  IoIosArrowBack,
+  IoIosArrowForward,
+} from "react-icons/io";
 import { LuFileUp } from "react-icons/lu";
 import {
   LoaderFunctionArgs,
@@ -55,9 +62,13 @@ import {
   uploadCaseForms,
   deleteFormItem,
   deleteDocumentationImages,
+  uploadComplainantPhoto,
+  uploadRespondentPhoto,
 } from "@/backendapi/caseApi";
 import { FiDownload, FiUpload } from "react-icons/fi";
 import { UserPropType } from "@/pages/Dashboard";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface ActionDataType {
   message?: string;
@@ -69,6 +80,8 @@ interface CaseDetailsType {
   complainant_name: string;
   complainant_number?: string;
   complainant_email?: string;
+  complainant_profile_picture: string;
+  respondent_profile_picture: string;
   complainant_address?: string;
   respondent_name: string;
   respondent_number?: string;
@@ -77,6 +90,9 @@ interface CaseDetailsType {
   case_description: string;
   caseForms: string[];
   documentationPhotos: string[];
+  case_type: string;
+  status: string;
+  createdAt: Date;
 }
 
 interface LoaderDataType {
@@ -102,6 +118,22 @@ export const action: ActionFunction = async ({ request }) => {
     const data: Record<string, FormDataEntryValue> = Object.fromEntries(
       formData.entries()
     );
+
+    console.log("Received form data:", data);
+
+    // Create a FormData instance to send the data to the Express API
+    const apiFormData = new FormData();
+
+    // Append each field in the data to the FormData
+    Object.keys(data).forEach((key) => {
+      // Handle different types of data, e.g., file upload
+      const value = data[key];
+      if (value instanceof File) {
+        apiFormData.append(key, value, value.name);
+      } else {
+        apiFormData.append(key, value as string);
+      }
+    });
 
     // Handle bulk delete operation
     if (data.transactionType === "bulkDelete") {
@@ -146,26 +178,35 @@ export const action: ActionFunction = async ({ request }) => {
       return deleteResponse;
     }
 
-    // Create a FormData instance to send the data to the Express API
-    const apiFormData = new FormData();
-
-    // Append each field in the data to the FormData
-    Object.keys(data).forEach((key) => {
-      // Handle different types of data, e.g., file upload
-      const value = data[key];
-      if (value instanceof File) {
-        apiFormData.append(key, value, value.name);
-      } else {
-        apiFormData.append(key, value as string);
-      }
-    });
-
     if (data.transactionType === "caseFormUpload") {
       const uploadCaseFormsData = await uploadCaseForms(data.id, apiFormData);
       return uploadCaseFormsData;
     }
 
+    // Handle complainant photo update
+    if (data.transactionType === "updateComplainantPhoto") {
+      const uploadComplainantPhotoData = await uploadComplainantPhoto(
+        data.id as string,
+        apiFormData
+      );
+
+      console.log("Upload response:", uploadComplainantPhotoData);
+      return uploadComplainantPhotoData;
+    }
+
+    // Handle complainant photo update
+    if (data.transactionType === "updateRespondentPhoto") {
+      const uploadRespondentPhotoData = await uploadRespondentPhoto(
+        data.id as string,
+        apiFormData
+      );
+
+      console.log("Upload response:", uploadRespondentPhotoData);
+      return uploadRespondentPhotoData;
+    }
+
     if (data.transactionType === "documentationUpload") {
+      console.log(apiFormData);
       const uploadImageData = await uploadDoucmentaryImages(
         data.id,
         apiFormData
@@ -175,9 +216,11 @@ export const action: ActionFunction = async ({ request }) => {
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      console.log(error.message);
+      console.log("Error in action function:", error.message);
+      return { message: error.message, type: "error" };
     } else {
       console.log("An unknown error occurred");
+      return { message: "An unknown error occurred", type: "error" };
     }
   }
 };
@@ -188,6 +231,8 @@ const CaseDetails = () => {
   const actionData = useActionData() as ActionDataType;
   const { caseDetails, userData } = useLoaderData() as LoaderDataType;
   const [open, setOpen] = useState(false);
+  const [openComplainantDialog, setOpenComplainantDialog] = useState(false);
+  const [openRespondentDialog, setOpenRespondentDialog] = useState(false);
 
   const [selectedImages, setSelectedImages] = useState<string[]>(() => {
     const stored = localStorage.getItem("selectedImages");
@@ -266,6 +311,28 @@ const CaseDetails = () => {
         });
       }
 
+      if (actionData.message === "Complainant photo updated successfully") {
+        setOpenComplainantDialog(false);
+        toaster.create({
+          title: "Photo Updated",
+          description: "Complainant's photo has been updated successfully.",
+          type: "success",
+        });
+        // Reload the page to fetch fresh data
+        window.location.reload();
+      }
+
+      if (actionData.message === "Respondent photo updated successfully") {
+        setOpenRespondentDialog(false);
+        toaster.create({
+          title: "Photo Updated",
+          description: "Respondent's photo has been updated successfully.",
+          type: "success",
+        });
+        // Reload the page to fetch fresh data
+        window.location.reload();
+      }
+
       if (
         actionData.message === "Item deleted successfully" ||
         actionData.message === "Items deleted successfully"
@@ -283,6 +350,135 @@ const CaseDetails = () => {
     }
   }, [navigation.state, actionData]);
 
+  const generateCaseReportPDF = async () => {
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    // Set global font to Courier
+    pdf.setFont("courier", "normal");
+
+    // Add Logo (Top Left)
+    const logoElement = document.getElementById("logo");
+    if (logoElement) {
+      const logoCanvas = await html2canvas(logoElement, { useCORS: true });
+      const logoImageData = logoCanvas.toDataURL("image/png");
+      pdf.addImage(logoImageData, "PNG", 15, 10, 20, 20);
+    }
+
+    // Header Text (Centered)
+    pdf.setFont("courier", "bold");
+    pdf.setFontSize(14);
+    pdf.text("REPUBLIC OF THE PHILIPPINES", 105, 15, { align: "center" });
+
+    pdf.setFont("courier", "normal");
+    pdf.setFontSize(12);
+    pdf.text("Department of Interior and Local Government", 105, 22, {
+      align: "center",
+    });
+
+    // Date (Right-aligned)
+    pdf.setFontSize(10);
+    pdf.text(
+      `Date: ${new Date(caseDetails.createdAt).toLocaleDateString()}`,
+      190,
+      35,
+      { align: "right" }
+    );
+
+    pdf.setFontSize(10);
+    pdf.text(`Status: ${caseDetails.status}`, 190, 40, { align: "right" });
+
+    // Title (Centered)
+    pdf.setFontSize(16);
+    pdf.text("Case Details Report", 105, 50, { align: "center" });
+
+    // Case Details Section
+    pdf.setFontSize(14);
+    pdf.setFont("courier", "bold");
+    pdf.text("Case Details", 15, 65);
+
+    // Complainant Details (Left)
+    pdf.setFontSize(12);
+    pdf.setFont("courier", "bold");
+    pdf.text("Complainant", 15, 75);
+    pdf.setFont("courier", "normal");
+
+    // Add complainant image
+    const complainantElement = document.getElementById("complainantImage");
+    if (complainantElement) {
+      const complainantCanvas = await html2canvas(complainantElement, {
+        useCORS: true,
+      });
+      const complainantImageData = complainantCanvas.toDataURL("image/png");
+      pdf.addImage(complainantImageData, "PNG", 15, 80, 40, 40);
+    } else {
+      console.error("Complainant image element not found!");
+      // If image fails to load, add a placeholder rectangle
+      pdf.rect(15, 80, 40, 40);
+      pdf.text("Photo", 35, 100, { align: "center" });
+    }
+
+    // Complainant information
+    pdf.text(`Name: ${caseDetails.complainant_name}`, 65, 85);
+    pdf.text(`Number: ${caseDetails.complainant_number || "N/A"}`, 65, 95);
+    pdf.text(`Email: ${caseDetails.complainant_email || "N/A"}`, 65, 105);
+    pdf.text(`Address: ${caseDetails.complainant_address || "N/A"}`, 65, 115);
+
+    // Respondent Details (Right)
+    pdf.setFont("courier", "bold");
+    pdf.text("Respondent", 15, 130);
+    pdf.setFont("courier", "normal");
+
+    // Add respondent image
+    const respondentElement = document.getElementById("respondentImage");
+    if (respondentElement) {
+      const respondentCanvas = await html2canvas(respondentElement, {
+        useCORS: true,
+      });
+      const respondentImageData = respondentCanvas.toDataURL("image/png");
+      pdf.addImage(respondentImageData, "PNG", 15, 135, 40, 40);
+    } else {
+      console.error("Respondent image element not found!");
+      // If image fails to load, add a placeholder rectangle
+      pdf.rect(15, 135, 40, 40);
+      pdf.text("Photo", 35, 155, { align: "center" });
+    }
+
+    // Respondent information
+    pdf.text(`Name: ${caseDetails.respondent_name}`, 65, 140);
+    pdf.text(`Number: ${caseDetails.respondent_number || "N/A"}`, 65, 150);
+    pdf.text(`Email: ${caseDetails.respondent_email || "N/A"}`, 65, 160);
+    pdf.text(`Address: ${caseDetails.respondent_address || "N/A"}`, 65, 170);
+
+    // Case Type
+    pdf.setFontSize(14);
+    pdf.setFont("courier", "bold");
+    pdf.text("Case Type", 15, 190);
+    pdf.setFont("courier", "normal");
+    pdf.setFontSize(12);
+    pdf.text(caseDetails.case_type || "N/A", 15, 200);
+
+    // Case Description
+    pdf.setFontSize(14);
+    pdf.setFont("courier", "bold");
+    pdf.text("Case Description", 15, 220);
+    pdf.setFontSize(12);
+    pdf.setFont("courier", "normal");
+
+    // Split description into multiple lines if needed
+    const splitDescription = pdf.splitTextToSize(
+      caseDetails.case_description,
+      170
+    );
+    pdf.text(splitDescription, 15, 230);
+
+    // Save the PDF
+    pdf.save(`case_report_${caseDetails._id}.pdf`);
+  };
+
   return (
     <>
       <Toaster />
@@ -292,6 +488,7 @@ const CaseDetails = () => {
         width={"full"}
         height={"full"}
         padding={{ base: "3", md: "5" }}
+        position="relative"
       >
         <Box
           width={"full"}
@@ -555,7 +752,40 @@ const CaseDetails = () => {
                     width={{ base: "120px", md: "150px" }}
                     height={{ base: "120px", md: "150px" }}
                     background={"gray.300"}
-                  ></Box>
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    overflow="hidden"
+                    cursor="pointer"
+                    onDoubleClick={() => setOpenComplainantDialog(true)}
+                    position="relative"
+                  >
+                    <Image
+                      id="complainantImage"
+                      src={
+                        caseDetails?.complainant_profile_picture || defaultUser
+                      }
+                      alt={`${caseDetails.complainant_name}'s photo`}
+                      objectFit="cover"
+                      width="100%"
+                      height="100%"
+                      border="1px solid"
+                      borderColor="gray.300"
+                    />
+                    <Box
+                      position="absolute"
+                      bottom={0}
+                      left={0}
+                      right={0}
+                      bg="rgba(0,0,0,0.5)"
+                      color="white"
+                      p={1}
+                      fontSize="xs"
+                      textAlign="center"
+                    >
+                      Double click to update
+                    </Box>
+                  </Box>
                   <Text> Name: {caseDetails.complainant_name}</Text>
 
                   <Collapsible.Root unmountOnExit>
@@ -595,7 +825,40 @@ const CaseDetails = () => {
                     width={{ base: "120px", md: "150px" }}
                     height={{ base: "120px", md: "150px" }}
                     background={"gray.300"}
-                  ></Box>
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    overflow="hidden"
+                    cursor="pointer"
+                    onDoubleClick={() => setOpenRespondentDialog(true)}
+                    position="relative"
+                  >
+                    <Image
+                      id="respondentImage"
+                      src={
+                        caseDetails?.respondent_profile_picture || defaultUser
+                      }
+                      alt={`${caseDetails.respondent_name}'s photo`}
+                      objectFit="cover"
+                      width="100%"
+                      height="100%"
+                      border="1px solid"
+                      borderColor="gray.300"
+                    />
+                    <Box
+                      position="absolute"
+                      bottom={0}
+                      left={0}
+                      right={0}
+                      bg="rgba(0,0,0,0.5)"
+                      color="white"
+                      p={1}
+                      fontSize="xs"
+                      textAlign="center"
+                    >
+                      Double click to update
+                    </Box>
+                  </Box>
                   <Text> Name: {caseDetails.respondent_name}</Text>
 
                   <Collapsible.Root unmountOnExit>
@@ -629,6 +892,16 @@ const CaseDetails = () => {
                   </Collapsible.Root>
                 </Box>
               </Box>
+            </Box>
+
+            <Box>
+              <Text fontSize={{ base: "16", md: "18" }} fontWeight={"bold"}>
+                Case Type
+              </Text>
+
+              <Text textAlign={"justify"} fontSize={"sm"}>
+                {caseDetails.case_type}
+              </Text>
             </Box>
 
             <Box>
@@ -820,32 +1093,188 @@ const CaseDetails = () => {
               </Grid>
 
               {/* Pagination Controls */}
-              <Box display="flex" justifyContent="center" mt={4} gap={2}>
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-                <Text alignSelf="center">
+              <Box
+                display="flex"
+                justifyContent="flex-end"
+                mt={4}
+                gap={2}
+                alignItems="center"
+              >
+                <Text fontSize="sm" color="gray.600">
                   Page {currentPage} of {totalPages}
                 </Text>
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </Button>
+                <Box display="flex" gap={2}>
+                  <IconButton
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                    aria-label="Previous page"
+                    variant="subtle"
+                    colorPalette="blue"
+                  >
+                    <IoIosArrowBack />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages}
+                    aria-label="Next page"
+                    variant="subtle"
+                    colorPalette="blue"
+                  >
+                    <IoIosArrowForward />
+                  </IconButton>
+                </Box>
               </Box>
             </>
           )}
         </Box>
+
+        {/* Add Download Button */}
+        <Box position="fixed" bottom={4} right={4} zIndex={1000}>
+          <Button
+            colorPalette="blue"
+            variant="solid"
+            onClick={generateCaseReportPDF}
+          >
+            Download Case
+          </Button>
+        </Box>
+
+        {/* Complainant Image Dialog */}
+        <DialogRoot
+          open={openComplainantDialog}
+          onOpenChange={(details) => setOpenComplainantDialog(details.open)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Update Complainant Photo</DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              <Form method="PUT" encType="multipart/form-data">
+                <Input name="id" value={caseDetails._id} type="hidden" />
+                <Input
+                  name="transactionType"
+                  value="updateComplainantPhoto"
+                  type="hidden"
+                />
+                <Box display="flex" flexDirection="column" gap={4}>
+                  <FileUploadRoot
+                    accept={["image/png", "image/jpeg"]}
+                    name="file"
+                    gap="1"
+                    width="full"
+                    required
+                  >
+                    <FileUploadLabel>Choose Photo</FileUploadLabel>
+                    <InputGroup
+                      width="full"
+                      startElement={<LuFileUp />}
+                      endElement={
+                        <FileUploadClearTrigger asChild>
+                          <CloseButton
+                            me="-1"
+                            size="xs"
+                            variant="plain"
+                            focusVisibleRing="inside"
+                            focusRingWidth="2px"
+                            pointerEvents="auto"
+                            color="fg.subtle"
+                          />
+                        </FileUploadClearTrigger>
+                      }
+                    >
+                      <FileInput />
+                    </InputGroup>
+                  </FileUploadRoot>
+                  <Button
+                    type="submit"
+                    colorPalette="blue"
+                    variant="solid"
+                    loading={navigation.state === "submitting"}
+                  >
+                    Update Photo
+                  </Button>
+                </Box>
+              </Form>
+            </DialogBody>
+            <DialogFooter>
+              <DialogActionTrigger asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogActionTrigger>
+            </DialogFooter>
+            <DialogCloseTrigger />
+          </DialogContent>
+        </DialogRoot>
+
+        {/* Respondent Image Dialog */}
+        <DialogRoot
+          open={openRespondentDialog}
+          onOpenChange={(details) => setOpenRespondentDialog(details.open)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Update Respondent Photo</DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              <Form method="PUT" encType="multipart/form-data">
+                <Input name="id" value={caseDetails._id} type="hidden" />
+                <Input
+                  name="transactionType"
+                  value="updateRespondentPhoto"
+                  type="hidden"
+                />
+                <Box display="flex" flexDirection="column" gap={4}>
+                  <FileUploadRoot
+                    accept={["image/png", "image/jpeg"]}
+                    name="file"
+                    gap="1"
+                    width="full"
+                  >
+                    <FileUploadLabel>Choose Photo</FileUploadLabel>
+                    <InputGroup
+                      width="full"
+                      startElement={<LuFileUp />}
+                      endElement={
+                        <FileUploadClearTrigger asChild>
+                          <CloseButton
+                            me="-1"
+                            size="xs"
+                            variant="plain"
+                            focusVisibleRing="inside"
+                            focusRingWidth="2px"
+                            pointerEvents="auto"
+                            color="fg.subtle"
+                          />
+                        </FileUploadClearTrigger>
+                      }
+                    >
+                      <FileInput />
+                    </InputGroup>
+                  </FileUploadRoot>
+                  <Button
+                    type="submit"
+                    colorPalette="blue"
+                    variant="solid"
+                    loading={navigation.state === "submitting"}
+                  >
+                    Update Photo
+                  </Button>
+                </Box>
+              </Form>
+            </DialogBody>
+            <DialogFooter>
+              <DialogActionTrigger asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogActionTrigger>
+            </DialogFooter>
+            <DialogCloseTrigger />
+          </DialogContent>
+        </DialogRoot>
       </Grid>
     </>
   );
