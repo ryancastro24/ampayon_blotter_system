@@ -8,7 +8,7 @@ import {
   GridItem,
   IconButton,
 } from "@chakra-ui/react";
-import { IoIosArrowBack, IoIosArrowForward, IoIosSearch } from "react-icons/io";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 import {
   DialogActionTrigger,
