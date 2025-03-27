@@ -1,7 +1,6 @@
 import {
   Box,
   Grid,
-  Icon,
   Button,
   Text,
   Collapsible,
@@ -11,6 +10,7 @@ import {
   Input,
   VStack,
   IconButton,
+  Icon,
 } from "@chakra-ui/react";
 
 import defaultUser from "@/assets/default-user.jpg";
@@ -233,6 +233,8 @@ const CaseDetails = () => {
   const [open, setOpen] = useState(false);
   const [openComplainantDialog, setOpenComplainantDialog] = useState(false);
   const [openRespondentDialog, setOpenRespondentDialog] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [openImageDialog, setOpenImageDialog] = useState(false);
 
   const [selectedImages, setSelectedImages] = useState<string[]>(() => {
     const stored = localStorage.getItem("selectedImages");
@@ -479,6 +481,37 @@ const CaseDetails = () => {
     pdf.save(`case_report_${caseDetails._id}.pdf`);
   };
 
+  const handleImageDoubleClick = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+    setOpenImageDialog(true);
+  };
+
+  const handlePreviousImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!caseDetails.documentationPhotos.includes(selectedImage || "")) return;
+    const currentIndex = caseDetails.documentationPhotos.indexOf(
+      selectedImage || ""
+    );
+    const prevIndex =
+      currentIndex > 0
+        ? currentIndex - 1
+        : caseDetails.documentationPhotos.length - 1;
+    setSelectedImage(caseDetails.documentationPhotos[prevIndex]);
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!caseDetails.documentationPhotos.includes(selectedImage || "")) return;
+    const currentIndex = caseDetails.documentationPhotos.indexOf(
+      selectedImage || ""
+    );
+    const nextIndex =
+      currentIndex < caseDetails.documentationPhotos.length - 1
+        ? currentIndex + 1
+        : 0;
+    setSelectedImage(caseDetails.documentationPhotos[nextIndex]);
+  };
+
   return (
     <>
       <Toaster />
@@ -513,9 +546,7 @@ const CaseDetails = () => {
               alignItems={"center"}
               gap={2}
             >
-              <Icon>
-                <TiArrowBack />
-              </Icon>
+              <TiArrowBack />
               Back
             </Button>
 
@@ -965,7 +996,7 @@ const CaseDetails = () => {
             flexWrap="wrap"
             gap={2}
           >
-            <Text>Documentation</Text>
+            <Text>Documentation/Evidences</Text>
             {selectedImages.length > 0 && (
               <Form method="POST">
                 <Input type="hidden" name="caseId" value={caseDetails._id} />
@@ -1086,6 +1117,7 @@ const CaseDetails = () => {
                         border={1}
                         borderColor={"gray.300"}
                         height={{ base: "120px", md: "150px" }}
+                        onDoubleClick={() => handleImageDoubleClick(val)}
                       />
                     </CheckboxCard.Content>
                   </CheckboxCard.Root>
@@ -1270,6 +1302,82 @@ const CaseDetails = () => {
             <DialogFooter>
               <DialogActionTrigger asChild>
                 <Button variant="outline">Cancel</Button>
+              </DialogActionTrigger>
+            </DialogFooter>
+            <DialogCloseTrigger />
+          </DialogContent>
+        </DialogRoot>
+
+        {/* Image Zoom Dialog */}
+        <DialogRoot
+          open={openImageDialog}
+          onOpenChange={(details) => setOpenImageDialog(details.open)}
+        >
+          <DialogContent
+            style={{
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              maxWidth: "50vw",
+              maxHeight: "90vh",
+              margin: 0,
+              padding: 0,
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>Documentation Photo</DialogTitle>
+            </DialogHeader>
+            <DialogBody p={0}>
+              {selectedImage && (
+                <Box position="relative" width="100%" height="70vh">
+                  <img
+                    src={selectedImage}
+                    alt="Zoomed documentation"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                    }}
+                  />
+                  <Button
+                    aria-label="Previous image"
+                    position="absolute"
+                    left="4"
+                    top="50%"
+                    transform="translateY(-50%)"
+                    onClick={handlePreviousImage}
+                    variant="ghost"
+                    colorScheme="whiteAlpha"
+                    p={2}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Icon as={IoIosArrowBack} />
+                  </Button>
+                  <Button
+                    aria-label="Next image"
+                    position="absolute"
+                    right="4"
+                    top="50%"
+                    transform="translateY(-50%)"
+                    onClick={handleNextImage}
+                    variant="ghost"
+                    colorScheme="whiteAlpha"
+                    p={2}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Icon as={IoIosArrowForward} />
+                  </Button>
+                </Box>
+              )}
+            </DialogBody>
+            <DialogFooter>
+              <DialogActionTrigger asChild>
+                <Button variant="outline">Close</Button>
               </DialogActionTrigger>
             </DialogFooter>
             <DialogCloseTrigger />
