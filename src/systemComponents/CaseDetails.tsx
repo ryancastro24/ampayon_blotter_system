@@ -944,41 +944,6 @@ const CaseDetails = () => {
                 {caseDetails.case_description}
               </Text>
             </Box>
-
-            <Box display={"flex"} flexDirection={"column"} gap={3}>
-              <Text fontSize={{ base: "16", md: "18" }} fontWeight={"bold"}>
-                Witnesses
-              </Text>
-
-              <Box
-                display={"flex"}
-                alignItems={"center"}
-                gap={{ base: "3", md: "5" }}
-                flexWrap="wrap"
-                justifyContent={{ base: "center", md: "flex-start" }}
-              >
-                <Box display={"flex"} flexDirection={"column"} gap={1}>
-                  <Box width={100} height={100} background={"gray.300"}></Box>
-                  <Text fontSize={"sm"}> Name: Jane Smith</Text>
-                  <Text fontSize={"sm"}> Number: 091231222123</Text>
-                  <Text fontSize={"sm"}> Email: No Email</Text>
-                </Box>
-
-                <Box display={"flex"} flexDirection={"column"} gap={1}>
-                  <Box width={100} height={100} background={"gray.300"}></Box>
-                  <Text fontSize={"sm"}> Name: Jane Smith</Text>
-                  <Text fontSize={"sm"}> Number: 091231222123</Text>
-                  <Text fontSize={"sm"}> Email: No Email</Text>
-                </Box>
-
-                <Box display={"flex"} flexDirection={"column"} gap={1}>
-                  <Box width={100} height={100} background={"gray.300"}></Box>
-                  <Text fontSize={"sm"}> Name: Jane Smith</Text>
-                  <Text fontSize={"sm"}> Number: 091231222123</Text>
-                  <Text fontSize={"sm"}> Email: No Email</Text>
-                </Box>
-              </Box>
-            </Box>
           </Box>
         </Box>
 

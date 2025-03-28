@@ -62,6 +62,8 @@ type CaseType = {
   barangay_name: string;
   barangay_captain: string;
   barangay_secretary: string;
+  complainant_address: string;
+  respondent_address: string;
   userType: string;
 };
 
@@ -80,6 +82,8 @@ const CasesCardContainer = ({
   attempt1,
   attempt2,
   attempt3,
+  complainant_address,
+  respondent_address,
   case_type,
   _id,
 }: CaseType) => {
@@ -238,6 +242,19 @@ const CasesCardContainer = ({
                                     defaultValue={complainant_email}
                                   />
                                 </Field>
+
+                                <Field
+                                  label="Address"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    id="complainant_address"
+                                    type="text"
+                                    placeholder="Enter Complainant Address"
+                                    name="complainant_address"
+                                    defaultValue={complainant_address}
+                                  />
+                                </Field>
                               </Box>
                             </Tabs.Content>
 
@@ -283,6 +300,19 @@ const CasesCardContainer = ({
                                     placeholder="sample@email.com"
                                     name="respondent_email"
                                     defaultValue={respondent_email}
+                                  />
+                                </Field>
+
+                                <Field
+                                  label="Address"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    id="respondent_address"
+                                    type="text"
+                                    placeholder="Enter Respondent Address"
+                                    name="respondent_address"
+                                    defaultValue={respondent_address}
                                   />
                                 </Field>
                               </Box>
