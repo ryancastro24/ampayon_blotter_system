@@ -4,21 +4,19 @@ import {
   Button,
   Separator,
   Icon,
-  IconButton,
   Input,
   ClientOnly,
   Grid,
   Avatar,
   GridItem,
 } from "@chakra-ui/react";
-import { HiUpload } from "react-icons/hi";
+
 import { PasswordInput } from "@/components/ui/password-input";
 import { Field } from "@/components/ui/field";
 import { IoChevronBackCircle } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { FaLocationDot } from "react-icons/fa6";
 import { BsFillPeopleFill } from "react-icons/bs";
-import { FaPlus } from "react-icons/fa6";
 import { BiSolidMessageSquareEdit } from "react-icons/bi";
 
 import {
