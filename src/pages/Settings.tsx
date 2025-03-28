@@ -18,11 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { FaLocationDot } from "react-icons/fa6";
 import { BsFillPeopleFill } from "react-icons/bs";
 import { BiSolidMessageSquareEdit } from "react-icons/bi";
-import {
-  FileUploadList,
-  FileUploadRoot,
-  FileUploadTrigger,
-} from "@/components/ui/file-upload";
+
 import {
   DialogActionTrigger,
   DialogBody,
