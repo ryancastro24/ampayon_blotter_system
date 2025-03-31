@@ -40,7 +40,7 @@ import IndexPage, {
 import { redirect } from "react-router-dom";
 import { isAuthenticated } from "./utils/auth";
 import { Box } from "@chakra-ui/react";
-import { ToastContainer } from "react-toastify";
+
 import ErrorComponent from "./systemComponents/ErrorComponent";
 import OverallReport, {
   loader as OverallReportLoader,
