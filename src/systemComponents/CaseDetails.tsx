@@ -126,7 +126,6 @@ export const action: ActionFunction = async ({ request }) => {
 
     // Append each field in the data to the FormData
     Object.keys(data).forEach((key) => {
-      // Handle different types of data, e.g., file upload
       const value = data[key];
       if (value instanceof File) {
         apiFormData.append(key, value, value.name);
@@ -134,6 +133,9 @@ export const action: ActionFunction = async ({ request }) => {
         apiFormData.append(key, value as string);
       }
     });
+
+    // Get the case ID from the form data
+    const caseId = data.id || data.caseId;
 
     // Handle bulk delete operation
     if (data.transactionType === "bulkDelete") {
@@ -144,7 +146,6 @@ export const action: ActionFunction = async ({ request }) => {
         type: typeof data.selectedImages,
       });
 
-      // Process each image for deletion
       const deleteData = {
         caseId: data.caseId.toString(),
         photoUrls: JSON.parse(data.selectedImages as string),
@@ -152,7 +153,7 @@ export const action: ActionFunction = async ({ request }) => {
 
       const deleteResponse = await deleteDocumentationImages(deleteData);
       console.log("Delete Response:", deleteResponse);
-      return deleteResponse;
+      return { ...deleteResponse, caseId };
     }
 
     // Handle delete operation
@@ -175,12 +176,12 @@ export const action: ActionFunction = async ({ request }) => {
 
       const deleteResponse = await deleteFormItem(deleteData);
       console.log("Delete Response:", deleteResponse);
-      return deleteResponse;
+      return { ...deleteResponse, caseId };
     }
 
     if (data.transactionType === "caseFormUpload") {
       const uploadCaseFormsData = await uploadCaseForms(data.id, apiFormData);
-      return uploadCaseFormsData;
+      return { ...uploadCaseFormsData, caseId };
     }
 
     // Handle complainant photo update
@@ -191,7 +192,7 @@ export const action: ActionFunction = async ({ request }) => {
       );
 
       console.log("Upload response:", uploadComplainantPhotoData);
-      return uploadComplainantPhotoData;
+      return { ...uploadComplainantPhotoData, caseId };
     }
 
     // Handle complainant photo update
@@ -202,7 +203,7 @@ export const action: ActionFunction = async ({ request }) => {
       );
 
       console.log("Upload response:", uploadRespondentPhotoData);
-      return uploadRespondentPhotoData;
+      return { ...uploadRespondentPhotoData, caseId };
     }
 
     if (data.transactionType === "documentationUpload") {
@@ -212,15 +213,21 @@ export const action: ActionFunction = async ({ request }) => {
         apiFormData
       );
 
-      return uploadImageData;
+      return { ...uploadImageData, caseId };
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.log("Error in action function:", error.message);
-      return { message: error.message, type: "error" };
+      return {
+        error: error.message,
+        type: "error",
+      };
     } else {
       console.log("An unknown error occurred");
-      return { message: "An unknown error occurred", type: "error" };
+      return {
+        error: "An unknown error occurred",
+        type: "error",
+      };
     }
   }
 };
@@ -347,6 +354,17 @@ const CaseDetails = () => {
           title: "Item Deleted",
           description: "The selected items have been successfully deleted.",
           type: "success",
+        });
+      }
+
+      // Handle error messages
+      if (actionData.type === "error") {
+        toaster.create({
+          title: "Error",
+          description:
+            actionData.message ||
+            "An error occurred while processing your request.",
+          type: "error",
         });
       }
     }

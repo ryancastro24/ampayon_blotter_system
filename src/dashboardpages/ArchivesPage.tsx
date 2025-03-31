@@ -260,8 +260,12 @@ const ArchivesPage = () => {
       return `${month}-${year}-${caseNumber}`;
     };
 
-    // Table Data
-    casesData.forEach((row: any, index: number) => {
+    // Table Data - Filter out failed cases
+    const settledCases = casesData.filter(
+      (case_: any) => case_.status !== "failed"
+    );
+
+    settledCases.forEach((row: any, index: number) => {
       const rowData = [
         formatCaseNumber(row.createdAt, index), // BRGY. CASE NO.
         row.complainant_name, // COMPLAINANT/S
