@@ -11,13 +11,16 @@ import {
   VStack,
   IconButton,
   Icon,
+  Textarea,
+  Tabs,
 } from "@chakra-ui/react";
 
+import { Field } from "@/components/ui/field";
 import defaultUser from "@/assets/default-user.jpg";
 
 import { Toaster, toaster } from "@/components/ui/toaster";
 import { IoIosWarning } from "react-icons/io";
-
+import { RiEdit2Fill } from "react-icons/ri";
 import {
   DialogActionTrigger,
   DialogBody,
@@ -69,7 +72,7 @@ import { FiDownload, FiUpload } from "react-icons/fi";
 import { UserPropType } from "@/pages/Dashboard";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-
+import { updateCase } from "@/backendapi/caseApi";
 interface ActionDataType {
   message?: string;
   type?: string;
@@ -179,6 +182,11 @@ export const action: ActionFunction = async ({ request }) => {
       return { ...deleteResponse, caseId };
     }
 
+    if (data.transactionType === "updateCaseDetails") {
+      const updatedCaseDetails = await updateCase(data.id, data);
+      console.log("Update Case details data:", data);
+      return updatedCaseDetails;
+    }
     if (data.transactionType === "caseFormUpload") {
       const uploadCaseFormsData = await uploadCaseForms(data.id, apiFormData);
       return { ...uploadCaseFormsData, caseId };
@@ -499,6 +507,92 @@ const CaseDetails = () => {
     pdf.save(`case_report_${caseDetails._id}.pdf`);
   };
 
+  const generateCertificationPDF = async () => {
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    // Set font to Courier
+    pdf.setFont("courier", "normal");
+
+    // Header
+    pdf.setFontSize(10);
+    pdf.text("(KP Form No. 20)", 105, 15, { align: "center" });
+
+    // Republic of the Philippines text
+    pdf.setFontSize(12);
+    pdf.text("Republic of the Philippines", 105, 25, { align: "center" });
+    pdf.text("City of Makati", 105, 30, { align: "center" });
+    pdf.text("Barangay Magallanes", 105, 35, { align: "center" });
+    pdf.text("Manila, Philippines", 105, 40, { align: "center" });
+    pdf.text("-oOo-", 105, 45, { align: "center" });
+
+    // Office title
+    pdf.setFontSize(12);
+    pdf.text("OFFICE OF THE LUPONG TAGAPAMAYAPA", 105, 55, { align: "center" });
+
+    // Parties involved
+    pdf.setFontSize(11);
+    pdf.text(`${caseDetails.complainant_name.toUpperCase()}`, 30, 70);
+    pdf.text("and", 30, 75);
+    pdf.text(`${caseDetails.respondent_name.toUpperCase()}`, 30, 80);
+    pdf.text("Respondents", 50, 85);
+
+    // Case number on the right
+    pdf.text(`Barangay Case No. ${caseDetails._id}`, 160, 70);
+    pdf.text("For: Slander, Threat and", 160, 75);
+    pdf.text("Physical Injuries", 160, 80);
+
+    // Main title
+    pdf.setFontSize(14);
+    pdf.setFont("courier", "bold");
+    pdf.text("CERTIFICATION TO FILE AN ACTION", 105, 100, { align: "center" });
+
+    // Main content
+    pdf.setFont("courier", "normal");
+    pdf.setFontSize(11);
+    pdf.text("This is to certify that:", 30, 115);
+
+    // Bullet points
+    const bulletPoints = [
+      "1. There was a personal confrontation between the parties before the Punong Barangay/Pangkat ng Tagapagkasundo;",
+      "2. An amicable settlement/agreement was not reached;",
+      "3. The settlement/agreement has been repudiated in a statement sworn to before the Punong Barangay by reason of violence, intimidation, fraud, or falsification; and",
+      "4. Therefore, the corresponding complaint for the dispute may now be filed in court/government office.",
+    ];
+
+    let yPosition = 130;
+    bulletPoints.forEach((point) => {
+      const splitText = pdf.splitTextToSize(point, 150);
+      pdf.text(splitText, 30, yPosition);
+      yPosition += 10 * splitText.length;
+    });
+
+    // Date
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+    pdf.text(`This ${currentDate}`, 30, yPosition + 10);
+
+    // Secretary signature line
+    pdf.setFontSize(11);
+    pdf.text("Ms. Julie B. Roberts", 105, yPosition + 30, { align: "center" });
+    pdf.text("Lupon Secretary", 105, yPosition + 35, { align: "center" });
+
+    // Attested section
+    pdf.text("Attested:", 30, yPosition + 45);
+
+    // Chairman signature line
+    pdf.text("Mr. Brando S. Topain", 105, yPosition + 60, { align: "center" });
+    pdf.text("Lupon Chairman", 105, yPosition + 65, { align: "center" });
+
+    pdf.save(`certification_${caseDetails._id}.pdf`);
+  };
+
   const handleImageDoubleClick = (imageUrl: string) => {
     setSelectedImage(imageUrl);
     setOpenImageDialog(true);
@@ -567,6 +661,147 @@ const CaseDetails = () => {
               <TiArrowBack />
               Back
             </Button>
+
+            {/* edit the case */}
+            <DialogRoot>
+              <DialogTrigger asChild>
+                <Button
+                  disabled={userData.userType === "admin"}
+                  size={"xs"}
+                  colorPalette={"blue"}
+                  variant={"surface"}
+                  display={"flex"}
+                  alignItems={"center"}
+                  justifyContent={"center"}
+                  gap={2}
+                >
+                  <RiEdit2Fill />
+                  Update Case Details
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogBody>
+                  <Form method="PUT">
+                    <DialogHeader>
+                      <DialogTitle>Update More Details Case</DialogTitle>
+                    </DialogHeader>
+
+                    {/* Tabs */}
+
+                    <Tabs.Root defaultValue="details_1">
+                      <Tabs.List>
+                        <Tabs.Trigger value="details_1">Details 1</Tabs.Trigger>
+                        <Tabs.Trigger value="details_2">Details 2</Tabs.Trigger>
+                      </Tabs.List>
+                      <Tabs.Content value="details_1">
+                        <Box display="flex" flexDirection="column" gap={5}>
+                          <Input
+                            type="hidden"
+                            name="id"
+                            value={caseDetails._id}
+                          />
+                          <Field
+                            label="Nature of the case"
+                            errorText="This field is required"
+                          >
+                            <Input
+                              type="text"
+                              placeholder="Enter the Nature of the case"
+                              name="nature_of_the_case"
+                            />
+                          </Field>
+
+                          <Grid templateColumns="1fr 1fr" gap={5}>
+                            <Field
+                              label="Date Filed"
+                              errorText="This field is required"
+                            >
+                              <Input
+                                id="date_filed"
+                                type="date"
+                                name="date_filed"
+                              />
+                            </Field>
+
+                            <Field
+                              label="Date of Settlement"
+                              errorText="This field is required"
+                            >
+                              <Input
+                                id="date_of_settlement"
+                                type="date"
+                                name="date_of_settlement"
+                              />
+                            </Field>
+                          </Grid>
+
+                          <Field
+                            label="Point of Agreement"
+                            errorText="This field is required"
+                          >
+                            <Textarea
+                              placeholder="Enter Complainant Address"
+                              name="point_of_agreement"
+                              resize={"none"}
+                            />
+                          </Field>
+                        </Box>
+                      </Tabs.Content>
+
+                      <Tabs.Content value="details_2">
+                        <Box display="flex" flexDirection="column" gap={5}>
+                          <Field
+                            label="Status of agreement"
+                            errorText="This field is required"
+                          >
+                            <Input
+                              id="status_of_agreement"
+                              type="text"
+                              placeholder="Enter Status of Agreement"
+                              name="status_of_agreement"
+                            />
+                          </Field>
+
+                          <Field
+                            label="Remarks"
+                            errorText="This field is required"
+                          >
+                            <Textarea
+                              id="remarks"
+                              placeholder="Enter remarks here..."
+                              name="remarks"
+                              resize={"none"}
+                            />
+                          </Field>
+                        </Box>
+                      </Tabs.Content>
+                    </Tabs.Root>
+
+                    <DialogFooter>
+                      <DialogActionTrigger asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogActionTrigger>
+                      <Button
+                        value={"updateCaseDetails"}
+                        name="transactionType"
+                        loading={navigation.state === "submitting"}
+                        type="submit"
+                        background={"blue.500"}
+                      >
+                        Update
+                      </Button>
+                    </DialogFooter>
+                    <DialogCloseTrigger />
+                  </Form>
+                </DialogBody>
+                <DialogFooter>
+                  <DialogActionTrigger asChild>
+                    <Button variant="outline">Close</Button>
+                  </DialogActionTrigger>
+                </DialogFooter>
+                <DialogCloseTrigger />
+              </DialogContent>
+            </DialogRoot>
 
             {/* upload forms */}
             <DialogRoot
@@ -1150,13 +1385,27 @@ const CaseDetails = () => {
         </Box>
 
         {/* Add Download Button */}
-        <Box position="fixed" bottom={4} right={4} zIndex={1000}>
+        <Box
+          position="fixed"
+          bottom={4}
+          right={4}
+          zIndex={1000}
+          display="flex"
+          gap={2}
+        >
           <Button
             colorPalette="blue"
             variant="solid"
             onClick={generateCaseReportPDF}
           >
             Download Case
+          </Button>
+          <Button
+            colorPalette="green"
+            variant="solid"
+            onClick={generateCertificationPDF}
+          >
+            Generate Certification
           </Button>
         </Box>
 
