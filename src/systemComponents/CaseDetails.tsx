@@ -96,6 +96,12 @@ interface CaseDetailsType {
   case_type: string;
   status: string;
   createdAt: Date;
+  nature_of_the_case: string;
+  date_filed: string;
+  date_of_settlement: string;
+  point_of_agreement: string;
+  status_of_agreement: string;
+  remarks: string;
 }
 
 interface LoaderDataType {
@@ -708,6 +714,7 @@ const CaseDetails = () => {
                               type="text"
                               placeholder="Enter the Nature of the case"
                               name="nature_of_the_case"
+                              defaultValue={caseDetails.nature_of_the_case}
                             />
                           </Field>
 
@@ -720,6 +727,7 @@ const CaseDetails = () => {
                                 id="date_filed"
                                 type="date"
                                 name="date_filed"
+                                defaultValue={caseDetails.date_filed}
                               />
                             </Field>
 
@@ -731,6 +739,7 @@ const CaseDetails = () => {
                                 id="date_of_settlement"
                                 type="date"
                                 name="date_of_settlement"
+                                defaultValue={caseDetails.date_of_settlement}
                               />
                             </Field>
                           </Grid>
@@ -742,6 +751,7 @@ const CaseDetails = () => {
                             <Textarea
                               placeholder="Enter Complainant Address"
                               name="point_of_agreement"
+                              defaultValue={caseDetails.point_of_agreement}
                               resize={"none"}
                             />
                           </Field>
@@ -759,6 +769,7 @@ const CaseDetails = () => {
                               type="text"
                               placeholder="Enter Status of Agreement"
                               name="status_of_agreement"
+                              defaultValue={caseDetails.status_of_agreement}
                             />
                           </Field>
 
@@ -770,6 +781,7 @@ const CaseDetails = () => {
                               id="remarks"
                               placeholder="Enter remarks here..."
                               name="remarks"
+                              defaultValue={caseDetails.remarks}
                               resize={"none"}
                             />
                           </Field>

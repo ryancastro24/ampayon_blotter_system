@@ -320,61 +320,51 @@ const ArchivesPage = () => {
     const pdf = new jsPDF({
       orientation: "landscape",
       unit: "mm",
-      format: "legal", // Using legal size for longer paper
+      format: "legal",
     });
 
-    // Set default font
+    // Set default font and calculate dimensions
     pdf.setFont("helvetica", "normal");
-
-    // Calculate page width to fit content properly
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const centerX = pageWidth / 2;
-    // Header text
+
+    // Header section
     pdf.setFontSize(14);
     pdf.setFont("helvetica", "bold");
 
-    // Add logo on the left side
-    // Calculate logo positions with 50px gap from center (convert px to mm)
-    const gapInMm = 160 * 0.264583; // Convert 50px to mm
+    // Logo positioning
+    const gapInMm = 160 * 0.264583;
     const logoWidth = 20;
     const logoHeight = 20;
     const logoY = 7;
-
-    // Position logos 50px away from center on each side
     const leftLogoX = centerX - logoWidth - gapInMm;
     const rightLogoX = centerX + gapInMm;
 
-    // Add logo on the left side
+    // Add logos
     pdf.addImage(dilg_logo, "PNG", leftLogoX, logoY, logoWidth, logoHeight);
-
-    // Add logo on the right side
     pdf.addImage(lupong_logo, "PNG", rightLogoX, logoY, logoWidth, logoHeight);
 
-    // Center text between logos
+    // Header text
     pdf.text("CY LUPONG TAGAPAMAYAPA", centerX, 15, { align: "center" });
     pdf.text("LTIA MONTHLY REPORT", centerX, 22, { align: "center" });
 
-    // Form details
+    // Form details section
     pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
-    const startY = 30;
+    let currentY = 30;
 
-    let currentY = startY;
-    // Form fields in table format
+    // Table configuration
     const tableStartX = 15;
     const tableWidthHeader = pageWidth - 30;
     const rowHeight = 7;
-    const labelValueMargin = 50; // 50px margin between label and value
-
-    // Calculate the width for the right-side box that will span all rows
-    const rightBoxWidth = 30; // Width for the right-side box
+    const labelValueMargin = 50;
+    const rightBoxWidth = 30;
     const mainTableWidth = tableWidthHeader - rightBoxWidth;
+    const labelWidth = 65 + labelValueMargin * 0.264583;
 
-    // Draw table borders
-    pdf.rect(tableStartX, currentY, mainTableWidth, rowHeight * 4); // Main table border
-
-    // Draw the right-side box that spans all rows
+    // Draw main table structure
+    pdf.rect(tableStartX, currentY, mainTableWidth, rowHeight * 4);
     pdf.rect(
       tableStartX + mainTableWidth,
       currentY,
@@ -382,29 +372,17 @@ const ArchivesPage = () => {
       rowHeight * 4
     );
 
-    // Horizontal lines
-    pdf.line(
-      tableStartX,
-      currentY + rowHeight,
-      tableStartX + mainTableWidth,
-      currentY + rowHeight
-    );
-    pdf.line(
-      tableStartX,
-      currentY + rowHeight * 2,
-      tableStartX + mainTableWidth,
-      currentY + rowHeight * 2
-    );
-    pdf.line(
-      tableStartX,
-      currentY + rowHeight * 3,
-      tableStartX + mainTableWidth,
-      currentY + rowHeight * 3
-    );
+    // Draw horizontal lines
+    for (let i = 1; i <= 3; i++) {
+      pdf.line(
+        tableStartX,
+        currentY + rowHeight * i,
+        tableStartX + mainTableWidth,
+        currentY + rowHeight * i
+      );
+    }
 
-    // Vertical line separating labels from values
-    // Convert 50px to mm (assuming 1px = 0.264583 mm)
-    const labelWidth = 65 + labelValueMargin * 0.264583;
+    // Draw vertical separator
     pdf.line(
       tableStartX + labelWidth,
       currentY,
@@ -413,55 +391,34 @@ const ArchivesPage = () => {
     );
 
     // Add table content
-    pdf.text("NAME OF LUPONG TAGAPAMAYAPA:", tableStartX + 2, currentY + 5);
-    pdf.text(
-      userData.barangay_name.toUpperCase(),
-      tableStartX + labelWidth + 2,
-      currentY + 5
-    );
+    const tableContent = [
+      { label: "NAME OF LUPONG TAGAPAMAYAPA:", value: userData.barangay_name },
+      { label: "BARANGAY CAPTAIN:", value: userData.barangay_captain },
+      { label: "CITY/MUNICIPALITY:", value: userData.city_name },
+      { label: "REGION:", value: userData.region_name },
+    ];
 
-    pdf.text("BARANGAY:", tableStartX + 2, currentY + rowHeight + 5);
-    pdf.text(
-      "BARANGAY " + userData.barangay_name.toUpperCase(),
-      tableStartX + labelWidth + 2,
-      currentY + rowHeight + 5
-    );
+    tableContent.forEach((item, index) => {
+      pdf.text(item.label, tableStartX + 2, currentY + rowHeight * index + 5);
+      pdf.text(
+        item.value.toUpperCase(),
+        tableStartX + labelWidth + 2,
+        currentY + rowHeight * index + 5
+      );
+    });
 
-    pdf.text(
-      "CITY/MUNICIPALITY:",
-      tableStartX + 2,
-      currentY + rowHeight * 2 + 5
-    );
-    pdf.text(
-      userData.city_name.toUpperCase(),
-      tableStartX + labelWidth + 2,
-      currentY + rowHeight * 2 + 5
-    );
-
-    pdf.text("REGION:", tableStartX + 2, currentY + rowHeight * 3 + 5);
-    pdf.text(
-      userData.region_name.toUpperCase(),
-      tableStartX + labelWidth + 2,
-      currentY + rowHeight * 3 + 5
-    );
-
-    // Add image on the right side
+    // Add barangay profile picture
     try {
-      // You can replace this with your actual logo or image path
       const imgData = userData.barangay_profile_picture;
-
-      // Calculate position to center the image in the right box
       const rightBoxX = tableStartX + mainTableWidth;
-      const rightBoxY = currentY;
-      const imageWidth = rightBoxWidth - 4; // Leave a small margin
-      const imageHeight = rowHeight * 4 - 4; // Leave a small margin
+      const imageWidth = rightBoxWidth - 4;
+      const imageHeight = rowHeight * 4 - 4;
 
-      // Position the image centered in the right box
       pdf.addImage(
         imgData,
         "PNG",
-        rightBoxX + 2, // 2mm margin from left of box
-        rightBoxY + 2, // 2mm margin from top of box
+        rightBoxX + 2,
+        currentY + 2,
         imageWidth,
         imageHeight
       );
@@ -469,22 +426,22 @@ const ArchivesPage = () => {
       console.error("Error adding image:", error);
     }
 
-    // Update currentY to be after the table
+    // Update position for next section
     currentY += rowHeight * 4;
 
-    // Add "LIST OF CASES" header with yellow background
+    // List of Cases header
     const listHeaderHeight = 10;
     pdf.setFontSize(14);
-    pdf.setFillColor(255, 255, 0); // Yellow background
+    pdf.setFillColor(255, 255, 0);
     pdf.rect(15, currentY, pageWidth - 30, listHeaderHeight, "F");
     pdf.setFont("helvetica", "bold");
-    pdf.setTextColor(0, 0, 0); // Black text
+    pdf.setTextColor(0, 0, 0);
     pdf.text("LIST OF CASES", centerX, currentY + 7, { align: "center" });
 
     currentY += listHeaderHeight;
 
-    // Adjust table to fit the width of the landscape legal page
-    const tableWidth = pageWidth - 30; // 15mm margins on each side
+    // Table headers configuration
+    const tableWidth = pageWidth - 30;
     const headers = [
       { title: "CASE NO.", width: tableWidth * 0.05 },
       { title: "CASE TITLE", width: tableWidth * 0.1 },
@@ -500,22 +457,18 @@ const ArchivesPage = () => {
       { title: "REMARKS", width: tableWidth * 0.05 },
     ];
 
+    // Draw headers
     let startX = 15;
-    // Draw table headers with double height (two rows)
-    const headerRowHeight = 18; // Double the normal row height
+    const headerRowHeight = 18;
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(9);
     headers.forEach((header) => {
       pdf.rect(startX, currentY, header.width, headerRowHeight);
-      // Center text vertically in the taller header cell
       pdf.text(
         header.title,
         startX + header.width / 2,
         currentY + headerRowHeight / 2,
-        {
-          maxWidth: header.width,
-          align: "center",
-        }
+        { maxWidth: header.width, align: "center" }
       );
       startX += header.width;
     });
@@ -523,80 +476,52 @@ const ArchivesPage = () => {
     // Table data
     currentY += headerRowHeight;
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(10); // Slightly smaller font for data to fit better
+    pdf.setFontSize(10);
 
     casesData.forEach((caseItem: any) => {
       startX = 15;
       const baseRowHeight = 8;
-
-      // Format case number as shown in image
-
       const caseNumber = caseItem.case_id_number;
-      const casetitlte = `${caseItem.complainant_name} (vs) ${caseItem.respondent_name}`;
-      // Case data array
+      const caseTitle = `${caseItem.complainant_name} (vs) ${caseItem.respondent_name}`;
+
       const rowData = [
         { text: caseNumber, width: headers[0].width },
-        { text: casetitlte || "", width: headers[1].width },
-        { text: caseItem.type || "", width: headers[2].width },
-        { text: caseItem.case_type || "Civil", width: headers[3].width },
+        { text: caseTitle || "", width: headers[1].width },
+        { text: caseItem.case_type || "", width: headers[2].width },
+        {
+          text: caseItem.nature_of_the_case || "Civil",
+          width: headers[3].width,
+        },
+        { text: caseItem.date_filed || "", width: headers[4].width },
         {
           text: new Date(caseItem.createdAt).toLocaleDateString(),
-          width: headers[4].width,
-        },
-        {
-          text: caseItem.initial_confrontation_date
-            ? new Date(caseItem.initial_confrontation_date).toLocaleDateString()
-            : "",
           width: headers[5].width,
         },
         { text: caseItem.action_taken || "", width: headers[6].width },
-        {
-          text: caseItem.settlement_date
-            ? new Date(caseItem.settlement_date).toLocaleDateString()
-            : "",
-          width: headers[7].width,
-        },
-        {
-          text: caseItem.execution_date
-            ? new Date(caseItem.execution_date).toLocaleDateString()
-            : "",
-          width: headers[8].width,
-        },
-        { text: caseItem.agreement_points || "", width: headers[9].width },
-        { text: caseItem.compliance_status || "", width: headers[10].width },
+        { text: caseItem.date_of_settlement || "", width: headers[7].width },
+        { text: caseItem.date_of_settlement || "", width: headers[8].width },
+        { text: caseItem.point_of_agreement || "", width: headers[9].width },
+        { text: caseItem.status_of_agreement || "", width: headers[10].width },
         { text: caseItem.remarks || "", width: headers[11].width },
       ];
 
-      // Calculate the maximum height needed for each cell
+      // Calculate row height
       const cellHeights = rowData.map((cell) => {
-        // Get the text width based on font size and content
         const textLines = pdf.splitTextToSize(cell.text, cell.width - 4);
-        return Math.max(baseRowHeight, textLines.length * 4); // 4mm per line of text
+        return Math.max(baseRowHeight, textLines.length * 4);
       });
-
-      // Use the tallest cell to determine row height
       const rowHeight = Math.max(...cellHeights);
 
-      // Draw row cells with dynamic height
-      rowData.forEach((cell, cellIndex) => {
+      // Draw cells
+      rowData.forEach((cell) => {
         pdf.rect(startX, currentY, cell.width, rowHeight);
-
-        // Split text to fit within cell width
         const textLines = pdf.splitTextToSize(cell.text, cell.width - 4);
+        const textY = currentY + 4;
 
-        // Calculate vertical position to center text in cell
-        const textY = currentY + 4; // Start 4mm from top of cell
-
-        // Add each line of text
         textLines.forEach((line: string, lineIndex: number) => {
-          pdf.text(
-            line,
-            startX + 2,
-            textY + lineIndex * 4, // 4mm line height
-            {
-              maxWidth: cell.width - 4,
-            }
-          );
+          pdf.text(line, startX + 2, textY + lineIndex * 4, {
+            maxWidth: cell.width - 4,
+          });
         });
 
         startX += cell.width;
@@ -604,14 +529,14 @@ const ArchivesPage = () => {
 
       currentY += rowHeight;
 
-      // Check if we need a new page
+      // Add new page if needed
       if (currentY > pageHeight - 20) {
         pdf.addPage();
         currentY = 20;
       }
     });
 
-    // Add signature section at the bottom
+    // Signature section
     currentY += 15;
     pdf.setFont("helvetica", "normal");
     pdf.text("Prepared by:", 15, currentY);
@@ -629,6 +554,314 @@ const ArchivesPage = () => {
 
     // Save the PDF
     pdf.save("DILG_monthly_report.pdf");
+  };
+
+  const generateCasesSummary = () => {
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "legal",
+    });
+
+    pdf.setFont("helvetica", "normal");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const centerX = pageWidth / 2;
+    const headerHeight = 12;
+    const tableHeight = 90;
+    const startX = 25;
+    const tableWidth = 300;
+    const yPos = 110;
+
+    // Add DILG Logo
+    pdf.addImage(dilg_logo, "PNG", 20, 10, 15, 15);
+
+    // Header text
+    pdf.setFontSize(14);
+    pdf.text("CY LUPONG TAGAPAMAYAPA INCENTIVES AWARDS (LTIA)", centerX, 15, {
+      align: "center",
+    });
+    pdf.text("LTIA FORM 06-SUMMARY OF CASES", centerX, 22, { align: "center" });
+
+    // Category box
+    pdf.setFontSize(10);
+    pdf.rect(25, 30, pageWidth - 50, 10);
+    pdf.text("CATEGORY: HIGHLY URBANIZED CITY", centerX, 36, {
+      align: "center",
+    });
+
+    const leftBoxWidth = (pageWidth - 50) * 0.7;
+    const rightBoxWidth = (pageWidth - 50) * 0.3;
+
+    const leftInfo = [
+      "FINALIST LUPONG TAGAPAMAYAPA: BARANGAY SAMPLE",
+      "PUNONG BARANGAY: JOHN DOE",
+      "CITY/MUNICIPALITY: SAMPLE CITY",
+      "MAYOR: HON. RONNIE VICENTE C. LAGNADA",
+      "PROVINCE: AGUSAN DEL NORTE",
+      "REGION: CARAGA",
+    ];
+
+    leftInfo.forEach((text, index) => {
+      const itemY = 45 + 8 + index * 8;
+      pdf.rect(25, itemY - 5, leftBoxWidth, 8);
+      pdf.text(text, 30, itemY);
+    });
+
+    const rightBoxX = 25 + leftBoxWidth + 5;
+    const rightInfo = [
+      "POPULATION: 14,382",
+      "LAND AREA: 1,873",
+      "TOTAL NO. OF CASES: 50",
+      "NUMBER OF LUPONS: 11",
+      "MALE: 6",
+      "FEMALE: 5",
+    ];
+
+    rightInfo.forEach((text, index) => {
+      const itemY = 45 + 8 + index * 8;
+      pdf.rect(25 + leftBoxWidth, itemY - 5, rightBoxWidth, 8);
+      pdf.text(text, rightBoxX, itemY);
+    });
+
+    // Main table
+    pdf.rect(startX, yPos, tableWidth, tableHeight);
+
+    const colWidths = {
+      natureOfCases: 70,
+      settled: 70,
+      notSettled: 110,
+      outside: 25,
+      totalCases: 25,
+    };
+
+    // Vertical lines
+    let currentX = startX;
+    Object.values(colWidths).forEach((width) => {
+      pdf.line(currentX, yPos, currentX, yPos + tableHeight);
+      currentX += width;
+    });
+    pdf.line(currentX, yPos, currentX, yPos + tableHeight); // last vertical
+
+    // Horizontal lines
+    pdf.line(startX, yPos, startX + tableWidth, yPos); // Top
+    pdf.line(
+      startX + colWidths.natureOfCases,
+      yPos + headerHeight,
+      startX + tableWidth,
+      yPos + headerHeight
+    );
+    pdf.line(
+      startX,
+      yPos + headerHeight * 2,
+      startX + tableWidth,
+      yPos + headerHeight * 2
+    );
+    pdf.line(
+      startX,
+      yPos + headerHeight * 3,
+      startX + tableWidth,
+      yPos + headerHeight * 3
+    );
+
+    // Sub vertical between SETTLED and NOT SETTLED
+    const settledX = startX + colWidths.natureOfCases;
+    const notSettledX = settledX + colWidths.settled;
+    pdf.line(
+      notSettledX,
+      yPos + headerHeight,
+      notSettledX,
+      yPos + headerHeight * 2
+    );
+
+    // HEADERS
+    pdf.setFontSize(9);
+    pdf.text(
+      "NATURE OF CASES (1)",
+      startX + colWidths.natureOfCases / 2,
+      yPos + headerHeight,
+      {
+        align: "center",
+        baseline: "middle",
+      }
+    );
+
+    pdf.text(
+      "ACTION TAKEN",
+      settledX + (colWidths.settled + colWidths.notSettled) / 2,
+      yPos + headerHeight / 2,
+      {
+        align: "center",
+        baseline: "middle",
+      }
+    );
+
+    pdf.text(
+      "SETTLED (4)",
+      settledX + colWidths.settled / 2,
+      yPos + headerHeight + 7,
+      {
+        align: "center",
+      }
+    );
+
+    pdf.text(
+      "NOT SETTLED (3)",
+      notSettledX + colWidths.notSettled / 2,
+      yPos + headerHeight + 7,
+      {
+        align: "center",
+      }
+    );
+
+    // Sub-headers with their corresponding numbers
+    const natureHeaders = [
+      { text: "CRIMINAL", number: 12 },
+      { text: "CIVIL", number: 8 },
+      { text: "OTHERS", number: 5 },
+      { text: "TOTAL", number: 25 },
+    ];
+    let subX = startX;
+    const natureColWidth = colWidths.natureOfCases / 4;
+    natureHeaders.forEach((header, i) => {
+      pdf.text(
+        header.text,
+        subX + natureColWidth / 2,
+        yPos + headerHeight * 2 + 7,
+        {
+          align: "center",
+          maxWidth: natureColWidth - 2,
+        }
+      );
+      // Add sample values
+      pdf.text(
+        header.number.toString(),
+        subX + natureColWidth / 2,
+        yPos + tableHeight - 5,
+        {
+          align: "center",
+        }
+      );
+      subX += natureColWidth;
+      if (i < natureHeaders.length) {
+        pdf.line(subX, yPos + headerHeight * 2, subX, yPos + tableHeight);
+      }
+    });
+
+    const settledHeaders = [
+      { text: "MEDIATION", number: 10 },
+      { text: "CONCILIATION", number: 7 },
+      { text: "ARBITRATION", number: 3 },
+      { text: "TOTAL", number: 20 },
+    ];
+    let currentSettledX = settledX;
+    const settledColWidth = colWidths.settled / 4;
+    settledHeaders.forEach((header, i) => {
+      pdf.text(
+        header.text,
+        currentSettledX + settledColWidth / 2,
+        yPos + headerHeight * 2 + 7,
+        {
+          align: "center",
+          maxWidth: settledColWidth - 2,
+        }
+      );
+      // Add sample values
+      pdf.text(
+        header.number.toString(),
+        currentSettledX + settledColWidth / 2,
+        yPos + tableHeight - 5,
+        {
+          align: "center",
+        }
+      );
+      currentSettledX += settledColWidth;
+      if (i < settledHeaders.length) {
+        pdf.line(
+          currentSettledX,
+          yPos + headerHeight * 2,
+          currentSettledX,
+          yPos + tableHeight
+        );
+      }
+    });
+
+    const notSettledHeaders = [
+      { text: "PENDING", number: 15 },
+      { text: "DISMISSED", number: 8 },
+      { text: "REPUDIATED", number: 5 },
+      { text: "CERTIFICATE TO FILE IN COURT", number: 3 },
+      { text: "WITHDRAWN", number: 4 },
+      { text: "TOTAL", number: 35 },
+    ];
+    let currentNotSettledX = notSettledX;
+    const notSettledColWidth = colWidths.notSettled / 6;
+    notSettledHeaders.forEach((header, i) => {
+      const headerLines = pdf.splitTextToSize(
+        header.text,
+        notSettledColWidth - 2
+      );
+      pdf.text(
+        headerLines,
+        currentNotSettledX + notSettledColWidth / 2,
+        yPos + headerHeight * 2 + 3,
+        {
+          align: "center",
+        }
+      );
+      // Add sample values
+      pdf.text(
+        header.number.toString(),
+        currentNotSettledX + notSettledColWidth / 2,
+        yPos + tableHeight - 5,
+        {
+          align: "center",
+        }
+      );
+      currentNotSettledX += notSettledColWidth;
+      if (i < notSettledHeaders.length) {
+        pdf.line(
+          currentNotSettledX,
+          yPos + headerHeight * 2,
+          currentNotSettledX,
+          yPos + tableHeight
+        );
+      }
+    });
+
+    const outsideX = notSettledX + colWidths.notSettled;
+    const outsideText = pdf.splitTextToSize(
+      "OUTSIDE THE JURISDICTION OF THE BARANGAY",
+      colWidths.outside - 2
+    );
+    pdf.text(
+      outsideText,
+      outsideX + colWidths.outside / 2,
+      yPos + headerHeight + 3,
+      {
+        align: "center",
+      }
+    );
+
+    const totalX = outsideX + colWidths.outside;
+    const totalText = pdf.splitTextToSize(
+      "TOTAL CASES FILED",
+      colWidths.totalCases - 2
+    );
+    pdf.text(
+      totalText,
+      totalX + colWidths.totalCases / 2,
+      yPos + headerHeight + 3,
+      {
+        align: "center",
+      }
+    );
+
+    // Add data rows if needed
+    if (casesData && Array.isArray(casesData)) {
+      // Fill rows here
+    }
+
+    pdf.save("cases_summary.pdf");
   };
 
   if (casesData.length === 0) {
@@ -683,6 +916,15 @@ const ArchivesPage = () => {
             variant={"subtle"}
           >
             DILG Report
+            <LuDownload />
+          </Button>
+
+          <Button
+            onClick={generateCasesSummary}
+            colorPalette={"orange"}
+            variant={"subtle"}
+          >
+            Cases Summary
             <LuDownload />
           </Button>
         </Box>

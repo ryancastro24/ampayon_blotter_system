@@ -36,7 +36,6 @@ import Loading from "@/systemComponents/Loading";
 import { ActionFunction, useNavigation, Form } from "react-router-dom";
 import { getUserProfile } from "@/backendapi/usersApi";
 
-
 export const action: ActionFunction = async ({ request }) => {
   console.log(request.method);
   console.log(request);
@@ -89,241 +88,299 @@ const Settings = () => {
           </Box>
 
           <Box paddingLeft={5} display={"flex"} flexDir={"column"} gap={6}>
-            <Box
-              display={"flex"}
-              alignItems={"center"}
-              justifyContent={"space-between"}
-              width={"full"}
-            >
-              <Box>
-                <Text fontSize={"2xl"} fontWeight={"bold"}>
-                  Settings
-                </Text>
-                <Text fontSize={"sm"}>Update your data</Text>
-              </Box>
-              <Box>
-                <DialogRoot>
-                  <DialogTrigger asChild>
-                    <Button
-                      display={"flex"}
-                      alignItems={"center"}
-                      justifyContent={"center"}
-                      gap={2}
-                      colorPalette={"blue"}
-                      variant={"solid"}
-                    >
-                      <BiSolidMessageSquareEdit />
-                      Update Data
-                    </Button>
-                  </DialogTrigger>
+            <Box>
+              <Text fontSize={"2xl"} fontWeight={"bold"}>
+                Settings
+              </Text>
+              <Text fontSize={"sm"}>Update your data</Text>
+            </Box>
+            {userData.userType == "admin" && (
+              <Form method="PUT" className="w-[600px]">
+                <Box display={"flex"} flexDir={"column"} gap={5}>
+                  <Input type="hidden" value={userData.id} name="id" />
 
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Update Data</DialogTitle>
-                    </DialogHeader>
+                  <Field
+                    label="Change Password"
+                    errorText="This field is required"
+                  >
+                    <PasswordInput name="password" />
+                  </Field>
+                </Box>
+                <Box display={"flex"} gap={2} marginTop={5}>
+                  <Button variant="outline">Cancel</Button>
 
-                    <Form method="PUT">
-                      <DialogBody display={"flex"} flexDir={"column"} gap={5}>
-                        <Input type="hidden" value={userData.id} name="id" />
-                        <Grid width={"full"} templateColumns="60% 40%" gap={2}>
-                          <GridItem>
-                            <Field
-                              label="Barangay Captain"
-                              errorText="This field is required"
-                            >
-                              <Input
-                                defaultValue={userProfileData.barangay_captain}
-                                id="barangay_captain"
-                                type="text"
-                                placeholder="Enter New Barangay Captain"
-                                name="barangay_captain"
-                              />
-                            </Field>
-                          </GridItem>
-
-                          <GridItem>
-                            <Field
-                              label="Contact Number"
-                              errorText="This field is required"
-                            >
-                              <Input
-                                defaultValue={
-                                  userProfileData.barangay_captain_contact_number
-                                }
-                                id="contactnumber"
-                                type="text"
-                                placeholder="09XXXXXXXX"
-                                name="barangay_captain_contact_number"
-                              />
-                            </Field>
-                          </GridItem>
-                        </Grid>
-
-                        <Grid templateColumns="60% 40%" width={"full"} gap={2}>
-                          <GridItem>
-                            <Field
-                              label="Barangay Secretary"
-                              errorText="This field is required"
-                            >
-                              <Input
-                                defaultValue={
-                                  userProfileData.barangay_secretary
-                                }
-                                id="barangay_secretary"
-                                type="text"
-                                placeholder="Enter New Barangay Secretary"
-                                name="barangay_secretary"
-                              />
-                            </Field>
-                          </GridItem>
-
-                          <GridItem>
-                            <Field
-                              label="Contact Number"
-                              errorText="This field is required"
-                            >
-                              <Input
-                                defaultValue={
-                                  userProfileData.barangay_secretary_contact_number
-                                }
-                                id="contactnumber"
-                                type="text"
-                                placeholder="09XXXXXXXX"
-                                name="barangay_secretary_contact_number"
-                              />
-                            </Field>
-                          </GridItem>
-                        </Grid>
-
-                        <Field
-                          label="Change Password"
-                          errorText="This field is required"
-                        >
-                          <PasswordInput name="password" />
-                        </Field>
-                      </DialogBody>
-                      <DialogFooter>
-                        <DialogActionTrigger asChild>
-                          <Button variant="outline">Cancel</Button>
-                        </DialogActionTrigger>
+                  <Button
+                    type="submit"
+                    loading={navigation.state === "submitting"}
+                    colorPalette={"blue"}
+                    variant={"solid"}
+                  >
+                    Save
+                  </Button>
+                </Box>
+              </Form>
+            )}
+            {userData.userType == "user" && (
+              <>
+                <Box
+                  display={"flex"}
+                  alignItems={"center"}
+                  justifyContent={"space-between"}
+                  width={"full"}
+                >
+                  <Box>
+                    <Text fontSize={"2xl"} fontWeight={"bold"}>
+                      Settings
+                    </Text>
+                    <Text fontSize={"sm"}>Update your data</Text>
+                  </Box>
+                  <Box>
+                    <DialogRoot>
+                      <DialogTrigger asChild>
                         <Button
-                          type="submit"
-                          loading={navigation.state === "submitting"}
+                          display={"flex"}
+                          alignItems={"center"}
+                          justifyContent={"center"}
+                          gap={2}
                           colorPalette={"blue"}
                           variant={"solid"}
                         >
-                          Save
+                          <BiSolidMessageSquareEdit />
+                          Update Data
                         </Button>
-                      </DialogFooter>
-                    </Form>
-                  </DialogContent>
-                </DialogRoot>
-              </Box>
-            </Box>
+                      </DialogTrigger>
 
-            {/* location */}
-            <Box display={"flex"} flexDir={"column"} gap={2}>
-              <Text display={"flex"} alignItems={"center"} gap={1}>
-                <Icon>
-                  <FaLocationDot />
-                </Icon>{" "}
-                Location
-              </Text>
-              <Separator />
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Update Data</DialogTitle>
+                        </DialogHeader>
 
-              <Box marginTop={2} display={"flex"} alignItems={"center"} gap={5}>
-                <Avatar.Root size="2xl">
-                  <Avatar.Fallback>
-                    {userData.barangay_name.slice(0, 2)}
-                  </Avatar.Fallback>
-                  <Avatar.Image src={userData.barangay_profile_picture} />
-                </Avatar.Root>
-                <Box>
-                  <Text fontSize={"2xl"} fontWeight={"bold"}>
-                    Barangay {userData.barangay_name}
+                        <Form method="PUT">
+                          <DialogBody
+                            display={"flex"}
+                            flexDir={"column"}
+                            gap={5}
+                          >
+                            <Input
+                              type="hidden"
+                              value={userData.id}
+                              name="id"
+                            />
+                            <Grid
+                              width={"full"}
+                              templateColumns="60% 40%"
+                              gap={2}
+                            >
+                              <GridItem>
+                                <Field
+                                  label="Barangay Captain"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    defaultValue={
+                                      userProfileData.barangay_captain
+                                    }
+                                    id="barangay_captain"
+                                    type="text"
+                                    placeholder="Enter New Barangay Captain"
+                                    name="barangay_captain"
+                                  />
+                                </Field>
+                              </GridItem>
+
+                              <GridItem>
+                                <Field
+                                  label="Contact Number"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    defaultValue={
+                                      userProfileData.barangay_captain_contact_number
+                                    }
+                                    id="contactnumber"
+                                    type="text"
+                                    placeholder="09XXXXXXXX"
+                                    name="barangay_captain_contact_number"
+                                  />
+                                </Field>
+                              </GridItem>
+                            </Grid>
+
+                            <Grid
+                              templateColumns="60% 40%"
+                              width={"full"}
+                              gap={2}
+                            >
+                              <GridItem>
+                                <Field
+                                  label="Barangay Secretary"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    defaultValue={
+                                      userProfileData.barangay_secretary
+                                    }
+                                    id="barangay_secretary"
+                                    type="text"
+                                    placeholder="Enter New Barangay Secretary"
+                                    name="barangay_secretary"
+                                  />
+                                </Field>
+                              </GridItem>
+
+                              <GridItem>
+                                <Field
+                                  label="Contact Number"
+                                  errorText="This field is required"
+                                >
+                                  <Input
+                                    defaultValue={
+                                      userProfileData.barangay_secretary_contact_number
+                                    }
+                                    id="contactnumber"
+                                    type="text"
+                                    placeholder="09XXXXXXXX"
+                                    name="barangay_secretary_contact_number"
+                                  />
+                                </Field>
+                              </GridItem>
+                            </Grid>
+
+                            <Field
+                              label="Change Password"
+                              errorText="This field is required"
+                            >
+                              <PasswordInput name="password" />
+                            </Field>
+                          </DialogBody>
+                          <DialogFooter>
+                            <DialogActionTrigger asChild>
+                              <Button variant="outline">Cancel</Button>
+                            </DialogActionTrigger>
+                            <Button
+                              type="submit"
+                              loading={navigation.state === "submitting"}
+                              colorPalette={"blue"}
+                              variant={"solid"}
+                            >
+                              Save
+                            </Button>
+                          </DialogFooter>
+                        </Form>
+                      </DialogContent>
+                    </DialogRoot>
+                  </Box>
+                </Box>
+
+                <Box display={"flex"} flexDir={"column"} gap={2}>
+                  <Text display={"flex"} alignItems={"center"} gap={1}>
+                    <Icon>
+                      <FaLocationDot />
+                    </Icon>{" "}
+                    Location
                   </Text>
-                  <Text fontSize={"md"}>Region: {userData.region_name}</Text>
-                  <Text fontSize={"md"}>City: {userData.city_name}</Text>
-                </Box>
-              </Box>
-            </Box>
+                  <Separator />
 
-            {/* officials */}
-
-            <Box display={"flex"} flexDir={"column"} gap={2}>
-              <Text display={"flex"} alignItems={"center"} gap={1}>
-                <Icon>
-                  <BsFillPeopleFill />
-                </Icon>{" "}
-                Officials
-              </Text>
-              <Separator />
-
-              <Box
-                marginTop={2}
-                display={"flex"}
-                alignItems={"center"}
-                gap={10}
-              >
-                {/* profile container */}
-                <Box
-                  display={"flex"}
-                  alignItems={"center"}
-                  gap={1}
-                  flexDirection={"column"}
-                >
                   <Box
-                    width={70}
-                    height={70}
-                    rounded={"md"}
-                    background={"gray.400"}
-                  ></Box>
-                  <Box
+                    marginTop={2}
                     display={"flex"}
-                    flexDir={"column"}
-                    gap={0}
                     alignItems={"center"}
+                    gap={5}
                   >
-                    <Text fontSize={"md"}>
-                      {userProfileData.barangay_captain}
-                    </Text>
-                    <Text fontSize={"sm"} fontStyle={"italic"}>
-                      Barangay Captain
-                    </Text>
-                  </Box>
-                </Box>
-                {/* profile container */}
-                <Box
-                  display={"flex"}
-                  alignItems={"center"}
-                  gap={1}
-                  flexDirection={"column"}
-                >
-                  <Box
-                    width={70}
-                    height={70}
-                    rounded={"md"}
-                    background={"gray.400"}
-                  ></Box>
-
-                  <Box
-                    display={"flex"}
-                    flexDir={"column"}
-                    gap={0}
-                    alignItems={"center"}
-                  >
-                    <Text fontSize={"md"}>
-                      {userProfileData.barangay_secretary}
-                    </Text>
-                    <Text fontSize={"sm"} fontStyle={"italic"}>
-                      Barangay Secretary
-                    </Text>
+                    <Avatar.Root size="2xl">
+                      <Avatar.Fallback>
+                        {userData.barangay_name.slice(0, 2)}
+                      </Avatar.Fallback>
+                      <Avatar.Image src={userData.barangay_profile_picture} />
+                    </Avatar.Root>
+                    <Box>
+                      <Text fontSize={"2xl"} fontWeight={"bold"}>
+                        Barangay {userData.barangay_name}
+                      </Text>
+                      <Text fontSize={"md"}>
+                        Region: {userData.region_name}
+                      </Text>
+                      <Text fontSize={"md"}>City: {userData.city_name}</Text>
+                    </Box>
                   </Box>
                 </Box>
 
-                <Separator orientation="vertical" height="24" />
-              </Box>
-            </Box>
+                <Box display={"flex"} flexDir={"column"} gap={2}>
+                  <Text display={"flex"} alignItems={"center"} gap={1}>
+                    <Icon>
+                      <BsFillPeopleFill />
+                    </Icon>{" "}
+                    Officials
+                  </Text>
+                  <Separator />
+
+                  <Box
+                    marginTop={2}
+                    display={"flex"}
+                    alignItems={"center"}
+                    gap={10}
+                  >
+                    {/* profile container */}
+                    <Box
+                      display={"flex"}
+                      alignItems={"center"}
+                      gap={1}
+                      flexDirection={"column"}
+                    >
+                      <Box
+                        width={70}
+                        height={70}
+                        rounded={"md"}
+                        background={"gray.400"}
+                      ></Box>
+                      <Box
+                        display={"flex"}
+                        flexDir={"column"}
+                        gap={0}
+                        alignItems={"center"}
+                      >
+                        <Text fontSize={"md"}>
+                          {userProfileData.barangay_captain}
+                        </Text>
+                        <Text fontSize={"sm"} fontStyle={"italic"}>
+                          Barangay Captain
+                        </Text>
+                      </Box>
+                    </Box>
+                    {/* profile container */}
+                    <Box
+                      display={"flex"}
+                      alignItems={"center"}
+                      gap={1}
+                      flexDirection={"column"}
+                    >
+                      <Box
+                        width={70}
+                        height={70}
+                        rounded={"md"}
+                        background={"gray.400"}
+                      ></Box>
+
+                      <Box
+                        display={"flex"}
+                        flexDir={"column"}
+                        gap={0}
+                        alignItems={"center"}
+                      >
+                        <Text fontSize={"md"}>
+                          {userProfileData.barangay_secretary}
+                        </Text>
+                        <Text fontSize={"sm"} fontStyle={"italic"}>
+                          Barangay Secretary
+                        </Text>
+                      </Box>
+                    </Box>
+
+                    <Separator orientation="vertical" height="24" />
+                  </Box>
+                </Box>
+              </>
+            )}
 
             {/* logout */}
 
