@@ -68,7 +68,8 @@ import {
   uploadComplainantPhoto,
   uploadRespondentPhoto,
 } from "@/backendapi/caseApi";
-import { FiDownload, FiUpload } from "react-icons/fi";
+import { FiUpload } from "react-icons/fi";
+import { IoDocumentText } from "react-icons/io5";
 import { UserPropType } from "@/pages/Dashboard";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -190,7 +191,7 @@ export const action: ActionFunction = async ({ request }) => {
 
     if (data.transactionType === "updateCaseDetails") {
       const updatedCaseDetails = await updateCase(data.id, data);
-      console.log("Update Case details data:", data);
+      console.log("Update Case details data:", updatedCaseDetails);
       return updatedCaseDetails;
     }
     if (data.transactionType === "caseFormUpload") {
@@ -321,6 +322,16 @@ const CaseDetails = () => {
           title: "File Uploaded",
           description:
             "Your file has been uploaded successfully and is now available.",
+          type: "success",
+        });
+      }
+
+      if (actionData.message === "Case updated successfully") {
+        setOpen(false);
+        toaster.create({
+          title: "Case Successfully Updated",
+          description:
+            "The case and associated file have been updated successfully.",
           type: "success",
         });
       }
@@ -789,9 +800,9 @@ const CaseDetails = () => {
                       </Tabs.Content>
                     </Tabs.Root>
 
-                    <DialogFooter>
+                    <DialogFooter className="w-full justify-end">
                       <DialogActionTrigger asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">Close</Button>
                       </DialogActionTrigger>
                       <Button
                         value={"updateCaseDetails"}
@@ -800,17 +811,13 @@ const CaseDetails = () => {
                         type="submit"
                         background={"blue.500"}
                       >
-                        Update
+                        Update Case Details
                       </Button>
                     </DialogFooter>
                     <DialogCloseTrigger />
                   </Form>
                 </DialogBody>
-                <DialogFooter>
-                  <DialogActionTrigger asChild>
-                    <Button variant="outline">Close</Button>
-                  </DialogActionTrigger>
-                </DialogFooter>
+
                 <DialogCloseTrigger />
               </DialogContent>
             </DialogRoot>
@@ -832,12 +839,12 @@ const CaseDetails = () => {
                   gap={2}
                 >
                   <FiUpload />
-                  Upload Forms
+                  Upload Documents
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Upload Forms</DialogTitle>
+                  <DialogTitle>Upload Documents</DialogTitle>
                 </DialogHeader>
                 <DialogBody>
                   <Box>
@@ -884,7 +891,7 @@ const CaseDetails = () => {
                             name="transactionType"
                             value={"caseFormUpload"}
                           >
-                            Upload Form
+                            Upload Documents
                           </Button>
                         </Box>
                       </Form>
@@ -914,8 +921,8 @@ const CaseDetails = () => {
                   justifyContent={"center"}
                   gap={2}
                 >
-                  <FiDownload />
-                  Download Forms
+                  <IoDocumentText />
+                  Documents
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -1018,7 +1025,7 @@ const CaseDetails = () => {
                 </DialogBody>
                 <DialogFooter>
                   <DialogActionTrigger asChild>
-                    <Button variant="outline">Cancel</Button>
+                    <Button variant="outline">Close</Button>
                   </DialogActionTrigger>
                 </DialogFooter>
                 <DialogCloseTrigger />
@@ -1093,7 +1100,7 @@ const CaseDetails = () => {
                       fontSize="sm"
                       cursor={"pointer"}
                     >
-                      More <IoIosArrowDown />
+                      More Information <IoIosArrowDown />
                     </Collapsible.Trigger>
                     <Collapsible.Content>
                       <Text>
@@ -1166,7 +1173,7 @@ const CaseDetails = () => {
                       fontSize="sm"
                       cursor={"pointer"}
                     >
-                      More <IoIosArrowDown />
+                      More Information <IoIosArrowDown />
                     </Collapsible.Trigger>
                     <Collapsible.Content>
                       <Text>
@@ -1213,11 +1220,13 @@ const CaseDetails = () => {
         </Box>
 
         <Box
-          padding={{ base: "2", md: "4" }}
+          background={"gray.100"}
+          padding={{ base: "2", md: "10" }}
           width={"full"}
           display={"flex"}
           flexDirection={"column"}
           gap={{ base: "3", md: "5" }}
+          borderRadius={"md"}
         >
           <Box
             display="flex"
@@ -1412,13 +1421,15 @@ const CaseDetails = () => {
           >
             Download Case
           </Button>
-          <Button
-            colorPalette="green"
-            variant="solid"
-            onClick={generateCertificationPDF}
-          >
-            Generate Certification
-          </Button>
+          {caseDetails.status === "failed" && (
+            <Button
+              colorPalette="red"
+              variant="solid"
+              onClick={generateCertificationPDF}
+            >
+              Generate certificate for transfer
+            </Button>
+          )}
         </Box>
 
         {/* Complainant Image Dialog */}

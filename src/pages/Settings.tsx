@@ -88,37 +88,39 @@ const Settings = () => {
           </Box>
 
           <Box paddingLeft={5} display={"flex"} flexDir={"column"} gap={6}>
-            <Box>
-              <Text fontSize={"2xl"} fontWeight={"bold"}>
-                Settings
-              </Text>
-              <Text fontSize={"sm"}>Update your data</Text>
-            </Box>
             {userData.userType == "admin" && (
-              <Form method="PUT" className="w-[600px]">
-                <Box display={"flex"} flexDir={"column"} gap={5}>
-                  <Input type="hidden" value={userData.id} name="id" />
-
-                  <Field
-                    label="Change Password"
-                    errorText="This field is required"
-                  >
-                    <PasswordInput name="password" />
-                  </Field>
+              <>
+                <Box>
+                  <Text fontSize={"2xl"} fontWeight={"bold"}>
+                    Settings
+                  </Text>
+                  <Text fontSize={"sm"}>Update your data</Text>
                 </Box>
-                <Box display={"flex"} gap={2} marginTop={5}>
-                  <Button variant="outline">Cancel</Button>
+                <Form method="PUT" className="w-[600px]">
+                  <Box display={"flex"} flexDir={"column"} gap={5}>
+                    <Input type="hidden" value={userData.id} name="id" />
 
-                  <Button
-                    type="submit"
-                    loading={navigation.state === "submitting"}
-                    colorPalette={"blue"}
-                    variant={"solid"}
-                  >
-                    Save
-                  </Button>
-                </Box>
-              </Form>
+                    <Field
+                      label="Change Password"
+                      errorText="This field is required"
+                    >
+                      <PasswordInput name="password" />
+                    </Field>
+                  </Box>
+                  <Box display={"flex"} gap={2} marginTop={5}>
+                    <Button variant="outline">Cancel</Button>
+
+                    <Button
+                      type="submit"
+                      loading={navigation.state === "submitting"}
+                      colorPalette={"blue"}
+                      variant={"solid"}
+                    >
+                      Save
+                    </Button>
+                  </Box>
+                </Form>
+              </>
             )}
             {userData.userType == "user" && (
               <>

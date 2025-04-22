@@ -55,16 +55,20 @@ const Dashboard = () => {
           <Box display={"flex"} alignItems={"center"} gap={3}>
             <Avatar.Root>
               <Avatar.Fallback>
-                {userData.barangay_name.slice(0, 2)}
+                {userData.userType == "admin"
+                  ? "AD"
+                  : userData.barangay_name.slice(0, 2)}
               </Avatar.Fallback>
               <Avatar.Image src={userData.barangay_profile_picture} />
             </Avatar.Root>
             <Box>
               <Text fontWeight={"bold"} color={"white"}>
-                {userData.barangay_name}
+                {userData.userType == "admin"
+                  ? "Blotter System"
+                  : userData.barangay_name}
               </Text>
               <Text fontSize={"sm"} color={"white"}>
-                {userData.city_name}
+                {userData.userType == "admin" ? "admin" : userData.city_name}
               </Text>
             </Box>
           </Box>
