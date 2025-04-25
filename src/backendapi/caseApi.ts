@@ -71,12 +71,13 @@ export async function updateCase(id: any, updatedData: any) {
 }
 
 // attempt1
-export async function attempt1(id: any) {
+export async function attempt1(id: any, data: any) {
   const response = await fetch(`${baseAPI}/cases/attempt1/${id}`, {
     method: "PUT", // Use "PUT" or "PATCH" for updating
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify(data), // Send the updated data
   });
 
   const result = await response.json();
@@ -86,12 +87,13 @@ export async function attempt1(id: any) {
 }
 
 // attempt2
-export async function attempt2(id: any) {
+export async function attempt2(id: any, data: any) {
   const response = await fetch(`${baseAPI}/cases/attempt2/${id}`, {
     method: "PUT", // Use "PUT" or "PATCH" for updating
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify(data), // Send the updated data
   });
 
   const result = await response.json();
@@ -101,12 +103,13 @@ export async function attempt2(id: any) {
 }
 
 // attempt2
-export async function attempt3(id: any) {
+export async function attempt3(id: any, data: any) {
   const response = await fetch(`${baseAPI}/cases/attempt3/${id}`, {
     method: "PUT", // Use "PUT" or "PATCH" for updating
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify(data), // Send the updated data
   });
 
   const result = await response.json();

@@ -491,65 +491,245 @@ const CasesCardContainer = ({
                           >
                             <Text>Send notification</Text>
                             <Box display={"flex"} alignItems={"center"} gap={5}>
-                              <Form method="put">
-                                <Input value={_id} name="id" type="hidden" />
-                                <IconButton
-                                  disabled={userType === "admin"}
-                                  loading={
-                                    navigation.state === "submitting" &&
-                                    buttonClicked == "attempt1"
-                                  }
-                                  type={attempt1 ? "button" : "submit"}
-                                  name="type"
-                                  value={"attempt1"}
-                                  variant={attempt1 ? "solid" : "subtle"}
-                                  colorPalette={attempt1 ? "green" : ""}
-                                  size={"lg"}
-                                  onClick={() => setButtonClicked("attempt1")}
-                                >
-                                  {attempt1 ? <FaCheck /> : <TbMessage2Share />}
-                                </IconButton>
-                              </Form>
+                              <DialogRoot>
+                                <DialogTrigger asChild>
+                                  <IconButton
+                                    disabled={userType === "admin"}
+                                    type={attempt1 ? "button" : "submit"}
+                                    variant={attempt1 ? "solid" : "subtle"}
+                                    colorPalette={attempt1 ? "green" : ""}
+                                    size={"lg"}
+                                    onClick={() => setButtonClicked("attempt1")}
+                                  >
+                                    {attempt1 ? (
+                                      <FaCheck />
+                                    ) : (
+                                      <TbMessage2Share />
+                                    )}
+                                  </IconButton>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <Form method="put">
+                                    <Input
+                                      value={_id}
+                                      name="id"
+                                      type="hidden"
+                                    />
+                                    <DialogHeader>
+                                      <DialogTitle>
+                                        Schedule Notification
+                                      </DialogTitle>
+                                      <Text>
+                                        Set the date and time for sending the
+                                        notification
+                                      </Text>
+                                    </DialogHeader>
+                                    <DialogBody>
+                                      <Box
+                                        display="flex"
+                                        flexDirection="column"
+                                        gap={4}
+                                      >
+                                        <Box>
+                                          <Text mb={2}>Hearing Date</Text>
+                                          <Input
+                                            type="date"
+                                            name="hearing_date"
+                                            required
+                                          />
+                                        </Box>
+                                        <Box>
+                                          <Text mb={2}>Hearing Time</Text>
+                                          <Input
+                                            type="time"
+                                            name="hearing_time"
+                                            required
+                                          />
+                                        </Box>
+                                      </Box>
+                                    </DialogBody>
+                                    <DialogFooter>
+                                      <DialogActionTrigger asChild>
+                                        <Button variant="outline">
+                                          Cancel
+                                        </Button>
+                                      </DialogActionTrigger>
+                                      <Button
+                                        loading={
+                                          navigation.state === "submitting"
+                                        }
+                                        type="submit"
+                                        background={"blue.500"}
+                                        name="type"
+                                        value={"attempt1"}
+                                      >
+                                        Send Schedule
+                                      </Button>
+                                    </DialogFooter>
+                                    <DialogCloseTrigger />
+                                  </Form>
+                                </DialogContent>
+                              </DialogRoot>
 
-                              <Form method="put">
-                                <Input value={_id} name="id" type="hidden" />
-                                <IconButton
-                                  disabled={userType === "admin" || !attempt1}
-                                  loading={
-                                    navigation.state === "submitting" &&
-                                    buttonClicked == "attempt2"
-                                  }
-                                  type={attempt2 ? "button" : "submit"}
-                                  name="type"
-                                  value={"attempt2"}
-                                  variant={attempt2 ? "solid" : "subtle"}
-                                  colorPalette={attempt2 ? "green" : ""}
-                                  size={"lg"}
-                                  onClick={() => setButtonClicked("attempt2")}
-                                >
-                                  {attempt2 ? <FaCheck /> : <TbMessage2Share />}
-                                </IconButton>
-                              </Form>
+                              <DialogRoot>
+                                <DialogTrigger asChild>
+                                  <IconButton
+                                    disabled={userType === "admin" || !attempt1}
+                                    type={attempt2 ? "button" : "submit"}
+                                    variant={attempt2 ? "solid" : "subtle"}
+                                    colorPalette={attempt2 ? "green" : ""}
+                                    size={"lg"}
+                                    onClick={() => setButtonClicked("attempt2")}
+                                  >
+                                    {attempt2 ? (
+                                      <FaCheck />
+                                    ) : (
+                                      <TbMessage2Share />
+                                    )}
+                                  </IconButton>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <Form method="put">
+                                    <Input
+                                      value={_id}
+                                      name="id"
+                                      type="hidden"
+                                    />
+                                    <DialogHeader>
+                                      <DialogTitle>
+                                        Schedule Notification
+                                      </DialogTitle>
+                                      <Text>
+                                        Set the date and time for sending the
+                                        notification
+                                      </Text>
+                                    </DialogHeader>
+                                    <DialogBody>
+                                      <Box
+                                        display="flex"
+                                        flexDirection="column"
+                                        gap={4}
+                                      >
+                                        <Box>
+                                          <Text mb={2}>Hearing Date</Text>
+                                          <Input
+                                            type="date"
+                                            name="hearing_date"
+                                            required
+                                          />
+                                        </Box>
+                                        <Box>
+                                          <Text mb={2}>Hearing Time</Text>
+                                          <Input
+                                            type="time"
+                                            name="hearing_time"
+                                            required
+                                          />
+                                        </Box>
+                                      </Box>
+                                    </DialogBody>
+                                    <DialogFooter>
+                                      <DialogActionTrigger asChild>
+                                        <Button variant="outline">
+                                          Cancel
+                                        </Button>
+                                      </DialogActionTrigger>
+                                      <Button
+                                        loading={
+                                          navigation.state === "submitting"
+                                        }
+                                        type="submit"
+                                        background={"blue.500"}
+                                        name="type"
+                                        value={"attempt2"}
+                                      >
+                                        Send Schedule
+                                      </Button>
+                                    </DialogFooter>
+                                    <DialogCloseTrigger />
+                                  </Form>
+                                </DialogContent>
+                              </DialogRoot>
 
-                              <Form method="put">
-                                <Input value={_id} name="id" type="hidden" />
-                                <IconButton
-                                  disabled={userType === "admin" || !attempt2}
-                                  loading={
-                                    navigation.state === "submitting" &&
-                                    buttonClicked == "attempt3"
-                                  }
-                                  type={attempt3 ? "button" : "submit"}
-                                  name="type"
-                                  value={"attempt3"}
-                                  variant={attempt3 ? "solid" : "subtle"}
-                                  colorPalette={attempt3 ? "green" : ""}
-                                  size={"lg"}
-                                  onClick={() => setButtonClicked("attempt3")}
-                                >
-                                  {attempt3 ? <FaCheck /> : <TbMessage2Share />}
-                                </IconButton>
-                              </Form>
+                              <DialogRoot>
+                                <DialogTrigger asChild>
+                                  <IconButton
+                                    disabled={userType === "admin" || !attempt2}
+                                    type={attempt3 ? "button" : "submit"}
+                                    variant={attempt3 ? "solid" : "subtle"}
+                                    colorPalette={attempt3 ? "green" : ""}
+                                    size={"lg"}
+                                    onClick={() => setButtonClicked("attempt3")}
+                                  >
+                                    {attempt3 ? (
+                                      <FaCheck />
+                                    ) : (
+                                      <TbMessage2Share />
+                                    )}
+                                  </IconButton>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <Form method="put">
+                                    <Input
+                                      value={_id}
+                                      name="id"
+                                      type="hidden"
+                                    />
+                                    <DialogHeader>
+                                      <DialogTitle>
+                                        Schedule Notification
+                                      </DialogTitle>
+                                      <Text>
+                                        Set the date and time for sending the
+                                        notification
+                                      </Text>
+                                    </DialogHeader>
+                                    <DialogBody>
+                                      <Box
+                                        display="flex"
+                                        flexDirection="column"
+                                        gap={4}
+                                      >
+                                        <Box>
+                                          <Text mb={2}>Hearing Date</Text>
+                                          <Input
+                                            type="date"
+                                            name="hearing_date"
+                                            required
+                                          />
+                                        </Box>
+                                        <Box>
+                                          <Text mb={2}>Hearing Time</Text>
+                                          <Input
+                                            type="time"
+                                            name="hearing_time"
+                                            required
+                                          />
+                                        </Box>
+                                      </Box>
+                                    </DialogBody>
+                                    <DialogFooter>
+                                      <DialogActionTrigger asChild>
+                                        <Button variant="outline">
+                                          Cancel
+                                        </Button>
+                                      </DialogActionTrigger>
+                                      <Button
+                                        loading={
+                                          navigation.state === "submitting"
+                                        }
+                                        type="submit"
+                                        background={"blue.500"}
+                                        name="type"
+                                        value={"attempt3"}
+                                      >
+                                        Send Schedule
+                                      </Button>
+                                    </DialogFooter>
+                                    <DialogCloseTrigger />
+                                  </Form>
+                                </DialogContent>
+                              </DialogRoot>
                             </Box>
                           </Box>
 

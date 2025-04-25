@@ -12,9 +12,16 @@ import {
   IconButton,
   Icon,
   Textarea,
+  createListCollection,
   Tabs,
 } from "@chakra-ui/react";
 
+const dataArray = createListCollection({
+  items: [
+    { label: "Mediation", value: "Mediation" },
+    { label: "Conciliation", value: "Conciliation" },
+  ],
+});
 import { Field } from "@/components/ui/field";
 import defaultUser from "@/assets/default-user.jpg";
 
@@ -32,6 +39,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Select } from "@chakra-ui/react";
 import { FaFaceSadCry } from "react-icons/fa6";
 import { useState, useEffect } from "react";
 import { RiDeleteBin2Fill } from "react-icons/ri";
@@ -783,6 +791,35 @@ const CaseDetails = () => {
                               defaultValue={caseDetails.status_of_agreement}
                             />
                           </Field>
+
+                          <Select.Root
+                            name="action_taken"
+                            collection={dataArray}
+                          >
+                            <Select.HiddenSelect />
+                            <Select.Label>Select Action Taken</Select.Label>
+
+                            <Select.Control>
+                              <Select.Trigger>
+                                <Select.ValueText placeholder="Select Action" />
+                              </Select.Trigger>
+                              <Select.IndicatorGroup>
+                                <Select.Indicator />
+                                <Select.ClearTrigger />
+                              </Select.IndicatorGroup>
+                            </Select.Control>
+
+                            <Select.Positioner>
+                              <Select.Content>
+                                {dataArray.items.map((val) => (
+                                  <Select.Item item={val} key={val.value}>
+                                    {val.label}
+                                    <Select.ItemIndicator />
+                                  </Select.Item>
+                                ))}
+                              </Select.Content>
+                            </Select.Positioner>
+                          </Select.Root>
 
                           <Field
                             label="Remarks"

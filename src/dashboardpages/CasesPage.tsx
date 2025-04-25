@@ -75,24 +75,19 @@ export const action: ActionFunction = async ({ request }) => {
   }
 
   if (data.type === "attempt1") {
-    const attempt1Data = await attempt1(data?.id);
-
-    return attempt1Data;
-  }
-  if (data.type === "attempt1") {
-    const attempt1Data = await attempt1(data?.id);
+    const attempt1Data = await attempt1(data?.id, data);
 
     return attempt1Data;
   }
 
   if (data.type === "attempt2") {
-    const attempt1Data = await attempt2(data?.id);
+    const attempt1Data = await attempt2(data?.id, data);
 
     return attempt1Data;
   }
 
   if (data.type === "attempt3") {
-    const attempt1Data = await attempt3(data?.id);
+    const attempt1Data = await attempt3(data?.id, data);
 
     return attempt1Data;
   }
