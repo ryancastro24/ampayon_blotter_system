@@ -20,6 +20,8 @@ const dataArray = createListCollection({
   items: [
     { label: "Mediation", value: "Mediation" },
     { label: "Conciliation", value: "Conciliation" },
+    { label: "Arbitration", value: "Arbitration" },
+    { label: "N/A", value: "N/A" },
   ],
 });
 import { Field } from "@/components/ui/field";

@@ -1,7 +1,6 @@
 import { Field } from "@/components/ui/field";
 import { Button, Card, Input, Text } from "@chakra-ui/react";
 import logo from "../assets/blotter_system_logo.png";
-
 import { PasswordInput } from "@/components/ui/password-input";
 import {
   ActionFunction,
@@ -38,6 +37,7 @@ const LoginPage = () => {
     username: "",
     password: "",
   });
+
   return (
     <div className="w-full h-screen flex items-center justify-center">
       <Card.Root width={350} padding={5}>
