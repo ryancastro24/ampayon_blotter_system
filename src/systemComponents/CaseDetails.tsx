@@ -113,6 +113,9 @@ interface CaseDetailsType {
   point_of_agreement: string;
   status_of_agreement: string;
   remarks: string;
+  case_id_number: string;
+  barangay_secretary: string;
+  barangay_captain: string;
 }
 
 interface LoaderDataType {
@@ -562,32 +565,38 @@ const CaseDetails = () => {
 
     // Parties involved
     pdf.setFontSize(11);
-    pdf.text(`${caseDetails.complainant_name.toUpperCase()}`, 30, 70);
-    pdf.text("and", 30, 75);
-    pdf.text(`${caseDetails.respondent_name.toUpperCase()}`, 30, 80);
-    pdf.text("Respondents", 50, 85);
+    pdf.setFont("courier", "bold");
+    pdf.text(`${caseDetails.complainant_name.toUpperCase()}`, 20, 70);
+    pdf.setFont("courier", "normal");
+    pdf.text("Complainant", 20, 75);
+    pdf.text("-against-", 20, 85);
+
+    pdf.setFont("courier", "bold");
+    pdf.text(`${caseDetails.respondent_name.toUpperCase()}`, 20, 95);
+    pdf.setFont("courier", "normal");
+    pdf.text("Respondent", 20, 100);
 
     // Case number on the right
-    pdf.text(`Barangay Case No. ${caseDetails._id}`, 160, 70);
-    pdf.text("For: Slander, Threat and", 160, 75);
-    pdf.text("Physical Injuries", 160, 80);
+    pdf.text(`Barangay Case No. ${caseDetails.case_id_number}`, 125, 70);
+    pdf.text(`For: ${caseDetails.case_type}`, 125, 75);
+    pdf.text("Physical Injuries", 125, 80);
 
     // Main title
     pdf.setFontSize(14);
     pdf.setFont("courier", "bold");
-    pdf.text("CERTIFICATION TO FILE AN ACTION", 105, 100, { align: "center" });
+    pdf.text("CERTIFICATION TO FILE AN ACTION", 105, 110, { align: "center" });
 
     // Main content
     pdf.setFont("courier", "normal");
     pdf.setFontSize(11);
-    pdf.text("This is to certify that:", 30, 115);
+    pdf.text("This is to certify that:", 30, 120);
 
     // Bullet points
     const bulletPoints = [
       "1. There was a personal confrontation between the parties before the Punong Barangay/Pangkat ng Tagapagkasundo;",
       "2. An amicable settlement/agreement was not reached;",
-      "3. The settlement/agreement has been repudiated in a statement sworn to before the Punong Barangay by reason of violence, intimidation, fraud, or falsification; and",
-      "4. Therefore, the corresponding complaint for the dispute may now be filed in court/government office.",
+      `3. The settlement/agreement has been repudiated in a statement sworn to before the Punong Barangay by reason of ${caseDetails.remarks}`,
+      `4. Therefore, the corresponding complaint for the dispute may now be filed in court/government office. This April 24, 2025`,
     ];
 
     let yPosition = 130;
@@ -597,27 +606,25 @@ const CaseDetails = () => {
       yPosition += 10 * splitText.length;
     });
 
-    // Date
-    const currentDate = new Date().toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
-    pdf.text(`This ${currentDate}`, 30, yPosition + 10);
-
     // Secretary signature line
     pdf.setFontSize(11);
-    pdf.text("Ms. Julie B. Roberts", 105, yPosition + 30, { align: "center" });
-    pdf.text("Lupon Secretary", 105, yPosition + 35, { align: "center" });
+    pdf.setFont("courier", "bold");
+    pdf.text(caseDetails.barangay_secretary, 140, yPosition + 30);
+    pdf.setFont("courier", "normal");
+    pdf.text("Lupon Secretary", 140, yPosition + 35);
 
     // Attested section
     pdf.text("Attested:", 30, yPosition + 45);
 
     // Chairman signature line
-    pdf.text("Mr. Brando S. Topain", 105, yPosition + 60, { align: "center" });
-    pdf.text("Lupon Chairman", 105, yPosition + 65, { align: "center" });
+    pdf.setFont("courier", "bold");
+    pdf.text(caseDetails.barangay_captain, 20, yPosition + 60);
+    pdf.setFont("courier", "normal");
+    pdf.text("Lupon Chairman", 20, yPosition + 65);
 
-    pdf.save(`certification_${caseDetails._id}.pdf`);
+    pdf.save(
+      `${caseDetails.complainant_name}_VS_${caseDetails.respondent_name}_CTFC.pdf`
+    );
   };
 
   const handleImageDoubleClick = (imageUrl: string) => {

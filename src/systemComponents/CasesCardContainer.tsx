@@ -494,7 +494,7 @@ const CasesCardContainer = ({
                               <DialogRoot>
                                 <DialogTrigger asChild>
                                   <IconButton
-                                    disabled={userType === "admin"}
+                                    disabled={userType === "admin" || attempt1}
                                     type={attempt1 ? "button" : "submit"}
                                     variant={attempt1 ? "solid" : "subtle"}
                                     colorPalette={attempt1 ? "green" : ""}
@@ -574,7 +574,11 @@ const CasesCardContainer = ({
                               <DialogRoot>
                                 <DialogTrigger asChild>
                                   <IconButton
-                                    disabled={userType === "admin" || !attempt1}
+                                    disabled={
+                                      userType === "admin" ||
+                                      !attempt1 ||
+                                      attempt2
+                                    }
                                     type={attempt2 ? "button" : "submit"}
                                     variant={attempt2 ? "solid" : "subtle"}
                                     colorPalette={attempt2 ? "green" : ""}
@@ -654,7 +658,11 @@ const CasesCardContainer = ({
                               <DialogRoot>
                                 <DialogTrigger asChild>
                                   <IconButton
-                                    disabled={userType === "admin" || !attempt2}
+                                    disabled={
+                                      userType === "admin" ||
+                                      !attempt2 ||
+                                      attempt3
+                                    }
                                     type={attempt3 ? "button" : "submit"}
                                     variant={attempt3 ? "solid" : "subtle"}
                                     colorPalette={attempt3 ? "green" : ""}
