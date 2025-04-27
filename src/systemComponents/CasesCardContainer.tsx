@@ -46,6 +46,7 @@ import {
 import { MenuContent, MenuRoot, MenuTrigger } from "@/components/ui/menu";
 type CaseType = {
   case_number: number;
+  case_id_number: string;
   status: string;
   attempt1: boolean;
   attempt2: boolean;
@@ -87,6 +88,7 @@ const CasesCardContainer = ({
   complainant_address,
   respondent_address,
   case_type,
+  case_id_number,
   _id,
 }: CaseType) => {
   const navigation = useNavigation();
@@ -140,10 +142,10 @@ const CasesCardContainer = ({
             >
               <Text fontSize={"sm"} display={"flex"} alignItems={"center"}>
                 <Text fontSize={"sm"} color={"gray"} fontStyle={"italic"}>
-                  Case No.{" "}
+                  Case No:{" "}
                 </Text>
                 <Text fontSize={"sm"} color={"gray"}>
-                  {case_number}
+                  {case_id_number}
                 </Text>
               </Text>
 

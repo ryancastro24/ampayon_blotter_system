@@ -16,14 +16,6 @@ import {
   Tabs,
 } from "@chakra-ui/react";
 
-const dataArray = createListCollection({
-  items: [
-    { label: "Mediation", value: "Mediation" },
-    { label: "Conciliation", value: "Conciliation" },
-    { label: "Arbitration", value: "Arbitration" },
-    { label: "N/A", value: "N/A" },
-  ],
-});
 import { Field } from "@/components/ui/field";
 import defaultUser from "@/assets/default-user.jpg";
 
@@ -88,7 +80,26 @@ interface ActionDataType {
   message?: string;
   type?: string;
 }
+const dataArray = createListCollection({
+  items: [
+    { label: "Mediation", value: "Mediation" },
+    { label: "Conciliation", value: "Conciliation" },
+    { label: "Arbitration", value: "Arbitration" },
+    { label: "N/A", value: "N/A" },
+  ],
+});
 
+const failedDataArray = createListCollection({
+  items: [
+    { label: "Dismissed", value: "Dismissed" },
+    { label: "Repudiated", value: "Repudiated" },
+    {
+      label: "Certificate to file in action",
+      value: "Certificate to file in action",
+    },
+    { label: "Withdrawn", value: "Withdrawn" },
+  ],
+});
 interface CaseDetailsType {
   _id: string;
   complainant_name: string;
@@ -803,7 +814,11 @@ const CaseDetails = () => {
 
                           <Select.Root
                             name="action_taken"
-                            collection={dataArray}
+                            collection={
+                              caseDetails.status === "failed"
+                                ? failedDataArray
+                                : dataArray
+                            }
                           >
                             <Select.HiddenSelect />
                             <Select.Label>Select Action Taken</Select.Label>
@@ -820,12 +835,19 @@ const CaseDetails = () => {
 
                             <Select.Positioner>
                               <Select.Content>
-                                {dataArray.items.map((val) => (
-                                  <Select.Item item={val} key={val.value}>
-                                    {val.label}
-                                    <Select.ItemIndicator />
-                                  </Select.Item>
-                                ))}
+                                {caseDetails.status === "failed"
+                                  ? failedDataArray.items.map((val) => (
+                                      <Select.Item item={val} key={val.value}>
+                                        {val.label}
+                                        <Select.ItemIndicator />
+                                      </Select.Item>
+                                    ))
+                                  : dataArray.items.map((val) => (
+                                      <Select.Item item={val} key={val.value}>
+                                        {val.label}
+                                        <Select.ItemIndicator />
+                                      </Select.Item>
+                                    ))}
                               </Select.Content>
                             </Select.Positioner>
                           </Select.Root>

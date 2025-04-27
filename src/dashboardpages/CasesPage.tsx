@@ -136,7 +136,8 @@ const CasesPage = () => {
   const filteredCases = casesData.filter(
     (c: any) =>
       c.complainant_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.respondent_name.toLowerCase().includes(searchTerm.toLowerCase())
+      c.respondent_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.case_id_number.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredCases.length / casesPerPage);

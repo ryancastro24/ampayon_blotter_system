@@ -22,7 +22,7 @@ import {
   attempt2,
   attempt3,
 } from "@/backendapi/caseApi";
-
+import { getCases } from "@/backendapi/caseApi";
 export const action: ActionFunction = async ({ request }) => {
   console.log(request.method);
   console.log(request);
@@ -80,8 +80,8 @@ export const loader = async () => {
   const userData: UserPropType = JSON.parse(user as any);
 
   const casesData = await getSettleAndFailedCases(userData?.id);
-
-  return { userData, casesData };
+  const allcasesData = await getCases(userData?.id);
+  return { userData, casesData, allcasesData };
 };
 
 import CasesCardContainer from "@/systemComponents/CasesCardContainer";
@@ -91,7 +91,7 @@ const ArchivesPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { casesData, userData } = useLoaderData() as any;
+  const { casesData, userData, allcasesData } = useLoaderData() as any;
 
   console.log(casesData);
 
@@ -99,7 +99,8 @@ const ArchivesPage = () => {
   const filteredCases = casesData.filter(
     (c: any) =>
       c.complainant_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.respondent_name.toLowerCase().includes(searchTerm.toLowerCase())
+      c.respondent_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.case_id_number.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredCases.length / casesPerPage);
@@ -710,10 +711,27 @@ const ArchivesPage = () => {
 
     // Sub-headers with their corresponding numbers
     const natureHeaders = [
-      { text: "CRIMINAL", number: 12 },
-      { text: "CIVIL", number: 8 },
-      { text: "OTHERS", number: 5 },
-      { text: "TOTAL", number: 25 },
+      {
+        text: "CRIMINAL",
+        number: casesData.filter(
+          (caseItem: any) => caseItem.nature_of_the_case === "Criminal"
+        ).length,
+      },
+      {
+        text: "CIVIL",
+        number: casesData.filter(
+          (caseItem: any) => caseItem.nature_of_the_case === "Civil"
+        ).length,
+      },
+      {
+        text: "OTHERS",
+        number: casesData.filter(
+          (caseItem: any) =>
+            caseItem.nature_of_the_case !== "Criminal" &&
+            caseItem.nature_of_the_case !== "Civil"
+        ).length,
+      },
+      { text: "TOTAL", number: casesData.length },
     ];
     let subX = startX;
     const natureColWidth = colWidths.natureOfCases / 4;
@@ -743,10 +761,30 @@ const ArchivesPage = () => {
     });
 
     const settledHeaders = [
-      { text: "MEDIATION", number: 10 },
-      { text: "CONCILIATION", number: 7 },
-      { text: "ARBITRATION", number: 3 },
-      { text: "TOTAL", number: 20 },
+      {
+        text: "MEDIATION",
+        number: casesData.filter(
+          (caseItem: any) => caseItem.action_taken === "Mediation"
+        ).length,
+      },
+      {
+        text: "CONCILIATION",
+        number: casesData.filter(
+          (caseItem: any) => caseItem.action_taken === "Conciliation"
+        ).length,
+      },
+      {
+        text: "ARBITRATION",
+        number: casesData.filter(
+          (caseItem: any) => caseItem.action_taken === "Arbitration"
+        ).length,
+      },
+      {
+        text: "TOTAL",
+        number: casesData.filter(
+          (caseItem: any) => caseItem.status === "settled"
+        ).length,
+      },
     ];
     let currentSettledX = settledX;
     const settledColWidth = colWidths.settled / 4;
@@ -781,12 +819,38 @@ const ArchivesPage = () => {
     });
 
     const notSettledHeaders = [
-      { text: "PENDING", number: 15 },
-      { text: "DISMISSED", number: 8 },
-      { text: "REPUDIATED", number: 5 },
-      { text: "CERTIFICATE TO FILE IN COURT", number: 3 },
-      { text: "WITHDRAWN", number: 4 },
-      { text: "TOTAL", number: 35 },
+      { text: "PENDING", number: allcasesData.length },
+      {
+        text: "DISMISSED",
+        number: casesData.filter(
+          (caseItem: any) => caseItem.action_taken === "Dismissed"
+        ).length,
+      },
+      {
+        text: "REPUDIATED",
+        number: casesData.filter(
+          (caseItem: any) => caseItem.action_taken === "Repudiated"
+        ).length,
+      },
+      {
+        text: "CERTIFICATE TO FILE IN COURT",
+        number: casesData.filter(
+          (caseItem: any) =>
+            caseItem.action_taken === "Certificate to file in action"
+        ).length,
+      },
+      {
+        text: "WITHDRAWN",
+        number: casesData.filter(
+          (caseItem: any) => caseItem.action_taken === "Withdrawn"
+        ).length,
+      },
+      {
+        text: "TOTAL",
+        number: casesData.filter(
+          (caseItem: any) => caseItem.status === "failed"
+        ).length,
+      },
     ];
     let currentNotSettledX = notSettledX;
     const notSettledColWidth = colWidths.notSettled / 6;
@@ -836,6 +900,10 @@ const ArchivesPage = () => {
         align: "center",
       }
     );
+    // Add number for outside jurisdiction
+    pdf.text("0", outsideX + colWidths.outside / 2, yPos + tableHeight - 5, {
+      align: "center",
+    });
 
     const totalX = outsideX + colWidths.outside;
     const totalText = pdf.splitTextToSize(
@@ -846,6 +914,15 @@ const ArchivesPage = () => {
       totalText,
       totalX + colWidths.totalCases / 2,
       yPos + headerHeight + 3,
+      {
+        align: "center",
+      }
+    );
+    // Add total number of cases
+    pdf.text(
+      (casesData.length + allcasesData.length).toString(),
+      totalX + colWidths.totalCases / 2,
+      yPos + tableHeight - 5,
       {
         align: "center",
       }
