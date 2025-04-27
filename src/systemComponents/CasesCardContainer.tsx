@@ -72,7 +72,6 @@ type CaseType = {
 
 import { useNavigation, useNavigate } from "react-router-dom";
 const CasesCardContainer = ({
-  case_number,
   userType,
   status,
   complainant_name,
