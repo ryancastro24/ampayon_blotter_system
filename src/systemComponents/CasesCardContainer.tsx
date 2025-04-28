@@ -140,10 +140,10 @@ const CasesCardContainer = ({
               gap={2}
             >
               <Text fontSize={"sm"} display={"flex"} alignItems={"center"}>
-                <Text fontSize={"sm"} color={"gray"} fontStyle={"italic"}>
+                <Text fontSize={"xs"} color={"gray"} fontStyle={"italic"}>
                   Case No:{" "}
                 </Text>
-                <Text fontSize={"sm"} color={"gray"}>
+                <Text fontSize={"xs"} color={"gray"}>
                   {case_id_number}
                 </Text>
               </Text>
@@ -840,7 +840,7 @@ const CasesCardContainer = ({
 
           <Box className="mt-5 flex flex-col gap-2">
             <h2 className="font-display">
-              <strong className="italic">Case: </strong>
+              <strong className="italic">Case Type: </strong>
               {case_type}
             </h2>
 

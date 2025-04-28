@@ -11,6 +11,8 @@ import {
   GridItem,
 } from "@chakra-ui/react";
 
+import defaulUserImage from "@/assets/default-user1.jpg";
+
 import { PasswordInput } from "@/components/ui/password-input";
 import { Field } from "@/components/ui/field";
 import { IoChevronBackCircle } from "react-icons/io5";
@@ -333,7 +335,10 @@ const Settings = () => {
                         width={70}
                         height={70}
                         rounded={"md"}
-                        background={"gray.400"}
+                        backgroundImage={`url(${defaulUserImage})`}
+                        backgroundSize="cover"
+                        backgroundPosition="center"
+                        backgroundRepeat="no-repeat"
                       ></Box>
                       <Box
                         display={"flex"}
@@ -360,7 +365,10 @@ const Settings = () => {
                         width={70}
                         height={70}
                         rounded={"md"}
-                        background={"gray.400"}
+                        backgroundImage={`url(${defaulUserImage})`}
+                        backgroundSize="cover"
+                        backgroundPosition="center"
+                        backgroundRepeat="no-repeat"
                       ></Box>
 
                       <Box

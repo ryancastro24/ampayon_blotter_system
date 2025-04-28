@@ -847,9 +847,9 @@ const ArchivesPage = () => {
       },
       {
         text: "TOTAL",
-        number: casesData.filter(
-          (caseItem: any) => caseItem.status === "failed"
-        ).length,
+        number:
+          casesData.filter((caseItem: any) => caseItem.status === "failed")
+            .length + allcasesData.length,
       },
     ];
     let currentNotSettledX = notSettledX;
