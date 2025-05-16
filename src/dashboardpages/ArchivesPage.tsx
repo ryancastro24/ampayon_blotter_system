@@ -2,7 +2,15 @@ import { useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useLoaderData } from "react-router-dom";
 import { IoFolderOpen } from "react-icons/io5";
-import { Input, Box, IconButton, Button } from "@chakra-ui/react";
+import {
+  Input,
+  Box,
+  IconButton,
+  Button,
+  Portal,
+  Select,
+  createListCollection,
+} from "@chakra-ui/react";
 import { LuDownload } from "react-icons/lu";
 import { getSettleAndFailedCases } from "@/backendapi/caseApi";
 import { ClientOnly } from "@chakra-ui/react";
@@ -86,23 +94,40 @@ export const loader = async () => {
 
 import CasesCardContainer from "@/systemComponents/CasesCardContainer";
 
+const categories = createListCollection({
+  items: [
+    { label: "Settled", value: "settled" },
+    { label: "Failed", value: "failed" },
+  ],
+});
+
 const ArchivesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("settled");
+  const [selectedDate, setSelectedDate] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
 
   const { casesData, userData, allcasesData } = useLoaderData() as any;
 
-  console.log(casesData);
+  console.log(selectedCategory);
 
   const casesPerPage = 8;
-  const filteredCases = casesData.filter(
-    (c: any) =>
-      c.complainant_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.respondent_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.case_id_number.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+  const filteredCases = casesData
+    .filter(
+      (c: any) =>
+        c.complainant_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.respondent_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.case_id_number.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((c: any) =>
+      selectedCategory ? c.status?.toLowerCase() === selectedCategory : true
+    )
+    .filter((c: any) =>
+      selectedDate
+        ? new Date(c.date_filed).toISOString().slice(0, 10) === selectedDate
+        : true
+    );
   const totalPages = Math.ceil(filteredCases.length / casesPerPage);
   const paginatedCases = filteredCases.slice(
     (currentPage - 1) * casesPerPage,
@@ -973,6 +998,54 @@ const ArchivesPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
 
+          <Input
+            type="date"
+            width={160}
+            value={selectedDate}
+            onChange={(e) => {
+              setCurrentPage(1); // Reset pagination
+              setSelectedDate(e.target.value);
+            }}
+          />
+
+          <Select.Root
+            collection={categories}
+            defaultValue={[selectedCategory]}
+            onValueChange={(value: any) => {
+              setSelectedCategory(value.value[0]);
+              setCurrentPage(1); // Reset to page 1 on filter change
+            }}
+            size="sm"
+            width="180px"
+          >
+            <Select.HiddenSelect />
+
+            <Select.Control>
+              <Select.Trigger>
+                <Select.ValueText placeholder="Select Category" />
+              </Select.Trigger>
+              <Select.IndicatorGroup>
+                <Select.ClearTrigger />
+                <Select.Indicator />
+              </Select.IndicatorGroup>
+            </Select.Control>
+
+            <Portal>
+              <Select.Positioner>
+                <Select.Content>
+                  {categories.items.map((category) => (
+                    <Select.Item item={category} key={category.value}>
+                      {category.label}
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Positioner>
+            </Portal>
+          </Select.Root>
+        </Box>
+
+        <Box className="flex items-center gap-2">
           <Button
             onClick={generatePDF}
             colorPalette={"blue"}
@@ -1002,27 +1075,6 @@ const ArchivesPage = () => {
         </Box>
 
         {/* Pagination */}
-        <Box className="flex justify-center items-center gap-2">
-          <IconButton
-            size={"xs"}
-            variant={"subtle"}
-            disabled={currentPage === 1}
-            onClick={handlePrevPage}
-          >
-            <IoIosArrowBack />
-          </IconButton>
-          <span className="text-sm font-display">
-            Page {currentPage} of {totalPages}
-          </span>
-          <IconButton
-            size={"xs"}
-            variant={"subtle"}
-            disabled={currentPage === totalPages}
-            onClick={handleNextPage}
-          >
-            <IoIosArrowForward />
-          </IconButton>
-        </Box>
       </Box>
 
       {/* Available Cases */}
@@ -1051,6 +1103,34 @@ const ArchivesPage = () => {
       </Box>
 
       {/* selected case modal */}
+
+      <Box
+        marginTop={6}
+        paddingRight={10}
+        display="flex"
+        alignItems="flex-end"
+        justifyContent="flex-end"
+      >
+        <IconButton
+          size="xs"
+          variant="subtle"
+          disabled={currentPage === 1}
+          onClick={handlePrevPage}
+        >
+          <IoIosArrowBack />
+        </IconButton>
+        <span className="text-sm font-display mx-2">
+          Page {currentPage} of {totalPages}
+        </span>
+        <IconButton
+          size="xs"
+          variant="subtle"
+          disabled={currentPage === totalPages}
+          onClick={handleNextPage}
+        >
+          <IoIosArrowForward />
+        </IconButton>
+      </Box>
     </Box>
   );
 };
